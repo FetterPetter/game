@@ -5,13 +5,12 @@ import { Draw } from "ol/interaction";
 import { LineString, Point } from "ol/geom";
 import { Icon, Stroke, Style } from "ol/style";
 import VectorLayer from "ol/layer/Vector";
-import { getDistance } from "ol/sphere";
 import { pointToLineDistance } from "./helpPointLineDistance";
 
 export const playerStyle = (mirror: boolean = false) => {
   return new Style({
     image: new Icon({
-      src: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/132.png",
+      src: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/94.png",
       scale: mirror ? [-1, 1] : [1, 1],
       anchor: [0.5, 0.5],
     }),
@@ -20,13 +19,12 @@ export const playerStyle = (mirror: boolean = false) => {
 const backwardsPlayerStyle = () => {
   return new Style({
     image: new Icon({
-      src: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/132.png",
+      src: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/94.png",
       scale: 1,
       anchor: [0.5, 0.5],
     }),
   });
 };
-
 export const source = new VectorSource({});
 export const playerLayer = new VectorLayer({
   source: source,
@@ -37,7 +35,7 @@ export const enemyLayer = new VectorLayer({
   source: enemySource,
   style: new Style({
     image: new Icon({
-      src: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/122.png",
+      src: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/350.png",
       scale: 1,
     }),
   }),
@@ -64,12 +62,10 @@ export function GameButton({ map, source }: GameButtonProps) {
     const swordCoords = (sword.getGeometry() as LineString).getCoordinates();
     const enemyCoord = (enemy.getGeometry() as Point).getCoordinates();
     const hitRadius = 0.005;
-
     for (let i = 0; i < swordCoords.length - 1; i++) {
       const [x1, y1] = swordCoords[i];
       const [x2, y2] = swordCoords[i + 1];
       const [ex, ey] = enemyCoord;
-
       if (pointToLineDistance(ex, ey, x1, y1, x2, y2) < hitRadius) {
         return true;
       }
