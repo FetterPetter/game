@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Feature, Map } from "ol";
+import { Feature, Map, View } from "ol";
 import VectorSource from "ol/source/Vector";
 import { Draw } from "ol/interaction";
 import { LineString, Point } from "ol/geom";
 import { Icon, Stroke, Style } from "ol/style";
 import VectorLayer from "ol/layer/Vector";
+import { getDistance } from "ol/sphere";
+import { pointToLineDistance } from "./helpPointLineDistance";
 
 export const playerStyle = (mirror: boolean = false) => {
   return new Style({
@@ -30,25 +32,81 @@ export const playerLayer = new VectorLayer({
   source: source,
   style: playerStyle(false),
 });
-
+export const enemySource = new VectorSource({});
+export const enemyLayer = new VectorLayer({
+  source: enemySource,
+  style: new Style({
+    image: new Icon({
+      src: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/122.png",
+      scale: 1,
+    }),
+  }),
+});
 const swordStyle = () => {
   return new Style({
     stroke: new Stroke({
-      width: 3,
-      color: "gold",
+      width: 6,
+      color: "crimson",
     }),
   });
 };
 
-interface SnakeButtonProps {
+interface GameButtonProps {
   map: Map;
   source: VectorSource;
 }
 
-export function GameButton({ map, source }: SnakeButtonProps) {
+export function GameButton({ map, source }: GameButtonProps) {
   const [currentFeature, setCurrentFeature] = useState<Feature | null>(null);
-
+  const [intervalId, setIntervalId] = useState<number | null>(null);
   const speed = 0.002;
+  function checkSwordHit(sword: Feature, enemy: Feature): boolean {
+    const swordCoords = (sword.getGeometry() as LineString).getCoordinates();
+    const enemyCoord = (enemy.getGeometry() as Point).getCoordinates();
+    const hitRadius = 0.005;
+
+    for (let i = 0; i < swordCoords.length - 1; i++) {
+      const [x1, y1] = swordCoords[i];
+      const [x2, y2] = swordCoords[i + 1];
+      const [ex, ey] = enemyCoord;
+
+      if (pointToLineDistance(ex, ey, x1, y1, x2, y2) < hitRadius) {
+        return true;
+      }
+    }
+    return false;
+  }
+  function spawnRandomEnemy() {
+    const view: View = map.getView();
+    const extent = view.calculateExtent();
+    const [minX, minY, maxX, maxY] = extent;
+    let x, y;
+
+    const edge = Math.floor(Math.random() * 4);
+
+    switch (edge) {
+      case 0:
+        x = Math.random() * (maxX - minX) + minX;
+        y = maxY;
+        break;
+      case 1:
+        x = Math.random() * (maxX - minX) + minX;
+        y = minY;
+        break;
+      case 2:
+        x = minX;
+        y = Math.random() * (maxY - minY) + minY;
+        break;
+      case 3:
+        x = maxX;
+        y = Math.random() * (maxY - minY) + minY;
+        break;
+    }
+    const randomEnemyFeature = new Feature({
+      geometry: new Point([x ? x : 0, y ? y : 0]),
+    });
+    enemySource.addFeature(randomEnemyFeature);
+  }
 
   function drawPoint() {
     source.clear();
@@ -57,19 +115,25 @@ export function GameButton({ map, source }: SnakeButtonProps) {
     source.once("addfeature", (e) => {
       map.removeInteraction(draw);
       setCurrentFeature(e.feature!);
+      startSpawningRandomEnemies();
     });
   }
+  function startSpawningRandomEnemies() {
+    if (intervalId) return;
 
+    const id = setInterval(() => {
+      spawnRandomEnemy();
+    }, 1000);
+
+    setIntervalId(id);
+  }
   function swordSwing() {
     if (!currentFeature) return;
-
     const playerGeom = currentFeature.getGeometry() as Point;
     const playerCoords = playerGeom.getCoordinates();
-
     const swordLength = 0.015;
     const initialAngle = -2;
     const finalAngle = (Math.PI / 3) * 4;
-
     const swordCoords = [
       playerCoords,
       [
@@ -77,15 +141,13 @@ export function GameButton({ map, source }: SnakeButtonProps) {
         playerCoords[1] + swordLength * Math.sin(initialAngle),
       ],
     ];
-
     const swordFeature = new Feature({
       geometry: new LineString(swordCoords),
     });
-
     source.addFeature(swordFeature);
     swordFeature.setStyle(swordStyle());
     let startTime: number | null = null;
-    const animationDuration = 500;
+    const animationDuration = 300;
     const animationStep = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
       const progress = (timestamp - startTime) / animationDuration;
@@ -101,7 +163,11 @@ export function GameButton({ map, source }: SnakeButtonProps) {
           ],
         ];
         swordFeature.getGeometry()!.setCoordinates(newSwordCoords);
-
+        enemySource.forEachFeature((enemyFeature) => {
+          if (checkSwordHit(swordFeature, enemyFeature)) {
+            enemySource.removeFeature(enemyFeature);
+          }
+        });
         requestAnimationFrame(animationStep);
       } else {
         swordFeature
@@ -120,44 +186,76 @@ export function GameButton({ map, source }: SnakeButtonProps) {
     requestAnimationFrame(animationStep);
   }
 
+  const moveFeature = (xCord: number, yCord: number) => {
+    const geom = currentFeature!.getGeometry() as Point;
+    const coord = geom.getCoordinates();
+    const newCoord = [coord[0] + xCord, coord[1] + yCord];
+    geom.setCoordinates(newCoord);
+    map.getView().setCenter(newCoord);
+  };
   useEffect(() => {
     if (!currentFeature) return;
 
-    const moveFeature = (xCord: number, yCord: number) => {
-      const geom = currentFeature.getGeometry() as Point;
-      const coord = geom.getCoordinates();
-      const newCoord = [coord[0] + xCord, coord[1] + yCord];
-      geom.setCoordinates(newCoord);
-      map.getView().setCenter(newCoord);
-    };
-
     const handleKeyDown = (event: KeyboardEvent) => {
-      const step = speed;
       switch (event.key) {
         case "w":
           currentFeature.setStyle(backwardsPlayerStyle);
-          moveFeature(0, step);
+          moveFeature(0, speed);
           break;
         case "s":
           currentFeature.setStyle(playerStyle(false));
-          moveFeature(0, -step);
+          moveFeature(0, -speed);
           break;
         case "a":
           currentFeature.setStyle(playerStyle(false));
-          moveFeature(-step, 0);
+          moveFeature(-speed, 0);
           break;
         case "d":
           currentFeature.setStyle(playerStyle(true));
-          moveFeature(step, 0);
+          moveFeature(speed, 0);
           break;
         case " ":
           swordSwing();
           break;
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [currentFeature]);
+  useEffect(() => {
+    if (!currentFeature) return;
+    const moveEnemies = () => {
+      const playerGeom = currentFeature.getGeometry() as Point;
+      const playerCoords = playerGeom.getCoordinates();
+      const enemySpeed = 0.00112;
+
+      enemySource.forEachFeature((enemyFeature) => {
+        const enemyGeom = enemyFeature.getGeometry() as Point;
+        const enemyCoords = enemyGeom.getCoordinates();
+        const dx = playerCoords[0] - enemyCoords[0];
+        const dy = playerCoords[1] - enemyCoords[1];
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < 0.002) {
+          alert("Game Over!");
+          return;
+        }
+
+        const moveX = (dx / distance) * enemySpeed;
+        const moveY = (dy / distance) * enemySpeed;
+
+        enemyGeom.setCoordinates([
+          enemyCoords[0] + moveX,
+          enemyCoords[1] + moveY,
+        ]);
+      });
+    };
+
+    const enemyMovementInterval = setInterval(moveEnemies, 100);
+
+    return () => clearInterval(enemyMovementInterval);
   }, [currentFeature]);
 
   return (

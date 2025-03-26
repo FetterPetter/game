@@ -5,13 +5,18 @@ import { OSM } from "ol/source";
 import { useGeographic } from "ol/proj";
 
 import "ol/ol.css";
-import { GameButton, playerLayer, source } from "./addGameCharacter";
+import {
+  enemyLayer,
+  GameButton,
+  playerLayer,
+  source,
+} from "./addGameCharacter";
 
 useGeographic();
 
 const map = new Map({
   view: new View({ center: [10.8, 59.9], zoom: 13 }),
-  layers: [new TileLayer({ source: new OSM() }), playerLayer],
+  layers: [new TileLayer({ source: new OSM() }), playerLayer, enemyLayer],
 });
 
 export function Application() {
