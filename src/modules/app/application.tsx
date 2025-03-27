@@ -27,8 +27,10 @@ export function Application() {
 
   return (
     <>
-      <GameButton map={map} source={source} />
-      <div ref={mapRef}></div>
+      <div className="game-container">
+        <GameButton map={map} source={source} />
+        <div ref={mapRef} className="game-map"></div>
+      </div>
     </>
   );
 }

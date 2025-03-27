@@ -1,0 +1,74 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+}
+
+.game-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.game-header {
+  height: 10px; /* Adjust height as needed */
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  gap: 20px;
+  padding: 10px;
+}
+.header button {
+  background: crimson;
+  color: #bd5858;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.header button:hover {
+  background: darkred;
+}
+
+.game-map {
+  flex-grow: 1; /* Makes it take the remaining space */
+  width: 100vw;
+  height: calc(100vh - 80px); /* Full height minus header */
+}
+.game-over {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centers the div */
+  background: rgba(0, 0, 0, 0.8); /* Dark background */
+  color: white;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.game-over h1 {
+  margin-bottom: 15px;
+  font-size: 24px;
+}
+
+.game-over button {
+  background: crimson;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.game-over button:hover {
+  background: darkred;
+}
