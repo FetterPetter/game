@@ -30,7 +30,6 @@ const backwardsPlayerStyle = (shiny: string) => {
 export const source = new VectorSource({});
 export const playerLayer = new VectorLayer({
   source: source,
-  style: playerStyle(false, ""),
 });
 export const enemySource = new VectorSource({});
 export const enemyLayer = new VectorLayer({
@@ -148,6 +147,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       e.feature!.set("swordDamage", 1);
       e.feature!.set("speed", playerSpeed);
       setCurrentFeature(e.feature!);
+      e.feature!.setStyle(playerStyle(false, shiny));
       startSpawningRandomEnemies();
     });
   }
@@ -163,8 +163,6 @@ export function GameButton({ map, source }: GameButtonProps) {
         setIntervalId(null);
       }
     }, 900);
-
-    setIntervalId(id);
   }
 
   function swordSwing() {
@@ -205,10 +203,10 @@ export function GameButton({ map, source }: GameButtonProps) {
         enemySource.forEachFeature((enemyFeature) => {
           if (checkSwordHit(swordFeature, enemyFeature)) {
             let hp = enemyFeature.get("helsepoeng") || 0;
-            console.log(hp);
+
             const swordDamage = currentFeature.get("swordDamage");
             hp -= swordDamage;
-            console.log(hp);
+
             if (hp <= 0) {
               if (enemyFeature.get("type") === "boss") {
                 setPlayerSpeed((prevSpeed) => {
@@ -227,9 +225,7 @@ export function GameButton({ map, source }: GameButtonProps) {
                   setHighScore(newKillCount);
                   localStorage.setItem("highScore", newKillCount.toString());
                 }
-                if (newKillCount > 15) {
-                  setShiny("shiny/");
-                }
+
                 return newKillCount;
               });
             } else {
@@ -253,6 +249,12 @@ export function GameButton({ map, source }: GameButtonProps) {
 
     requestAnimationFrame(animationStep);
   }
+
+  useEffect(() => {
+    if (killCount > 2) {
+      setShiny("shiny/");
+    }
+  }, [killCount]);
 
   const moveFeature = (xCord: number, yCord: number) => {
     const geom = currentFeature!.getGeometry() as Point;
@@ -329,7 +331,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     };
 
     const enemyMovementInterval = setInterval(moveEnemies, 100);
-    setIntervalId(enemyMovementInterval);
+
     return () => clearInterval(enemyMovementInterval);
   }, [currentFeature, gameOver]);
 

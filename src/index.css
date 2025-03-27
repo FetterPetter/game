@@ -23,6 +23,7 @@ html {
   gap: 20px;
   padding: 10px;
 }
+
 .header button {
   background: crimson;
   color: #bd5858;
@@ -40,7 +41,9 @@ html {
   flex-grow: 1; /* Makes it take the remaining space */
   width: 100vw;
   height: calc(100vh - 80px); /* Full height minus header */
+  background-color: black;
 }
+
 .game-over {
   position: absolute;
   top: 50%;
