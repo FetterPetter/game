@@ -6,6 +6,7 @@ import { useGeographic } from "ol/proj";
 
 import "ol/ol.css";
 import {
+  bloodLayer,
   enemyLayer,
   GameButton,
   playerLayer,
@@ -16,7 +17,12 @@ useGeographic();
 
 const map = new Map({
   view: new View({ center: [10.8, 59.9], zoom: 13 }),
-  layers: [new TileLayer({ source: new OSM() }), playerLayer, enemyLayer],
+  layers: [
+    new TileLayer({ source: new OSM() }),
+    bloodLayer,
+    playerLayer,
+    enemyLayer,
+  ],
 });
 
 export function Application() {

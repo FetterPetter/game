@@ -3,9 +3,11 @@ import { Feature, Map, View } from "ol";
 import VectorSource from "ol/source/Vector";
 import { Draw } from "ol/interaction";
 import { LineString, Point } from "ol/geom";
-import { Icon, Stroke, Style } from "ol/style";
+import { Fill, Icon, Stroke, Style } from "ol/style";
 import VectorLayer from "ol/layer/Vector";
 import { pointToLineDistance } from "./helpPointLineDistance";
+import CircleStyle from "ol/style/Circle";
+import { generateRandomBloodShape } from "./randomBloodPattern";
 
 export const playerStyle = (mirror: boolean = false) => {
   return new Style({
@@ -35,11 +37,30 @@ export const enemyLayer = new VectorLayer({
   source: enemySource,
   style: new Style({
     image: new Icon({
-      src: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/350.png",
+      src: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/350.png",
       scale: 1,
+      anchor: [0.5, 0.5],
     }),
   }),
 });
+
+export const bloodSource = new VectorSource({});
+export const bloodLayer = new VectorLayer({
+  source: bloodSource,
+  style: new Style({
+    fill: new Fill({ color: "rgba(139, 0, 0, 0.8)" }),
+    stroke: new Stroke({ color: "darkred", width: 1 }),
+  }),
+});
+const enemyHitStyle = () => {
+  return new Style({
+    image: new Icon({
+      src: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/350.png",
+      scale: 1,
+      anchor: [0.5, 0.5],
+    }),
+  });
+};
 const swordStyle = () => {
   return new Style({
     stroke: new Stroke({
@@ -53,6 +74,12 @@ interface GameButtonProps {
   map: Map;
   source: VectorSource;
 }
+const dropBlood = (x: number, y: number) => {
+  const bloodFeature = new Feature({
+    geometry: generateRandomBloodShape(x, y),
+  });
+  bloodSource.addFeature(bloodFeature);
+};
 
 export function GameButton({ map, source }: GameButtonProps) {
   const [currentFeature, setCurrentFeature] = useState<Feature | null>(null);
@@ -72,6 +99,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       const [x2, y2] = swordCoords[i + 1];
       const [ex, ey] = enemyCoord;
       if (pointToLineDistance(ex, ey, x1, y1, x2, y2) < hitRadius) {
+        dropBlood(ex, ey);
         return true;
       }
     }
@@ -107,9 +135,9 @@ export function GameButton({ map, source }: GameButtonProps) {
     const randomEnemyFeature = new Feature({
       geometry: new Point([x ? x : 0, y ? y : 0]),
     });
+    randomEnemyFeature.set("helsepoeng", 10);
     enemySource.addFeature(randomEnemyFeature);
   }
-
   function drawPoint() {
     source.clear();
     const draw = new Draw({ type: "Point", source });
@@ -172,16 +200,22 @@ export function GameButton({ map, source }: GameButtonProps) {
         swordFeature.getGeometry()!.setCoordinates(newSwordCoords);
         enemySource.forEachFeature((enemyFeature) => {
           if (checkSwordHit(swordFeature, enemyFeature)) {
-            enemySource.removeFeature(enemyFeature);
-            setKillCount((prev) => {
-              const newKillCount = prev + 1;
-              if (newKillCount > highScore) {
-                setHighScore(newKillCount);
-                localStorage.setItem("highScore", newKillCount.toString());
-              }
-
-              return newKillCount;
-            });
+            let hp = enemyFeature.get("helsepoeng") || 0;
+            hp -= 1;
+            if (hp <= 0) {
+              enemySource.removeFeature(enemyFeature); // Remove enemy if HP reaches 0
+              setKillCount((prev) => {
+                const newKillCount = prev + 1;
+                if (newKillCount > highScore) {
+                  setHighScore(newKillCount);
+                  localStorage.setItem("highScore", newKillCount.toString());
+                }
+                return newKillCount;
+              });
+            } else {
+              enemyFeature.set("helsepoeng", hp);
+              enemyFeature.setStyle(enemyHitStyle);
+            }
           }
         });
         requestAnimationFrame(animationStep);
