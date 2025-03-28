@@ -68,7 +68,7 @@ const dropBlood = (x: number, y: number) => {
 
 export function GameButton({ map, source }: GameButtonProps) {
   const [currentFeature, setCurrentFeature] = useState<Feature | null>(null);
-
+  const [currentDamage, setCurrentDamage] = useState(1);
   const [intervalId, setIntervalId] = useState<number | null>(null);
   const [gameOver, setGameOver] = useState(false);
   const [killCount, setKillCount] = useState(0);
@@ -76,7 +76,15 @@ export function GameButton({ map, source }: GameButtonProps) {
   const [highScore, setHighScore] = useState(() => {
     return parseInt(localStorage.getItem("highScore") || "0", 10);
   });
-  let enemyMovementAnimationFrame: number | null = null;
+  const [timer, setTimer] = useState(0);
+
+  function startTimer() {
+    const timerInterval = setInterval(() => {
+      setTimer((prevTime) => prevTime + 1);
+    }, 1000);
+
+    return timerInterval;
+  }
 
   function checkSwordHit(sword: Feature, enemy: Feature): boolean {
     const swordCoords = (sword.getGeometry() as LineString).getCoordinates();
@@ -122,10 +130,11 @@ export function GameButton({ map, source }: GameButtonProps) {
         break;
     }
     const bossChance = Math.random();
-    if (bossChance < 0.05) {
+    if (bossChance < 0.01) {
       spawnBoss(x ? x : 0, y ? y : 0);
+    } else {
+      spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
     }
-    spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
   }
 
   function drawPoint() {
@@ -139,6 +148,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       setCurrentFeature(e.feature!);
       e.feature!.setStyle(playerStyle(false));
       startSpawningRandomEnemies();
+      startTimer();
     });
   }
 
@@ -152,16 +162,20 @@ export function GameButton({ map, source }: GameButtonProps) {
         clearInterval(id);
         setIntervalId(null);
       }
-    }, 1000);
+    }, 500);
   }
+
+  let isSwordActive = false;
 
   function swordSwing() {
     if (!currentFeature || gameOver) return;
+    if (isSwordActive) return;
+    isSwordActive = true;
     const playerCoords = (
       currentFeature.getGeometry() as Point
     ).getCoordinates();
     const swordLength = 0.015;
-    const numberOfFrames = 144;
+    const numberOfFrames = 60;
     const angles = Array.from({ length: numberOfFrames }, (_, index) => {
       return (index / numberOfFrames) * (Math.PI * 2);
     });
@@ -177,7 +191,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     swordFeature.setStyle(swordStyle());
 
     let startTime: number | null = null;
-    const animationDuration = 300;
+    const animationDuration = 320;
 
     const animationStep = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
@@ -192,24 +206,22 @@ export function GameButton({ map, source }: GameButtonProps) {
         enemySource.forEachFeature((enemyFeature) => {
           if (checkSwordHit(swordFeature, enemyFeature)) {
             let hp = enemyFeature.get("helsepoeng") || 0;
-
-            const swordDamage = currentFeature.get("swordDamage");
+            let swordDamage = currentFeature.get("swordDamage");
+            const enemyType = enemyFeature.get("type");
             hp -= swordDamage;
-
             if (hp <= 0) {
-              if (enemyFeature.get("type") === "boss") {
-                setPlayerSpeed((prevSpeed) => {
-                  const newSpeed = prevSpeed + 0.0005; // Increase speed by a certain value, e.g., 0.0005
-                  if (currentFeature) {
-                    currentFeature.set("speed", newSpeed); // Update the speed in currentFeature
-                  }
-                  return newSpeed;
-                });
+              if (enemyType === "normal") {
+                swordDamage += 0.1; // Increase by 0.1 for normal enemies
+              } else if (enemyType === "boss") {
+                swordDamage += 5; // Increase by 5 for boss enemies
               }
+              currentFeature.set("swordDamage", swordDamage);
+              swordDamage = parseFloat(swordDamage.toFixed(2));
+              setCurrentDamage(swordDamage);
               enemySource.removeFeature(enemyFeature);
+
               setKillCount((prev) => {
                 const newKillCount = prev + 1;
-                currentFeature.set("swordDamage", newKillCount);
                 if (newKillCount > highScore) {
                   setHighScore(newKillCount);
                   localStorage.setItem("highScore", newKillCount.toString());
@@ -232,9 +244,9 @@ export function GameButton({ map, source }: GameButtonProps) {
         requestAnimationFrame(animationStep);
       } else {
         source.removeFeature(swordFeature);
+        isSwordActive = false;
       }
     };
-
     requestAnimationFrame(animationStep);
   }
 
@@ -301,15 +313,17 @@ export function GameButton({ map, source }: GameButtonProps) {
       window.removeEventListener("keyup", handleKeyUp);
     };
   }, [currentFeature, gameOver]);
+  let enemyMovementAnimationFrame: number | null = null;
+
   const moveEnemies = (timestamp: number) => {
-    if (!currentFeature) return;
+    if (!currentFeature || gameOver) return;
 
     const playerCoords = (
       currentFeature.getGeometry() as Point
     ).getCoordinates();
 
     enemySource.forEachFeature((enemyFeature) => {
-      const enemySpeed = enemyFeature.get("speed");
+      const enemySpeed = enemyFeature.get("speed"); // Static speed from your enemyStats array
       const enemyGeom = enemyFeature.getGeometry() as Point;
       const enemyCoords = enemyGeom.getCoordinates();
 
@@ -326,6 +340,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         setGameOver(true);
         return;
       }
+
       const normalizedX = distance !== 0 ? dx / distance : 0;
       const normalizedY = distance !== 0 ? dy / distance : 0;
 
@@ -359,7 +374,9 @@ export function GameButton({ map, source }: GameButtonProps) {
         {!gameOver ? (
           <>
             <p>poeng: {killCount}</p>
+            <p>damege: {currentDamage}</p>
             <button onClick={drawPoint}>Velg spawn</button>
+            <p>Time: {timer}s</p> {/* Display timer here */}
           </>
         ) : (
           <>

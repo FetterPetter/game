@@ -11,11 +11,26 @@ const enemySprites = [
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png", // mjaut
 ];
 const enemyStats = [
-  [5, 0.00018],
+  [5, 0.0002],
   [1, 0.00065],
-  [100, 0.00019],
-  [80, 0.0002],
+  [120, 0.00019],
+  [80, 0.00029],
   [20, 0.00021],
+];
+const bossSprites = [
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/249.png", // lugia
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/130.png", // gyra
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/150.png", // mew2
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/143.png", // snor
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png", // char
+];
+
+const bossStats = [
+  [5600, 0.00023],
+  [2900, 0.00018],
+  [3000, 0.00019],
+  [10000, 0.0002],
+  [1000, 0.00029],
 ];
 const getRandomEnemy = () => {
   const enemyChances = [0.8, 0.05, 0.1, 0.01, 0.04];
@@ -33,21 +48,7 @@ const getRandomEnemy = () => {
   const [hp, speed] = enemyStats[selectedIndex];
   return { sprite, hp, speed };
 };
-const bossSprites = [
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/249.png", // lugia
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/130.png", // gyra
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/150.png", // mew2
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/143.png", // snor
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png", // char
-];
 
-const bossStats = [
-  [5600, 0.000209],
-  [2900, 0.00018],
-  [3000, 0.00013],
-  [10000, 0.00012],
-  [1500, 0.00023],
-];
 const getRandomBoss = () => {
   const enemyChances = [0.05, 0.15, 0.5, 0.15, 0.15];
   const rand = Math.random();
