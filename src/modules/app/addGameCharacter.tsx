@@ -9,19 +9,19 @@ import { pointToLineDistance } from "./helpPointLineDistance";
 import { generateRandomBloodShape } from "./randomBloodPattern";
 import { bossStyle, spawnBoss, spawnRandomEnemyNow } from "./bosslogic";
 
-export const playerStyle = (mirror: boolean = false, shiny: string) => {
+export const playerStyle = (mirror: boolean = false) => {
   return new Style({
     image: new Icon({
-      src: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${shiny}132.png`,
+      src: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png`,
       scale: mirror ? [-1, 1] : [1, 1],
       anchor: [0.5, 0.5],
     }),
   });
 };
-const backwardsPlayerStyle = (shiny: string) => {
+const backwardsPlayerStyle = () => {
   return new Style({
     image: new Icon({
-      src: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${shiny}132.png`,
+      src: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/132.png`,
       scale: 1,
       anchor: [0.5, 0.5],
     }),
@@ -68,14 +68,15 @@ const dropBlood = (x: number, y: number) => {
 
 export function GameButton({ map, source }: GameButtonProps) {
   const [currentFeature, setCurrentFeature] = useState<Feature | null>(null);
+
   const [intervalId, setIntervalId] = useState<number | null>(null);
   const [gameOver, setGameOver] = useState(false);
   const [killCount, setKillCount] = useState(0);
-  const [shiny, setShiny] = useState<string>("");
-  const [playerSpeed, setPlayerSpeed] = useState(0.002);
+  const [playerSpeed, setPlayerSpeed] = useState(0.0002);
   const [highScore, setHighScore] = useState(() => {
     return parseInt(localStorage.getItem("highScore") || "0", 10);
   });
+  let enemyMovementAnimationFrame: number | null = null;
 
   function checkSwordHit(sword: Feature, enemy: Feature): boolean {
     const swordCoords = (sword.getGeometry() as LineString).getCoordinates();
@@ -92,21 +93,6 @@ export function GameButton({ map, source }: GameButtonProps) {
     }
     return false;
   }
-
-  useEffect(() => {
-    if (gameOver) return;
-
-    if (killCount > 0 && killCount % 5 === 0) {
-      const view = map.getView();
-      const extent = view.calculateExtent();
-      const [minX, minY, maxX, maxY] = extent;
-
-      const x = Math.random() * (maxX - minX) + minX;
-      const y = Math.random() * (maxY - minY) + minY;
-
-      spawnBoss(x, y);
-    }
-  }, [killCount, gameOver, map]);
 
   function spawnRandomEnemy() {
     if (gameOver) return;
@@ -135,6 +121,10 @@ export function GameButton({ map, source }: GameButtonProps) {
         y = Math.random() * (maxY - minY) + minY;
         break;
     }
+    const bossChance = Math.random();
+    if (bossChance < 0.05) {
+      spawnBoss(x ? x : 0, y ? y : 0);
+    }
     spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
   }
 
@@ -147,7 +137,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       e.feature!.set("swordDamage", 1);
       e.feature!.set("speed", playerSpeed);
       setCurrentFeature(e.feature!);
-      e.feature!.setStyle(playerStyle(false, shiny));
+      e.feature!.setStyle(playerStyle(false));
       startSpawningRandomEnemies();
     });
   }
@@ -162,7 +152,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         clearInterval(id);
         setIntervalId(null);
       }
-    }, 900);
+    }, 1000);
   }
 
   function swordSwing() {
@@ -172,7 +162,6 @@ export function GameButton({ map, source }: GameButtonProps) {
     ).getCoordinates();
     const swordLength = 0.015;
     const numberOfFrames = 144;
-
     const angles = Array.from({ length: numberOfFrames }, (_, index) => {
       return (index / numberOfFrames) * (Math.PI * 2);
     });
@@ -183,8 +172,8 @@ export function GameButton({ map, source }: GameButtonProps) {
     const swordFeature = new Feature({
       geometry: new LineString([playerCoords, swordCoordinates[0]]),
     });
-
     source.addFeature(swordFeature);
+
     swordFeature.setStyle(swordStyle());
 
     let startTime: number | null = null;
@@ -225,7 +214,6 @@ export function GameButton({ map, source }: GameButtonProps) {
                   setHighScore(newKillCount);
                   localStorage.setItem("highScore", newKillCount.toString());
                 }
-
                 return newKillCount;
               });
             } else {
@@ -250,89 +238,118 @@ export function GameButton({ map, source }: GameButtonProps) {
     requestAnimationFrame(animationStep);
   }
 
-  useEffect(() => {
-    if (killCount > 2) {
-      setShiny("shiny/");
-    }
-  }, [killCount]);
-
   const moveFeature = (xCord: number, yCord: number) => {
+    if (gameOver) return;
     const geom = currentFeature!.getGeometry() as Point;
     const coord = geom.getCoordinates();
     const newCoord = [coord[0] + xCord, coord[1] + yCord];
     geom.setCoordinates(newCoord);
     map.getView().setCenter(newCoord);
   };
+
   useEffect(() => {
     if (!currentFeature || gameOver) return;
+
+    const keysPressed: { [key: string]: boolean } = {};
+
     const handleKeyDown = (event: KeyboardEvent) => {
-      switch (event.key) {
-        case "w":
-          currentFeature.setStyle(backwardsPlayerStyle(shiny));
-          moveFeature(0, playerSpeed);
-          break;
-        case "s":
-          currentFeature.setStyle(playerStyle(false, shiny));
-          moveFeature(0, -playerSpeed);
-          break;
-        case "a":
-          currentFeature.setStyle(playerStyle(false, shiny));
-          moveFeature(-playerSpeed, 0);
-          break;
-        case "d":
-          currentFeature.setStyle(playerStyle(true, shiny));
-          moveFeature(playerSpeed, 0);
-          break;
-        case " ":
-          swordSwing();
-          break;
+      keysPressed[event.key] = true;
+      if (event.key === " ") {
+        swordSwing();
       }
     };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      delete keysPressed[event.key];
+    };
+
+    const movePlayerSmoothly = () => {
+      if (!currentFeature) return;
+
+      let dx = 0,
+        dy = 0;
+
+      if (keysPressed["w"]) {
+        currentFeature.setStyle(backwardsPlayerStyle());
+        dy += playerSpeed;
+      }
+      if (keysPressed["s"]) {
+        currentFeature.setStyle(playerStyle(false));
+        dy -= playerSpeed;
+      }
+      if (keysPressed["a"]) {
+        currentFeature.setStyle(playerStyle(false));
+        dx -= playerSpeed + 0.0001;
+      }
+      if (keysPressed["d"]) {
+        currentFeature.setStyle(playerStyle(true));
+        dx += playerSpeed + 0.0001;
+      }
+      if (dx !== 0 || dy !== 0) {
+        moveFeature(dx, dy);
+      }
+      requestAnimationFrame(movePlayerSmoothly);
+    };
+
     window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    requestAnimationFrame(movePlayerSmoothly);
+
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [currentFeature]);
-  useEffect(() => {
-    if (!currentFeature || gameOver) {
-      if (intervalId) {
-        clearInterval(intervalId);
-        setIntervalId(null);
-      }
-      return;
-    }
+  }, [currentFeature, gameOver]);
+  const moveEnemies = (timestamp: number) => {
+    if (!currentFeature) return;
 
-    const moveEnemies = () => {
-      const playerCoords = (
-        currentFeature.getGeometry() as Point
-      ).getCoordinates();
-      enemySource.forEachFeature((enemyFeature) => {
-        const enemySpeed = enemyFeature.get("speed");
-        const enemyGeom = enemyFeature.getGeometry() as Point;
-        const enemyCoords = enemyGeom.getCoordinates();
-        const dx = playerCoords[0] - enemyCoords[0];
-        const dy = playerCoords[1] - enemyCoords[1];
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < 0.002) {
-          clearInterval(intervalId ? intervalId : 0);
-          setIntervalId(null);
-          setCurrentFeature(null);
-          source.clear();
-          setGameOver(true);
-          return;
+    const playerCoords = (
+      currentFeature.getGeometry() as Point
+    ).getCoordinates();
+
+    enemySource.forEachFeature((enemyFeature) => {
+      const enemySpeed = enemyFeature.get("speed");
+      const enemyGeom = enemyFeature.getGeometry() as Point;
+      const enemyCoords = enemyGeom.getCoordinates();
+
+      const dx = playerCoords[0] - enemyCoords[0];
+      const dy = playerCoords[1] - enemyCoords[1];
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < 0.003) {
+        if (enemyMovementAnimationFrame !== null) {
+          cancelAnimationFrame(enemyMovementAnimationFrame);
         }
-        const moveX = (dx / distance) * enemySpeed;
-        const moveY = (dy / distance) * enemySpeed;
-        enemyGeom.setCoordinates([
-          enemyCoords[0] + moveX,
-          enemyCoords[1] + moveY,
-        ]);
-      });
+        setCurrentFeature(null);
+        source.clear();
+        setGameOver(true);
+        return;
+      }
+      const normalizedX = distance !== 0 ? dx / distance : 0;
+      const normalizedY = distance !== 0 ? dy / distance : 0;
+
+      const moveX = normalizedX * (enemySpeed + 0.0001);
+      const moveY = normalizedY * enemySpeed;
+
+      enemyGeom.setCoordinates([
+        enemyCoords[0] + moveX,
+        enemyCoords[1] + moveY,
+      ]);
+    });
+
+    enemyMovementAnimationFrame = requestAnimationFrame(moveEnemies);
+  };
+  useEffect(() => {
+    if (gameOver) return;
+
+    enemyMovementAnimationFrame = requestAnimationFrame(moveEnemies);
+
+    return () => {
+      if (enemyMovementAnimationFrame !== null) {
+        cancelAnimationFrame(enemyMovementAnimationFrame);
+      }
     };
-
-    const enemyMovementInterval = setInterval(moveEnemies, 100);
-
-    return () => clearInterval(enemyMovementInterval);
   }, [currentFeature, gameOver]);
 
   return (

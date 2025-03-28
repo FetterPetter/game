@@ -3,21 +3,6 @@ import { Point } from "ol/geom";
 import { Icon, Style, Fill, Stroke, Text } from "ol/style";
 import { enemySource } from "./addGameCharacter";
 
-const bossSprites = [
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/249.png", // Boss 1
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/130.png", // Boss 2
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/150.png", // Boss 3
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/143.png", // Boss 4
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png", // Boss 5
-];
-
-const bossStats = [
-  [5000, 0.0009],
-  [2900, 0.0013],
-  [3000, 0.0012],
-  [10000, 0.001],
-  [3500, 0.0018],
-];
 const enemySprites = [
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png", //bulb
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/12.png", // butterfree
@@ -25,30 +10,63 @@ const enemySprites = [
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/30.png", // nidonoe?
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png", // mjaut
 ];
-
 const enemyStats = [
-  [10, 0.0019],
-  [1, 0.0039],
-  [78, 0.0012],
-  [50, 0.0011],
-  [1, 0.0018],
+  [5, 0.00018],
+  [1, 0.00065],
+  [100, 0.00019],
+  [80, 0.0002],
+  [20, 0.00021],
 ];
-
 const getRandomEnemy = () => {
-  const randomIndex = Math.floor(Math.random() * enemySprites.length);
-  const sprite = enemySprites[randomIndex];
-  const [hp, speed] = enemyStats[randomIndex];
+  const enemyChances = [0.8, 0.05, 0.1, 0.01, 0.04];
+  const rand = Math.random();
+  let cumulativeProbability = 0;
+  let selectedIndex = 0;
+  for (let i = 0; i < enemyChances.length; i++) {
+    cumulativeProbability += enemyChances[i];
+    if (rand < cumulativeProbability) {
+      selectedIndex = i;
+      break;
+    }
+  }
+  const sprite = enemySprites[selectedIndex];
+  const [hp, speed] = enemyStats[selectedIndex];
   return { sprite, hp, speed };
 };
+const bossSprites = [
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/249.png", // lugia
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/130.png", // gyra
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/150.png", // mew2
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/143.png", // snor
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png", // char
+];
+
+const bossStats = [
+  [5600, 0.000209],
+  [2900, 0.00018],
+  [3000, 0.00013],
+  [10000, 0.00012],
+  [1500, 0.00023],
+];
 const getRandomBoss = () => {
-  const randomIndex = Math.floor(Math.random() * bossSprites.length);
+  const enemyChances = [0.05, 0.15, 0.5, 0.15, 0.15];
+  const rand = Math.random();
+  let cumulativeProbability = 0;
+  let randomIndex = 0;
+  for (let i = 0; i < enemyChances.length; i++) {
+    cumulativeProbability += enemyChances[i];
+    if (rand < cumulativeProbability) {
+      randomIndex = i;
+      break;
+    }
+  }
   const sprite = bossSprites[randomIndex];
-  const [hp, speed] = bossStats[randomIndex]; // Get corresponding HP and speed for the random sprite
+  const [hp, speed] = bossStats[randomIndex];
   return { sprite, hp, speed };
 };
 
 export const bossStyle = (bossFeature: Feature) => {
-  const { sprite, hp } = bossFeature.get("bossData"); // Extract boss data (sprite, hp)
+  const { sprite, hp } = bossFeature.get("bossData");
   return new Style({
     image: new Icon({
       src: sprite,
