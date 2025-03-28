@@ -7,7 +7,12 @@ import { Fill, Icon, Stroke, Style } from "ol/style";
 import VectorLayer from "ol/layer/Vector";
 import { pointToLineDistance } from "./helpPointLineDistance";
 import { generateRandomBloodShape } from "./randomBloodPattern";
-import { bossStyle, spawnBoss, spawnRandomEnemyNow } from "./bosslogic";
+import {
+  bossStyle,
+  enemyStyle,
+  spawnBoss,
+  spawnRandomEnemyNow,
+} from "./bosslogic";
 
 export const playerStyle = (mirror: boolean = false) => {
   return new Style({
@@ -240,10 +245,17 @@ export function GameButton({ map, source }: GameButtonProps) {
               if (enemyFeature.get("type") == "boss") {
                 const bossData = enemyFeature.get("bossData");
                 if (bossData) {
-                  bossData.hp = hp;
+                  bossData.hp = parseFloat(hp.toFixed(2));
                   enemyFeature.set("bossData", bossData);
                 }
                 enemyFeature.setStyle(bossStyle(enemyFeature));
+              } else {
+                const enemyData = enemyFeature.get("enemyData");
+                if (enemyData) {
+                  enemyData.hp = parseFloat(hp.toFixed(2));
+                  enemyFeature.set("enemyDaya", enemyData);
+                }
+                enemyFeature.setStyle(enemyStyle(enemyFeature));
               }
             }
             hitEnemy = true;

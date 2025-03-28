@@ -101,20 +101,30 @@ export const bossStyle = (bossFeature: Feature) => {
       font: "bold 12px Arial",
       fill: new Fill({ color: "white" }),
       stroke: new Stroke({
-        color: "black",
-        width: 3,
+        color: "crimson",
+        width: 5,
       }),
       offsetY: 50,
     }),
   });
 };
 export const enemyStyle = (enemyFeature: Feature) => {
-  const { sprite } = enemyFeature.get("enemyData");
+  const { sprite, hp } = enemyFeature.get("enemyData");
   return new Style({
     image: new Icon({
       src: sprite,
       scale: 1,
       anchor: [0.5, 0.5],
+    }),
+    text: new Text({
+      text: `HP: ${hp}`,
+      font: "bold 12px Arial",
+      fill: new Fill({ color: "white" }),
+      stroke: new Stroke({
+        color: "black",
+        width: 3,
+      }),
+      offsetY: 50,
     }),
   });
 };
