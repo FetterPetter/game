@@ -4,19 +4,18 @@ import { Icon, Style, Fill, Stroke, Text } from "ol/style";
 import { enemySource } from "./addGameCharacter";
 
 const enemySprites = [
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png", //bulb
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/1.png", //bulb
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/12.png", // butterfree
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/12.png", // butterfree
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/15.png", // Bedrill
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/15.png", // Bedrill
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/30.png", // nidonoe?
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/30.png", // nidonoe?
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png", // mjaut
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/52.png", // mjaut
 ];
-const enemyStats = [
-  [30, 0.0002],
-  [1, 0.00065],
-  [120, 0.00022],
-  [180, 0.00029],
-  [150, 0.00021],
-];
+
 const bossSprites = [
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/249.png", // lugia
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/130.png", // gyra
@@ -26,14 +25,28 @@ const bossSprites = [
 ];
 
 const bossStats = [
-  [5600, 0.00023],
+  [5600, 0.00033],
   [2900, 0.00018],
   [3000, 0.00019],
   [10000, 0.00024],
   [1000, 0.00029],
 ];
+const enemyStats = [
+  [30, 0.0002], //bulb
+  [150, 0.0002], //bulb
+  [1, 0.00055], //butter
+  [1, 0.00075], //butter
+  [120, 0.00022], //bee
+  [420, 0.00028], //bee
+  [180, 0.00029], //nido
+  [9800, 0.0003], //nido
+  [150, 0.00021], //mjaut
+  [750, 0.00023], //mjaut
+];
 const getRandomEnemy = () => {
-  const enemyChances = [0.8, 0.05, 0.1, 0.01, 0.04];
+  const enemyChances = [
+    0.682, 0.01, 0.049, 0.01, 0.049, 0.049, 0.01, 0.001, 0.097, 0.01,
+  ];
   const rand = Math.random();
   let cumulativeProbability = 0;
   let selectedIndex = 0;

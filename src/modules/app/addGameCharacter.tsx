@@ -193,7 +193,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     swordFeature.setStyle(swordStyle());
 
     let startTime: number | null = null;
-    const animationDuration = 320;
+    const animationDuration = 420;
 
     const animationStep = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
@@ -388,7 +388,8 @@ export function GameButton({ map, source }: GameButtonProps) {
           </>
         ) : (
           <>
-            <p>du taptse :-(</p>
+            <p>du taptse :-( {killCount}</p>
+
             <button onClick={() => window.location.reload()}>Restart</button>
           </>
         )}
