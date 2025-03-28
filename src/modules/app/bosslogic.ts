@@ -34,8 +34,8 @@ const bossStats = [
 const enemyStats = [
   [30, 0.0002], //bulb
   [150, 0.0002], //bulb
-  [1, 0.00055], //butter
-  [1, 0.00075], //butter
+  [1, 0.0006], //butter
+  [1, 0.00073], //butter
   [120, 0.00022], //bee
   [420, 0.00028], //bee
   [180, 0.00029], //nido
@@ -45,7 +45,16 @@ const enemyStats = [
 ];
 const getRandomEnemy = () => {
   const enemyChances = [
-    0.682, 0.01, 0.049, 0.01, 0.049, 0.049, 0.01, 0.001, 0.097, 0.01,
+    0.693, // Normal Bulbasaur
+    0.007, // 1% of 0.693 for shiny Bulbasaur
+    0.047, // Normal Butterfree
+    0.003, // 1% of 0.047 for shiny Butterfree
+    0.09, // Normal Beedrill
+    0.01, // 1% of 0.090 for shiny Beedrill
+    0.09, // Normal Nidorina
+    0.01, // 1% of 0.090 for shiny Nidorina
+    0.019, // Normal Meowth
+    0.001, // 1% of 0.019 for shiny Meowth
   ];
   const rand = Math.random();
   let cumulativeProbability = 0;
