@@ -69,10 +69,10 @@ const dropBlood = (x: number, y: number) => {
 export function GameButton({ map, source }: GameButtonProps) {
   const [currentFeature, setCurrentFeature] = useState<Feature | null>(null);
   const [currentDamage, setCurrentDamage] = useState(1);
-  const [intervalId, setIntervalId] = useState<number | null>(null);
   const [gameOver, setGameOver] = useState(false);
   const [killCount, setKillCount] = useState(0);
   const [playerSpeed, setPlayerSpeed] = useState(0.0002);
+
   const [highScore, setHighScore] = useState(() => {
     return parseInt(localStorage.getItem("highScore") || "0", 10);
   });
@@ -80,9 +80,17 @@ export function GameButton({ map, source }: GameButtonProps) {
 
   function startTimer() {
     const timerInterval = setInterval(() => {
-      setTimer((prevTime) => prevTime + 1);
+      setTimer((prevTime) => {
+        const newTime = prevTime + 1;
+        if (newTime % 30 === 0) {
+          const { x, y } = spawnRandomEnemy();
+          spawnBoss(x ? x : 0, y ? y : 0);
+        }
+        const { x, y } = spawnRandomEnemy();
+        spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
+        return newTime;
+      });
     }, 1000);
-
     return timerInterval;
   }
 
@@ -103,7 +111,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   }
 
   function spawnRandomEnemy() {
-    if (gameOver) return;
+    if (gameOver) return { x: 0, y: 0 };
     const view: View = map.getView();
     const extent = view.calculateExtent();
     const [minX, minY, maxX, maxY] = extent;
@@ -129,12 +137,8 @@ export function GameButton({ map, source }: GameButtonProps) {
         y = Math.random() * (maxY - minY) + minY;
         break;
     }
-    const bossChance = Math.random();
-    if (bossChance < 0.01) {
-      spawnBoss(x ? x : 0, y ? y : 0);
-    } else {
-      spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
-    }
+
+    return { x, y };
   }
 
   function drawPoint() {
@@ -147,22 +151,8 @@ export function GameButton({ map, source }: GameButtonProps) {
       e.feature!.set("speed", playerSpeed);
       setCurrentFeature(e.feature!);
       e.feature!.setStyle(playerStyle(false));
-      startSpawningRandomEnemies();
       startTimer();
     });
-  }
-
-  function startSpawningRandomEnemies() {
-    if (intervalId || gameOver) return;
-
-    const id = setInterval(() => {
-      if (!gameOver) {
-        spawnRandomEnemy();
-      } else {
-        clearInterval(id);
-        setIntervalId(null);
-      }
-    }, 500);
   }
 
   let isSwordActive = false;
@@ -202,8 +192,9 @@ export function GameButton({ map, source }: GameButtonProps) {
         const frameIndex = Math.floor(progress * numberOfFrames);
         const newSwordCoords = [playerCoords, swordCoordinates[frameIndex]];
         swordFeature.getGeometry()!.setCoordinates(newSwordCoords);
-
+        let hitEnemy = false;
         enemySource.forEachFeature((enemyFeature) => {
+          if (hitEnemy) return;
           if (checkSwordHit(swordFeature, enemyFeature)) {
             let hp = enemyFeature.get("helsepoeng") || 0;
             let swordDamage = currentFeature.get("swordDamage");
@@ -239,6 +230,7 @@ export function GameButton({ map, source }: GameButtonProps) {
                 enemyFeature.setStyle(bossStyle(enemyFeature));
               }
             }
+            hitEnemy = true;
           }
         });
         requestAnimationFrame(animationStep);
