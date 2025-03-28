@@ -11,11 +11,11 @@ const enemySprites = [
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png", // mjaut
 ];
 const enemyStats = [
-  [5, 0.0002],
+  [80, 0.0002],
   [1, 0.00065],
-  [120, 0.00022],
-  [80, 0.00029],
-  [20, 0.00021],
+  [320, 0.00022],
+  [380, 0.00029],
+  [150, 0.00021],
 ];
 const bossSprites = [
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/249.png", // lugia
@@ -29,7 +29,7 @@ const bossStats = [
   [5600, 0.00023],
   [2900, 0.00018],
   [3000, 0.00019],
-  [10000, 0.0002],
+  [10000, 0.00024],
   [1000, 0.00029],
 ];
 const getRandomEnemy = () => {

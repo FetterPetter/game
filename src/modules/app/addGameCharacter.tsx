@@ -64,6 +64,9 @@ const dropBlood = (x: number, y: number) => {
     geometry: generateRandomBloodShape(x, y),
   });
   bloodSource.addFeature(bloodFeature);
+  setTimeout(() => {
+    bloodSource.removeFeature(bloodFeature);
+  }, 5000);
 };
 
 export function GameButton({ map, source }: GameButtonProps) {
@@ -86,8 +89,18 @@ export function GameButton({ map, source }: GameButtonProps) {
           const { x, y } = spawnRandomEnemy();
           spawnBoss(x ? x : 0, y ? y : 0);
         }
-        const { x, y } = spawnRandomEnemy();
-        spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
+        if (newTime % 0.5 === 0) {
+          if (newTime > 45) {
+            const { x, y } = spawnRandomEnemy();
+            spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
+          }
+          const { x, y } = spawnRandomEnemy();
+          spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
+        }
+        if (newTime > 30 && newTime % 1 === 0) {
+          const { x, y } = spawnRandomEnemy();
+          spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
+        }
         return newTime;
       });
     }, 1000);
@@ -202,9 +215,9 @@ export function GameButton({ map, source }: GameButtonProps) {
             hp -= swordDamage;
             if (hp <= 0) {
               if (enemyType === "normal") {
-                swordDamage += 0.1; // Increase by 0.1 for normal enemies
+                swordDamage += 0.1;
               } else if (enemyType === "boss") {
-                swordDamage += 5; // Increase by 5 for boss enemies
+                swordDamage += 5;
               }
               currentFeature.set("swordDamage", swordDamage);
               swordDamage = parseFloat(swordDamage.toFixed(2));
