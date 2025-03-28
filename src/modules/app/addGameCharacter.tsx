@@ -86,18 +86,18 @@ export function GameButton({ map, source }: GameButtonProps) {
       setTimer((prevTime) => {
         const newTime = prevTime + 1;
         if (newTime % 30 === 0) {
+          if (newTime > 60) {
+            const { x, y } = spawnRandomEnemy();
+            spawnBoss(x ? x : 0, y ? y : 0);
+          }
           const { x, y } = spawnRandomEnemy();
           spawnBoss(x ? x : 0, y ? y : 0);
         }
         if (newTime % 0.5 === 0) {
-          if (newTime > 45) {
-            const { x, y } = spawnRandomEnemy();
-            spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
-          }
           const { x, y } = spawnRandomEnemy();
           spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
         }
-        if (newTime > 30 && newTime % 1 === 0) {
+        if (newTime > 60 && newTime % 1 === 0) {
           const { x, y } = spawnRandomEnemy();
           spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
         }
@@ -116,7 +116,6 @@ export function GameButton({ map, source }: GameButtonProps) {
       const [x2, y2] = swordCoords[i + 1];
       const [ex, ey] = enemyCoord;
       if (pointToLineDistance(ex, ey, x1, y1, x2, y2) < hitRadius) {
-        dropBlood(ex, ey);
         return true;
       }
     }
@@ -222,6 +221,10 @@ export function GameButton({ map, source }: GameButtonProps) {
               currentFeature.set("swordDamage", swordDamage);
               swordDamage = parseFloat(swordDamage.toFixed(2));
               setCurrentDamage(swordDamage);
+              const enemyCoord = (
+                enemyFeature.getGeometry() as Point
+              ).getCoordinates();
+              dropBlood(enemyCoord[0], enemyCoord[1]);
               enemySource.removeFeature(enemyFeature);
 
               setKillCount((prev) => {

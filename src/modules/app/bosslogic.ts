@@ -11,10 +11,10 @@ const enemySprites = [
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png", // mjaut
 ];
 const enemyStats = [
-  [80, 0.0002],
+  [30, 0.0002],
   [1, 0.00065],
-  [320, 0.00022],
-  [380, 0.00029],
+  [120, 0.00022],
+  [180, 0.00029],
   [150, 0.00021],
 ];
 const bossSprites = [
