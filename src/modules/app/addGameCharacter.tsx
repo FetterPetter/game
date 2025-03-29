@@ -100,6 +100,7 @@ export function GameButton({ map, source }: GameButtonProps) {
             spawnBoss(x ? x : 0, y ? y : 0);
           }
         }
+
         if (newTime % 0.5 === 0) {
           if (newTime > 30) {
             const { x, y } = spawnRandomEnemy();
