@@ -6,7 +6,7 @@ import { LineString, Point } from "ol/geom";
 import { Fill, Icon, Stroke, Style } from "ol/style";
 import VectorLayer from "ol/layer/Vector";
 import { pointToLineDistance } from "./helpPointLineDistance";
-import { generateRandomBloodShape } from "./randomBloodPattern";
+import { dropBlood, generateRandomBloodShape } from "./randomBloodPattern";
 import {
   bossStyle,
   enemyStyle,
@@ -64,16 +64,6 @@ interface GameButtonProps {
   source: VectorSource;
 }
 
-const dropBlood = (x: number, y: number) => {
-  const bloodFeature = new Feature({
-    geometry: generateRandomBloodShape(x, y),
-  });
-  bloodSource.addFeature(bloodFeature);
-  setTimeout(() => {
-    bloodSource.removeFeature(bloodFeature);
-  }, 5000);
-};
-
 export function GameButton({ map, source }: GameButtonProps) {
   const [currentFeature, setCurrentFeature] = useState<Feature | null>(null);
   const [currentDamage, setCurrentDamage] = useState(1);
@@ -90,19 +80,27 @@ export function GameButton({ map, source }: GameButtonProps) {
     const timerInterval = setInterval(() => {
       setTimer((prevTime) => {
         const newTime = prevTime + 1;
-        if (newTime % 30 === 0) {
-          if (newTime > 60) {
+        if (newTime > 55) {
+          if (newTime % 30 === 0) {
             const { x, y } = spawnRandomEnemy();
             spawnBoss(x ? x : 0, y ? y : 0);
           }
-          const { x, y } = spawnRandomEnemy();
-          spawnBoss(x ? x : 0, y ? y : 0);
+        }
+        if (newTime > 90) {
+          if (newTime % 10 === 0) {
+            const { x, y } = spawnRandomEnemy();
+            spawnBoss(x ? x : 0, y ? y : 0);
+          }
         }
         if (newTime % 0.5 === 0) {
+          if (newTime > 30) {
+            const { x, y } = spawnRandomEnemy();
+            spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
+          }
           const { x, y } = spawnRandomEnemy();
           spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
         }
-        if (newTime > 60 && newTime % 1 === 0) {
+        if (newTime > 30 && newTime % 1 === 0) {
           const { x, y } = spawnRandomEnemy();
           spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
         }
@@ -133,9 +131,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     const extent = view.calculateExtent();
     const [minX, minY, maxX, maxY] = extent;
     let x, y;
-
     const edge = Math.floor(Math.random() * 4);
-
     switch (edge) {
       case 0:
         x = Math.random() * (maxX - minX) + minX;
@@ -154,7 +150,6 @@ export function GameButton({ map, source }: GameButtonProps) {
         y = Math.random() * (maxY - minY) + minY;
         break;
     }
-
     return { x, y };
   }
 
@@ -209,9 +204,8 @@ export function GameButton({ map, source }: GameButtonProps) {
         const frameIndex = Math.floor(progress * numberOfFrames);
         const newSwordCoords = [playerCoords, swordCoordinates[frameIndex]];
         swordFeature.getGeometry()!.setCoordinates(newSwordCoords);
-        let hitEnemy = false;
+
         enemySource.forEachFeature((enemyFeature) => {
-          if (hitEnemy) return;
           if (checkSwordHit(swordFeature, enemyFeature)) {
             let hp = enemyFeature.get("helsepoeng") || 0;
             let swordDamage = currentFeature.get("swordDamage");
@@ -258,7 +252,6 @@ export function GameButton({ map, source }: GameButtonProps) {
                 enemyFeature.setStyle(enemyStyle(enemyFeature));
               }
             }
-            hitEnemy = true;
           }
         });
         requestAnimationFrame(animationStep);

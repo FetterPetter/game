@@ -1,14 +1,16 @@
 import { MultiPolygon, Polygon } from "ol/geom";
+import { Feature } from "ol";
+import { bloodSource } from "./addGameCharacter";
 
 export const generateRandomBloodShape = (x: number, y: number) => {
-  const numBlobs = Math.floor(Math.random() * 7) + 4;
+  const numBlobs = Math.floor(Math.random() * 3) + 4;
 
   const blobs = Array.from({ length: numBlobs }, () => {
-    const numVertices = Math.floor(Math.random() * 7) + 12;
+    const numVertices = Math.floor(Math.random() * 2) + 3;
     const blobPoints: [number, number][] = [];
 
     for (let i = 0; i < numVertices; i++) {
-      const baseAngle = (i / numVertices) * 13 * Math.PI;
+      const baseAngle = (i / numVertices) * 3 * Math.PI;
       const angle = baseAngle + (Math.random() - 0.5) * 2.5;
 
       const vertexRadius = 0.0012 + Math.random() * 0.003;
@@ -23,4 +25,13 @@ export const generateRandomBloodShape = (x: number, y: number) => {
   });
 
   return new MultiPolygon(blobs.map((blob) => blob.getCoordinates()));
+};
+export const dropBlood = (x: number, y: number) => {
+  const bloodFeature = new Feature({
+    geometry: generateRandomBloodShape(x, y),
+  });
+  bloodSource.addFeature(bloodFeature);
+  setTimeout(() => {
+    bloodSource.removeFeature(bloodFeature);
+  }, 2500);
 };

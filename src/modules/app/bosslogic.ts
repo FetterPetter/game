@@ -3,89 +3,220 @@ import { Point } from "ol/geom";
 import { Icon, Style, Fill, Stroke, Text } from "ol/style";
 import { enemySource } from "./addGameCharacter";
 
-const enemySprites = [
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/1.png", //bulb
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/12.png", // butterfree
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/12.png", // butterfree
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/15.png", // Bedrill
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/15.png", // Bedrill
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/30.png", // nidonoe?
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/30.png", // nidonoe?
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png", // mjaut
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/52.png", // mjaut
+const bosses = [
+  {
+    name: "Lugia",
+    normal: {
+      hp: 4000,
+      speed: 0.000285,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/249.png",
+    },
+    shiny: {
+      hp: 5600,
+      speed: 0.00043,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/249.png",
+    },
+    chance: 0.05,
+  },
+  {
+    name: "Gyarados",
+    normal: {
+      hp: 2100,
+      speed: 0.000231,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/130.png",
+    },
+    shiny: {
+      hp: 3900,
+      speed: 0.00026,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/130.png",
+    },
+    chance: 0.25,
+  },
+  {
+    name: "Mewtwo",
+    normal: {
+      hp: 2500,
+      speed: 0.00021,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png",
+    },
+    shiny: {
+      hp: 3000,
+      speed: 0.00027,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/150.png",
+    },
+    chance: 0.25,
+  },
+  {
+    name: "Snorlax",
+    normal: {
+      hp: 8000,
+      speed: 0.000229,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/143.png",
+    },
+    shiny: {
+      hp: 15000,
+      speed: 0.000259,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/143.png",
+    },
+    chance: 0.2,
+  },
+  {
+    name: "Charizard",
+    normal: {
+      hp: 800,
+      speed: 0.0002899,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png",
+    },
+    shiny: {
+      hp: 1000,
+      speed: 0.00039,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png",
+    },
+    chance: 0.15,
+  },
 ];
 
-const bossSprites = [
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/249.png", // lugia
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/130.png", // gyra
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/150.png", // mew2
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/143.png", // snor
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png", // char
-];
-
-const bossStats = [
-  [5600, 0.00033],
-  [2900, 0.00018],
-  [3000, 0.00019],
-  [10000, 0.00024],
-  [1000, 0.00029],
-];
-const enemyStats = [
-  [30, 0.0002], //bulb
-  [150, 0.0002], //bulb
-  [1, 0.0006], //butter
-  [1, 0.00073], //butter
-  [120, 0.00022], //bee
-  [420, 0.00028], //bee
-  [180, 0.00029], //nido
-  [9800, 0.0003], //nido
-  [150, 0.00021], //mjaut
-  [750, 0.00023], //mjaut
+const enemies = [
+  {
+    name: "Bulbasaur",
+    normal: {
+      hp: 20,
+      speed: 0.0002,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
+    },
+    shiny: {
+      hp: 150,
+      speed: 0.0002,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/1.png",
+    },
+    chance: 0.8,
+  },
+  {
+    name: "Beedrill",
+    normal: {
+      hp: 100,
+      speed: 0.00022,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/15.png",
+    },
+    shiny: {
+      hp: 400,
+      speed: 0.00028,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/15.png",
+    },
+    chance: 0.1,
+  },
+  {
+    name: "Nidorina",
+    normal: {
+      hp: 180,
+      speed: 0.00029,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/30.png",
+    },
+    shiny: {
+      hp: 980,
+      speed: 0.0003,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/30.png",
+    },
+    chance: 0.05,
+  },
+  {
+    name: "Meowth",
+    normal: {
+      hp: 150,
+      speed: 0.00021,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png",
+    },
+    shiny: {
+      hp: 750,
+      speed: 0.00023,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/52.png",
+    },
+    chance: 0.04,
+  },
+  {
+    name: "Butterfree",
+    normal: {
+      hp: 1,
+      speed: 0.00065,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/12.png",
+    },
+    shiny: {
+      hp: 1,
+      speed: 0.00075,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/12.png",
+    },
+    chance: 0.01,
+  },
 ];
 const getRandomEnemy = () => {
-  const enemyChances = [
-    0.693, // Normal Bulbasaur
-    0.007, // 1% of 0.693 for shiny Bulbasaur
-    0.047, // Normal Butterfree
-    0.003, // 1% of 0.047 for shiny Butterfree
-    0.09, // Normal Beedrill
-    0.01, // 1% of 0.090 for shiny Beedrill
-    0.09, // Normal Nidorina
-    0.01, // 1% of 0.090 for shiny Nidorina
-    0.019, // Normal Meowth
-    0.001, // 1% of 0.019 for shiny Meowth
-  ];
-  const rand = Math.random();
-  let cumulativeProbability = 0;
-  let selectedIndex = 0;
-  for (let i = 0; i < enemyChances.length; i++) {
-    cumulativeProbability += enemyChances[i];
-    if (rand < cumulativeProbability) {
-      selectedIndex = i;
-      break;
+  let rand = Math.random();
+  let shinyRand = Math.random();
+  let cumulative = 0;
+
+  for (const enemy of enemies) {
+    cumulative += enemy.chance;
+    if (rand < cumulative) {
+      const variant = shinyRand < 0.01 ? enemy.shiny : enemy.normal;
+      return {
+        sprite: variant.sprite,
+        hp: variant.hp,
+        speed: variant.speed,
+      };
     }
   }
-  const sprite = enemySprites[selectedIndex];
-  const [hp, speed] = enemyStats[selectedIndex];
-  return { sprite, hp, speed };
+
+  return {
+    sprite: enemies[0].normal.sprite,
+    hp: enemies[0].normal.hp,
+    speed: enemies[0].normal.speed,
+  };
 };
 
 const getRandomBoss = () => {
-  const enemyChances = [0.05, 0.15, 0.5, 0.15, 0.15];
-  const rand = Math.random();
+  let rand = Math.random();
   let cumulativeProbability = 0;
-  let randomIndex = 0;
-  for (let i = 0; i < enemyChances.length; i++) {
-    cumulativeProbability += enemyChances[i];
+  let shinyRand = Math.random();
+
+  for (const boss of bosses) {
+    cumulativeProbability += boss.chance;
     if (rand < cumulativeProbability) {
-      randomIndex = i;
-      break;
+      const variant = shinyRand < 0.01 ? boss.shiny : boss.normal;
+      return {
+        name: boss.name,
+        sprite: variant.sprite,
+        hp: variant.hp,
+        speed: variant.speed,
+        shiny: shinyRand < 0.01,
+      };
     }
   }
-  const sprite = bossSprites[randomIndex];
-  const [hp, speed] = bossStats[randomIndex];
-  return { sprite, hp, speed };
+  return {
+    name: bosses[0].name,
+    sprite: bosses[0].normal.sprite,
+    hp: bosses[0].normal.hp,
+    speed: bosses[0].normal.speed,
+    shiny: false,
+  };
 };
 
 export const bossStyle = (bossFeature: Feature) => {
@@ -140,7 +271,6 @@ export function spawnBoss(x: number, y: number) {
   bossFeature.set("helsepoeng", hp);
   bossFeature.set("type", "boss");
   bossFeature.set("speed", speed);
-
   enemySource.addFeature(bossFeature);
   bossFeature.setStyle(bossStyle(bossFeature));
 }
