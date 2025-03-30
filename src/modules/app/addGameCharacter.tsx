@@ -16,6 +16,12 @@ import {
   spawnRandomEnemyNow,
 } from "./bosslogic";
 
+type KillLog = {
+  [enemyName: string]: {
+    sprite: string;
+    count: number;
+  };
+};
 export const playerStyle = (mirror: boolean = false, f: Feature) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
   const minDmg = 1;
@@ -128,9 +134,24 @@ export function GameButton({ map, source }: GameButtonProps) {
   const [currentFeature, setCurrentFeature] = useState<Feature | null>(null);
   const [currentDamage, setCurrentDamage] = useState(1);
   const [gameOver, setGameOver] = useState(false);
+  const [killLog, setKillLog] = useState<KillLog>({});
   const [killCount, setKillCount] = useState(0);
+  const [killedBy, setKilledBy] = useState<{
+    name: string;
+    sprite: string | null;
+  } | null>(null);
   const [playerSpeed, setPlayerSpeed] = useState(0.0002);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [songActive, setSongActive] = useState(false);
+  const [songIndex, setSongIndex] = useState(0);
+  const playlist = [
+    "https://kappa.vgmsite.com/soundtracks/crypt-of-the-necrodancer/dfwnidfm/02%20-%20Rhythmortis%20%28Lobby%29.mp3",
+    "https://kappa.vgmsite.com/soundtracks/crypt-of-the-necrodancer/xxbsascz/01%20-%20Tombtorial%20%28Tutorial%29.mp3",
+    "https://kappa.vgmsite.com/soundtracks/crypt-of-the-necrodancer/cylypazn/03%20-%20Watch%20Your%20Step%20%28Training%29.mp3",
+  ];
+  const audio = new Audio();
+  audio.loop = false;
+  audio.volume = 0.34;
 
   const [highScore, setHighScore] = useState(() => {
     return parseInt(localStorage.getItem("highScore") || "0", 10);
@@ -238,17 +259,33 @@ export function GameButton({ map, source }: GameButtonProps) {
     return { x, y };
   }
 
+  useEffect(() => {
+    if (songActive) {
+      audio.src = playlist[songIndex];
+      audio.play();
+
+      audio.onended = () => {
+        const nextIndex = (songIndex + 1) % playlist.length;
+        setSongIndex(nextIndex);
+      };
+    } else {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+  }, [songActive]);
+
   function drawPoint() {
     source.clear();
     const draw = new Draw({ type: "Point", source });
     map.addInteraction(draw);
     source.once("addfeature", (e) => {
       map.removeInteraction(draw);
-      e.feature!.set("swordDamage", 1);
+      e.feature!.set("swordDamage", 1000);
       e.feature!.set("speed", playerSpeed);
       setCurrentFeature(e.feature!);
       e.feature!.setStyle(playerStyle(false, e.feature!));
       startTimer();
+      setSongActive(true);
     });
   }
 
@@ -328,7 +365,7 @@ export function GameButton({ map, source }: GameButtonProps) {
                 enemyFeature.getGeometry() as Point
               ).getCoordinates();
               dropBlood(enemyCoord[0], enemyCoord[1]);
-
+              handleEnemyKilled(enemyFeature);
               enemySource.removeFeature(enemyFeature);
 
               setKillCount((prev) => {
@@ -371,6 +408,18 @@ export function GameButton({ map, source }: GameButtonProps) {
     };
     requestAnimationFrame(animationStep);
   }
+
+  const handleEnemyKilled = (enemyFeature: Feature) => {
+    const { name, sprite, shiny } = enemyFeature.get("enemyData");
+    const enemyKey = shiny ? `${name}_shiny` : name;
+    setKillLog((prev) => ({
+      ...prev,
+      [enemyKey]: {
+        sprite,
+        count: (prev[enemyKey]?.count || 0) + 1,
+      },
+    }));
+  };
 
   const moveFeature = (xCord: number, yCord: number, sprinting: boolean) => {
     if (gameOver) return;
@@ -472,8 +521,9 @@ export function GameButton({ map, source }: GameButtonProps) {
       const dx = playerCoords[0] - enemyCoords[0];
       const dy = playerCoords[1] - enemyCoords[1];
       const distance = Math.sqrt(dx * dx + dy * dy);
-
+      const { name, sprite } = enemyFeature.get("enemyData");
       if (distance < 0.003) {
+        setKilledBy({ name, sprite });
         if (enemyMovementAnimationFrame !== null) {
           cancelAnimationFrame(enemyMovementAnimationFrame);
         }
@@ -481,6 +531,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         setCurrentFeature(null);
         source.clear();
         setGameOver(true);
+        setSongActive(false);
         clearInterval(timerIntervalRef.current!);
         return;
       }
@@ -524,10 +575,38 @@ export function GameButton({ map, source }: GameButtonProps) {
         ) : (
           <>
             <p>du taptse :-( {killCount}</p>
-
             <button onClick={() => window.location.reload()}>Restart</button>
             <p>tid: {timer}s</p>
             <p>highscore: {highScore} </p>
+            <div className="kill-tracker">
+              <div className="kill-tracker">
+                <h2>Enemies Defeated</h2>
+                {Object.keys(killLog).length > 0 ? (
+                  Object.entries(killLog).map(([enemyKey, data]) => (
+                    <div key={enemyKey} className="enemy-kill">
+                      <img src={data.sprite} alt={enemyKey} />
+                      <p>
+                        {enemyKey}: {data.count} Kills
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p>Noob?</p>
+                )}
+              </div>
+              {Object.keys(killLog).length > 0 ? (
+                Object.entries(killLog).map(([enemyName, data]) => (
+                  <div key={enemyName} className="enemy-kill">
+                    <img src={data.sprite} alt={enemyName} />
+                    <p>
+                      {enemyName}: {data.count} Kills
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p>??</p>
+              )}
+            </div>
           </>
         )}
       </div>

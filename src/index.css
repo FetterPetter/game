@@ -75,3 +75,44 @@ html {
 .game-over button:hover {
   background: darkred;
 }
+
+.kill-tracker {
+  display: block !important;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  z-index: 1000;
+}
+
+.enemy-kill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.enemy-kill img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  border-radius: 5px;
+  border: 2px solid white;
+}
+
+/* Make it semi-transparent when game is running */
+.game-active .kill-tracker {
+  opacity: 0.3;
+  pointer-events: none; /* Prevent interaction */
+}
+
+/* Fully visible when game is over */
+.game-over .kill-tracker {
+  opacity: 1;
+  pointer-events: auto;
+}
