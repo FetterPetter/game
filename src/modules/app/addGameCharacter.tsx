@@ -151,7 +151,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   ];
   const audio = new Audio();
   audio.loop = false;
-  audio.volume = 0.34;
+  audio.volume = 0.24;
 
   const [highScore, setHighScore] = useState(() => {
     return parseInt(localStorage.getItem("highScore") || "0", 10);
