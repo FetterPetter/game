@@ -36,7 +36,7 @@ export const playerStyle = (mirror: boolean = false, f: Feature) => {
       anchor: [0.5, 0.5],
     }),
     text: new Text({
-      text: `demg: ${dmg}`,
+      text: `dmg: ${dmg}`,
       font: "bold 12px comic sans",
       fill: new Fill({ color: `rgb(${r}, ${g}, ${b})` }),
       stroke: new Stroke({
@@ -100,14 +100,23 @@ export const bloodLayer = new VectorLayer({
   }),
 });
 
-const swordStyle = () => {
+const swordStyle = (f: Feature) => {
+  const dmg = parseFloat(f.get("swordDamage").toFixed(2));
   return new Style({
     stroke: new Stroke({
-      width: 6,
-      color: "crimson",
+      width: Math.min(3 + dmg * 0.1, 8),
+      color: getSwordColor(dmg),
     }),
   });
 };
+
+function getSwordColor(damage: number) {
+  if (damage < 10) return "silver";
+  if (damage < 20) return "deepskyblue";
+  if (damage < 30) return "purple";
+  if (damage < 40) return "orange";
+  return "crimson";
+}
 
 interface GameButtonProps {
   map: Map;
@@ -151,6 +160,11 @@ export function GameButton({ map, source }: GameButtonProps) {
             spawnBoss(x ? x : 0, y ? y : 0);
             spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
           }
+        }
+        if (newTime > 130) {
+          const { x, y } = spawnRandomEnemy();
+          spawnBoss(x ? x : 0, y ? y : 0);
+          spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
         }
 
         if (newTime % 0.5 === 0) {
@@ -251,7 +265,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     });
     source.addFeature(swordFeature);
 
-    swordFeature.setStyle(swordStyle());
+    swordFeature.setStyle(swordStyle(currentFeature));
 
     let startTime: number | null = null;
     const animationDuration = 420;
@@ -278,16 +292,18 @@ export function GameButton({ map, source }: GameButtonProps) {
               if (enemyType === "normal") {
                 swordDamage += 0.1;
                 if (isShiny) {
+                  swordDamage += 0.4;
                   let currentSwordLength =
                     currentFeature.get("swordLength") || 0.015;
-                  let newSwordLength = currentSwordLength + 0.0005;
+                  let newSwordLength = currentSwordLength + 0.001;
                   currentFeature.set("swordLength", newSwordLength);
                 }
               } else if (enemyType === "boss") {
                 swordDamage += 5;
                 if (isShiny) {
+                  swordDamage += 10;
                   let currentSwordLength =
-                    currentFeature.get("swordLength") || 0.005;
+                    currentFeature.get("swordLength") || 0.015;
                   let newSwordLength = currentSwordLength + 0.015;
                   currentFeature.set("swordLength", newSwordLength);
                 }
