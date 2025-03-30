@@ -192,40 +192,44 @@ const getRandomEnemy = () => {
   for (const enemy of enemies) {
     cumulative += enemy.chance;
     if (rand < cumulative) {
-      const variant = shinyRand < 0.01 ? enemy.shiny : enemy.normal;
+      const isShiny = shinyRand < 0.01;
+      const variant = isShiny ? enemy.shiny : enemy.normal;
       return {
         sprite: variant.sprite,
         hp: variant.hp,
         speed: variant.speed,
+        shiny: isShiny,
       };
     }
   }
-
   return {
     sprite: enemies[0].normal.sprite,
     hp: enemies[0].normal.hp,
     speed: enemies[0].normal.speed,
+    shiny: false,
   };
 };
 
 const getRandomBoss = () => {
   let rand = Math.random();
-  let cumulativeProbability = 0;
   let shinyRand = Math.random();
+  let cumulativeProbability = 0;
 
   for (const boss of bosses) {
     cumulativeProbability += boss.chance;
     if (rand < cumulativeProbability) {
-      const variant = shinyRand < 0.01 ? boss.shiny : boss.normal;
+      const isShiny = shinyRand < 0.01;
+      const variant = isShiny ? boss.shiny : boss.normal;
       return {
         name: boss.name,
         sprite: variant.sprite,
         hp: variant.hp,
         speed: variant.speed,
-        shiny: shinyRand < 0.01,
+        shiny: isShiny,
       };
     }
   }
+
   return {
     name: bosses[0].name,
     sprite: bosses[0].normal.sprite,
@@ -277,29 +281,31 @@ export const enemyStyle = (enemyFeature: Feature) => {
 };
 
 export function spawnBoss(x: number, y: number) {
-  const { sprite, hp, speed } = getRandomBoss();
+  const { sprite, hp, speed, shiny } = getRandomBoss();
 
   const bossFeature = new Feature({
     geometry: new Point([x, y]),
   });
 
-  bossFeature.set("bossData", { sprite, hp, speed });
+  bossFeature.set("bossData", { sprite, hp, speed, shiny });
   bossFeature.set("helsepoeng", hp);
   bossFeature.set("type", "boss");
   bossFeature.set("speed", speed);
+  bossFeature.set("shiny", shiny);
   enemySource.addFeature(bossFeature);
   bossFeature.setStyle(bossStyle(bossFeature));
 }
 
 export function spawnRandomEnemyNow(x: number, y: number) {
-  const { sprite, hp, speed } = getRandomEnemy();
+  const { sprite, hp, speed, shiny } = getRandomEnemy();
   const randomEnemyFeature = new Feature({
     geometry: new Point([x ? x : 0, y ? y : 0]),
   });
-  randomEnemyFeature.set("enemyData", { sprite, hp, speed });
+  randomEnemyFeature.set("enemyData", { sprite, hp, speed, shiny });
   randomEnemyFeature.set("helsepoeng", hp);
   randomEnemyFeature.set("type", "normal");
   randomEnemyFeature.set("speed", speed);
+  randomEnemyFeature.set("shiny", shiny);
   enemySource.addFeature(randomEnemyFeature);
   randomEnemyFeature.setStyle(enemyStyle(randomEnemyFeature));
 }

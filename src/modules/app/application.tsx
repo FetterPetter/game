@@ -28,9 +28,9 @@ const map = new Map({
   target: "map",
   view: new View({
     center: [10.8, 59.9],
-    zoom: 13,
-    minZoom: 13,
-    maxZoom: 13,
+    zoom: 12.82,
+    minZoom: 12.82,
+    maxZoom: 12.82,
   }),
   layers: [darkMatterLayer, bloodLayer, playerLayer, enemyLayer],
 });

@@ -6,7 +6,7 @@ import { LineString, Point } from "ol/geom";
 import { Fill, Icon, Stroke, Style } from "ol/style";
 import VectorLayer from "ol/layer/Vector";
 import { pointToLineDistance } from "./helpPointLineDistance";
-import { dropBlood, generateRandomBloodShape } from "./randomBloodPattern";
+import { dropBlood } from "./randomBloodPattern";
 import {
   bossStyle,
   enemyStyle,
@@ -70,6 +70,8 @@ export function GameButton({ map, source }: GameButtonProps) {
   const [gameOver, setGameOver] = useState(false);
   const [killCount, setKillCount] = useState(0);
   const [playerSpeed, setPlayerSpeed] = useState(0.0002);
+  const [sprintCooldown, setSprintCooldown] = useState(0);
+  const [isSprinting, setIsSprinting] = useState(false);
 
   const [highScore, setHighScore] = useState(() => {
     return parseInt(localStorage.getItem("highScore") || "0", 10);
@@ -122,7 +124,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   function checkSwordHit(sword: Feature, enemy: Feature): boolean {
     const swordCoords = (sword.getGeometry() as LineString).getCoordinates();
     const enemyCoord = (enemy.getGeometry() as Point).getCoordinates();
-    const hitRadius = 0.005;
+    const hitRadius = 0.0075;
     for (let i = 0; i < swordCoords.length - 1; i++) {
       const [x1, y1] = swordCoords[i];
       const [x2, y2] = swordCoords[i + 1];
@@ -185,14 +187,13 @@ export function GameButton({ map, source }: GameButtonProps) {
     const playerCoords = (
       currentFeature.getGeometry() as Point
     ).getCoordinates();
-    const swordLength = 0.015;
-    const numberOfFrames = 60;
-    const angles = Array.from({ length: numberOfFrames }, (_, index) => {
-      return (index / numberOfFrames) * (Math.PI * 2);
-    });
-    const swordCoordinates = angles.map((angle) => [
-      playerCoords[0] + swordLength * Math.cos(angle),
-      playerCoords[1] + swordLength * Math.sin(angle),
+    const swordLength = currentFeature.get("swordLength") || 0.015;
+    const numberOfFrames = 1544;
+    const angleStep = (Math.PI * 2) / numberOfFrames;
+
+    const swordCoordinates = Array.from({ length: numberOfFrames }, (_, i) => [
+      playerCoords[0] + swordLength * Math.cos(i * angleStep),
+      playerCoords[1] + swordLength * Math.sin(i * angleStep),
     ]);
     const swordFeature = new Feature({
       geometry: new LineString([playerCoords, swordCoordinates[0]]),
@@ -219,12 +220,26 @@ export function GameButton({ map, source }: GameButtonProps) {
             let hp = enemyFeature.get("helsepoeng") || 0;
             let swordDamage = currentFeature.get("swordDamage");
             const enemyType = enemyFeature.get("type");
+            const isShiny = enemyFeature.get("shiny");
+
             hp -= swordDamage;
             if (hp <= 0) {
               if (enemyType === "normal") {
                 swordDamage += 0.1;
+                if (isShiny) {
+                  let currentSwordLength =
+                    currentFeature.get("swordLength") || 0.015;
+                  let newSwordLength = currentSwordLength + 0.0005;
+                  currentFeature.set("swordLength", newSwordLength);
+                }
               } else if (enemyType === "boss") {
                 swordDamage += 5;
+                if (isShiny) {
+                  let currentSwordLength =
+                    currentFeature.get("swordLength") || 0.005;
+                  let newSwordLength = currentSwordLength + 0.015;
+                  currentFeature.set("swordLength", newSwordLength);
+                }
               }
               currentFeature.set("swordDamage", swordDamage);
               swordDamage = parseFloat(swordDamage.toFixed(2));
@@ -233,6 +248,7 @@ export function GameButton({ map, source }: GameButtonProps) {
                 enemyFeature.getGeometry() as Point
               ).getCoordinates();
               dropBlood(enemyCoord[0], enemyCoord[1]);
+
               enemySource.removeFeature(enemyFeature);
 
               setKillCount((prev) => {
@@ -272,37 +288,56 @@ export function GameButton({ map, source }: GameButtonProps) {
     requestAnimationFrame(animationStep);
   }
 
-  const moveFeature = (xCord: number, yCord: number) => {
+  const moveFeature = (xCord: number, yCord: number, sprinting: boolean) => {
     if (gameOver) return;
+    if (sprinting) {
+      xCord *= 1.9;
+      yCord *= 1.9;
+    }
     const geom = currentFeature!.getGeometry() as Point;
     const coord = geom.getCoordinates();
     const newCoord = [coord[0] + xCord, coord[1] + yCord];
+
     geom.setCoordinates(newCoord);
     map.getView().setCenter(newCoord);
   };
-
   useEffect(() => {
     if (!currentFeature || gameOver) return;
-
     const keysPressed: { [key: string]: boolean } = {};
-
+    let animationFrameId: number | null = null;
+    let isSprinting = false;
+    let canSprint = true;
     const handleKeyDown = (event: KeyboardEvent) => {
-      keysPressed[event.key] = true;
+      const normalizedKey = event.key.toLowerCase();
+      keysPressed[normalizedKey] = true;
+      if (animationFrameId === null) {
+        movePlayerSmoothly();
+      }
+
       if (event.key === " ") {
         swordSwing();
+      }
+      if (event.key === "Shift" && canSprint) {
+        isSprinting = true;
+        canSprint = false;
+        setTimeout(() => {
+          canSprint = true;
+        }, 2000);
+        setTimeout(() => {
+          isSprinting = false;
+        }, 350);
       }
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
-      delete keysPressed[event.key];
+      const normalizedKey = event.key.toLowerCase();
+      delete keysPressed[normalizedKey];
     };
 
     const movePlayerSmoothly = () => {
       if (!currentFeature) return;
-
       let dx = 0,
         dy = 0;
-
       if (keysPressed["w"]) {
         currentFeature.setStyle(backwardsPlayerStyle());
         dy += playerSpeed;
@@ -320,9 +355,10 @@ export function GameButton({ map, source }: GameButtonProps) {
         dx += playerSpeed + 0.0001;
       }
       if (dx !== 0 || dy !== 0) {
-        moveFeature(dx, dy);
+        moveFeature(dx, dy, isSprinting);
       }
-      requestAnimationFrame(movePlayerSmoothly);
+
+      animationFrameId = requestAnimationFrame(movePlayerSmoothly);
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -333,19 +369,20 @@ export function GameButton({ map, source }: GameButtonProps) {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+      }
     };
   }, [currentFeature, gameOver]);
   let enemyMovementAnimationFrame: number | null = null;
 
-  const moveEnemies = (timestamp: number) => {
+  const moveEnemies = () => {
     if (!currentFeature || gameOver) return;
-
     const playerCoords = (
       currentFeature.getGeometry() as Point
     ).getCoordinates();
-
     enemySource.forEachFeature((enemyFeature) => {
-      const enemySpeed = enemyFeature.get("speed"); // Static speed from your enemyStats array
+      const enemySpeed = enemyFeature.get("speed");
       const enemyGeom = enemyFeature.getGeometry() as Point;
       const enemyCoords = enemyGeom.getCoordinates();
 
@@ -362,7 +399,6 @@ export function GameButton({ map, source }: GameButtonProps) {
         setGameOver(true);
         return;
       }
-
       const normalizedX = distance !== 0 ? dx / distance : 0;
       const normalizedY = distance !== 0 ? dy / distance : 0;
 
