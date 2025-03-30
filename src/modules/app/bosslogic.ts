@@ -116,14 +116,14 @@ const bosses = [
   {
     name: "Lugia",
     normal: {
-      hp: 10000,
+      hp: 50000,
       speed: 0.000299,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/249.png",
     },
     shiny: {
-      hp: 105600,
-      speed: 0.00043,
+      hp: 155600,
+      speed: 0.0004,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/249.png",
     },
@@ -132,13 +132,13 @@ const bosses = [
   {
     name: "Gyarados",
     normal: {
-      hp: 12100,
+      hp: 32100,
       speed: 0.000251,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/130.png",
     },
     shiny: {
-      hp: 33900,
+      hp: 133900,
       speed: 0.00026,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/130.png",
@@ -148,13 +148,13 @@ const bosses = [
   {
     name: "Mewtwo",
     normal: {
-      hp: 10500,
+      hp: 20500,
       speed: 0.00027,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png",
     },
     shiny: {
-      hp: 25000,
+      hp: 55000,
       speed: 0.000294,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/150.png",
@@ -164,13 +164,13 @@ const bosses = [
   {
     name: "Snorlax",
     normal: {
-      hp: 18000,
+      hp: 38000,
       speed: 0.000229,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/143.png",
     },
     shiny: {
-      hp: 1500000,
+      hp: 2500000,
       speed: 0.000299,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/143.png",
@@ -180,13 +180,13 @@ const bosses = [
   {
     name: "Charizard",
     normal: {
-      hp: 1800,
+      hp: 3800,
       speed: 0.0002899,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png",
     },
     shiny: {
-      hp: 15000,
+      hp: 19000,
       speed: 0.00039,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png",
@@ -196,13 +196,13 @@ const bosses = [
   {
     name: "Nidoking",
     normal: {
-      hp: 8000,
+      hp: 18000,
       speed: 0.0002901,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/34.png",
     },
     shiny: {
-      hp: 25000,
+      hp: 95000,
       speed: 0.000299,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/34.png",
@@ -221,7 +221,7 @@ const enemies = [
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
     },
     shiny: {
-      hp: 150,
+      hp: 2150,
       speed: 0.00021,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/1.png",
@@ -231,13 +231,13 @@ const enemies = [
   {
     name: "Beedrill",
     normal: {
-      hp: 100,
+      hp: 200,
       speed: 0.00025,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/15.png",
     },
     shiny: {
-      hp: 400,
+      hp: 4300,
       speed: 0.00028,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/15.png",
@@ -269,7 +269,7 @@ const enemies = [
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png",
     },
     shiny: {
-      hp: 1550,
+      hp: 2550,
       speed: 0.0002,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/52.png",

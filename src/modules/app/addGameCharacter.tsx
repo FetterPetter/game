@@ -175,6 +175,18 @@ export function GameButton({ map, source }: GameButtonProps) {
           const { x, y } = spawnRandomEnemy();
           spawnGigaEnemy(x ? x : 0, y ? y : 0);
         }
+        if (newTime > 400) {
+          const { x, y } = spawnRandomEnemy();
+          spawnGigaEnemy(x ? x : 0, y ? y : 0);
+          if (newTime % 0.5 === 0) {
+            const { x, y } = spawnRandomEnemy();
+            spawnGigaEnemy(x ? x : 0, y ? y : 0);
+          }
+          if (newTime % 1 === 0) {
+            const { x, y } = spawnRandomEnemy();
+            spawnGigaEnemy(x ? x : 0, y ? y : 0);
+          }
+        }
 
         return newTime;
       });
