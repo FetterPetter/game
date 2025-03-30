@@ -382,9 +382,12 @@ export function GameButton({ map, source }: GameButtonProps) {
     ).getCoordinates();
     enemySource.forEachFeature((enemyFeature) => {
       const enemySpeed = enemyFeature.get("speed");
+      if (enemyFeature.get("name") === "Bulbasaur") {
+        console.log(enemySpeed);
+      }
+      console.log(enemySpeed);
       const enemyGeom = enemyFeature.getGeometry() as Point;
       const enemyCoords = enemyGeom.getCoordinates();
-
       const dx = playerCoords[0] - enemyCoords[0];
       const dy = playerCoords[1] - enemyCoords[1];
       const distance = Math.sqrt(dx * dx + dy * dy);

@@ -154,18 +154,19 @@ const enemies = [
   {
     name: "Meowth",
     normal: {
-      hp: 150,
-      speed: 0.00021,
+      hp: 750,
+      speed: 0.0001,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png",
     },
     shiny: {
-      hp: 750,
+      hp: 1550,
       speed: 0.00023,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/52.png",
     },
     chance: 0.04,
+    timeAlive: 0,
   },
   {
     name: "Butterfree",
@@ -188,13 +189,13 @@ const getRandomEnemy = () => {
   let rand = Math.random();
   let shinyRand = Math.random();
   let cumulative = 0;
-
   for (const enemy of enemies) {
     cumulative += enemy.chance;
     if (rand < cumulative) {
       const isShiny = shinyRand < 0.01;
       const variant = isShiny ? enemy.shiny : enemy.normal;
       return {
+        name: enemy.name,
         sprite: variant.sprite,
         hp: variant.hp,
         speed: variant.speed,
@@ -209,7 +210,6 @@ const getRandomEnemy = () => {
     shiny: false,
   };
 };
-
 const getRandomBoss = () => {
   let rand = Math.random();
   let shinyRand = Math.random();
@@ -229,7 +229,6 @@ const getRandomBoss = () => {
       };
     }
   }
-
   return {
     name: bosses[0].name,
     sprite: bosses[0].normal.sprite,
@@ -281,13 +280,13 @@ export const enemyStyle = (enemyFeature: Feature) => {
 };
 
 export function spawnBoss(x: number, y: number) {
-  const { sprite, hp, speed, shiny } = getRandomBoss();
+  const { sprite, hp, speed, shiny, name } = getRandomBoss();
 
   const bossFeature = new Feature({
     geometry: new Point([x, y]),
   });
-
-  bossFeature.set("bossData", { sprite, hp, speed, shiny });
+  bossFeature.set("bossData", { sprite, hp, speed, shiny, name });
+  bossFeature.set("name", name);
   bossFeature.set("helsepoeng", hp);
   bossFeature.set("type", "boss");
   bossFeature.set("speed", speed);
@@ -297,15 +296,36 @@ export function spawnBoss(x: number, y: number) {
 }
 
 export function spawnRandomEnemyNow(x: number, y: number) {
-  const { sprite, hp, speed, shiny } = getRandomEnemy();
+  const { sprite, hp, speed, shiny, name } = getRandomEnemy();
   const randomEnemyFeature = new Feature({
     geometry: new Point([x ? x : 0, y ? y : 0]),
   });
-  randomEnemyFeature.set("enemyData", { sprite, hp, speed, shiny });
+  randomEnemyFeature.set("enemyData", {
+    sprite,
+    hp,
+    speed,
+    shiny,
+    name,
+    timeAlive: 0,
+  });
+  randomEnemyFeature.set("name", name);
   randomEnemyFeature.set("helsepoeng", hp);
   randomEnemyFeature.set("type", "normal");
   randomEnemyFeature.set("speed", speed);
   randomEnemyFeature.set("shiny", shiny);
   enemySource.addFeature(randomEnemyFeature);
   randomEnemyFeature.setStyle(enemyStyle(randomEnemyFeature));
+  const updateEnemySpeed = () => {
+    const enemyData = randomEnemyFeature.get("enemyData");
+    if (enemyData.name === "Meowth") {
+      enemyData.timeAlive += 1;
+      const speedIncreaseRate = enemyData.shiny ? 0.0000021 : 0.000001;
+      enemyData.speed += speedIncreaseRate * enemyData.timeAlive;
+      randomEnemyFeature.set("speed", enemyData.speed);
+      randomEnemyFeature.setStyle(enemyStyle(randomEnemyFeature));
+    }
+    setTimeout(updateEnemySpeed, 1000);
+  };
+
+  updateEnemySpeed();
 }
