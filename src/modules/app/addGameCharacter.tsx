@@ -519,14 +519,15 @@ export function GameButton({ map, source }: GameButtonProps) {
             <p>damege: {currentDamage}</p>
             <button onClick={drawPoint}>Velg spawn</button>
             <p>Time: {timer}s</p>
+            <p>highscore: {highScore} </p>
           </>
         ) : (
           <>
             <p>du taptse :-( {killCount}</p>
 
-            <p>highscore: {highScore} </p>
             <button onClick={() => window.location.reload()}>Restart</button>
             <p>tid: {timer}s</p>
+            <p>highscore: {highScore} </p>
           </>
         )}
       </div>
