@@ -88,13 +88,28 @@ html {
   border-radius: 10px;
   text-align: center;
   z-index: 1000;
+  max-height: 80%; /* Set maximum height */
+  overflow-y: auto; /* Allow vertical scrolling if content overflows */
+  width: 80%; /* Set width */
+}
+
+/* Grid layout for enemy kills */
+.enemy-kill-container {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(120px, 1fr)
+  ); /* Automatically adjust number of columns */
+  gap: 15px;
+  margin-top: 10px;
 }
 
 .enemy-kill {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  margin: 10px 0;
+  gap: 5px;
+  margin: 0;
 }
 
 .enemy-kill img {
@@ -105,14 +120,7 @@ html {
   border: 2px solid white;
 }
 
-/* Make it semi-transparent when game is running */
 .game-active .kill-tracker {
   opacity: 0.3;
   pointer-events: none; /* Prevent interaction */
-}
-
-/* Fully visible when game is over */
-.game-over .kill-tracker {
-  opacity: 1;
-  pointer-events: auto;
 }

@@ -149,14 +149,17 @@ export function GameButton({ map, source }: GameButtonProps) {
     "https://kappa.vgmsite.com/soundtracks/crypt-of-the-necrodancer/xxbsascz/01%20-%20Tombtorial%20%28Tutorial%29.mp3",
     "https://kappa.vgmsite.com/soundtracks/crypt-of-the-necrodancer/cylypazn/03%20-%20Watch%20Your%20Step%20%28Training%29.mp3",
   ];
-  const audio = new Audio();
-  audio.loop = false;
-  audio.volume = 0.24;
 
   const [highScore, setHighScore] = useState(() => {
     return parseInt(localStorage.getItem("highScore") || "0", 10);
   });
   const [timer, setTimer] = useState(0);
+  useEffect(() => {
+    const savedKillLog = localStorage.getItem("killLog");
+    if (savedKillLog) {
+      setKillLog(JSON.parse(savedKillLog)); // Parse and set the kill log
+    }
+  }, []);
 
   function startTimer() {
     timerIntervalRef.current = setInterval(() => {
@@ -260,6 +263,10 @@ export function GameButton({ map, source }: GameButtonProps) {
   }
 
   useEffect(() => {
+    const audio = new Audio();
+    audio.volume = 0.34;
+    audio.loop = false;
+
     if (songActive) {
       audio.src = playlist[songIndex];
       audio.play();
@@ -272,7 +279,12 @@ export function GameButton({ map, source }: GameButtonProps) {
       audio.pause();
       audio.currentTime = 0;
     }
-  }, [songActive]);
+
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, [songActive, songIndex]);
 
   function drawPoint() {
     source.clear();
@@ -579,32 +591,29 @@ export function GameButton({ map, source }: GameButtonProps) {
             <p>tid: {timer}s</p>
             <p>highscore: {highScore} </p>
             <div className="kill-tracker">
-              <div className="kill-tracker">
-                <h2>Enemies Defeated</h2>
-                {Object.keys(killLog).length > 0 ? (
-                  Object.entries(killLog).map(([enemyKey, data]) => (
-                    <div key={enemyKey} className="enemy-kill">
-                      <img src={data.sprite} alt={enemyKey} />
-                      <p>
-                        {enemyKey}: {data.count} Kills
-                      </p>
-                    </div>
-                  ))
+              <div className="killed-by">
+                <h2>You Were Killed By</h2>
+                {killedBy ? (
+                  <>
+                    <img src={killedBy.sprite!} alt={killedBy.name} />
+                    <p>{killedBy.name}</p>
+                  </>
                 ) : (
-                  <p>Noob?</p>
+                  <p>?</p>
                 )}
               </div>
+              <h2>Enemies Defeated</h2>
               {Object.keys(killLog).length > 0 ? (
-                Object.entries(killLog).map(([enemyName, data]) => (
-                  <div key={enemyName} className="enemy-kill">
-                    <img src={data.sprite} alt={enemyName} />
+                Object.entries(killLog).map(([enemyKey, data]) => (
+                  <div key={enemyKey} className="enemy-kill">
+                    <img src={data.sprite} alt={enemyKey} />
                     <p>
-                      {enemyName}: {data.count} Kills
+                      {enemyKey}: {data.count} Kills
                     </p>
                   </div>
                 ))
               ) : (
-                <p>??</p>
+                <p>Noob?</p>
               )}
             </div>
           </>
