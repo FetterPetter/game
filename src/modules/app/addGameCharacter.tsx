@@ -10,14 +10,16 @@ import { dropBlood } from "./randomBloodPattern";
 import {
   bossStyle,
   enemyStyle,
+  gigaEnemyStyle,
   spawnBoss,
+  spawnGigaEnemy,
   spawnRandomEnemyNow,
 } from "./bosslogic";
 
 export const playerStyle = (mirror: boolean = false, f: Feature) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
   const minDmg = 1;
-  const maxDmg = 50;
+  const maxDmg = 100;
 
   const normalized = Math.min(
     Math.max((dmg - minDmg) / (maxDmg - minDmg), 0),
@@ -29,7 +31,7 @@ export const playerStyle = (mirror: boolean = false, f: Feature) => {
   return new Style({
     image: new Icon({
       src:
-        dmg > 20
+        dmg > 100
           ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/132.png`
           : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png`,
       scale: mirror ? [-1, 1] : [1, 1],
@@ -50,7 +52,7 @@ export const playerStyle = (mirror: boolean = false, f: Feature) => {
 const backwardsPlayerStyle = (f: Feature) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
   const minDmg = 1;
-  const maxDmg = 50;
+  const maxDmg = 100;
 
   const normalized = Math.min(
     Math.max((dmg - minDmg) / (maxDmg - minDmg), 0),
@@ -63,7 +65,7 @@ const backwardsPlayerStyle = (f: Feature) => {
   return new Style({
     image: new Icon({
       src:
-        dmg > 20
+        dmg > 100
           ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/132.png`
           : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/132.png`,
       scale: 1,
@@ -139,45 +141,40 @@ export function GameButton({ map, source }: GameButtonProps) {
     timerIntervalRef.current = setInterval(() => {
       setTimer((prevTime) => {
         const newTime = prevTime + 1;
-        if (newTime > 55) {
-          if (newTime % 30 === 0) {
-            const { x, y } = spawnRandomEnemy();
-            spawnBoss(x ? x : 0, y ? y : 0);
-          }
-        }
-        if (newTime > 90) {
-          const { x, y } = spawnRandomEnemy();
-          spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
-          if (newTime % 10 === 0) {
-            const { x, y } = spawnRandomEnemy();
-            spawnBoss(x ? x : 0, y ? y : 0);
-          }
-        }
-        if (newTime > 110) {
-          if (newTime % 5 === 0) {
-            const { x, y } = spawnRandomEnemy();
-            spawnBoss(x ? x : 0, y ? y : 0);
-            spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
-          }
-        }
-        if (newTime > 130) {
-          const { x, y } = spawnRandomEnemy();
-          spawnBoss(x ? x : 0, y ? y : 0);
-          spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
-        }
 
         if (newTime % 0.5 === 0) {
-          if (newTime > 30) {
-            const { x, y } = spawnRandomEnemy();
-            spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
-          }
           const { x, y } = spawnRandomEnemy();
           spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
         }
-        if (newTime > 30 && newTime % 1 === 0) {
+        if (newTime > 30 && newTime % 2 === 0) {
           const { x, y } = spawnRandomEnemy();
           spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
         }
+        if (newTime % 1 === 0) {
+          const { x, y } = spawnRandomEnemy();
+          spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
+        }
+        if (newTime > 55 && newTime % 30 === 0) {
+          const { x, y } = spawnRandomEnemy();
+          spawnBoss(x ? x : 0, y ? y : 0);
+        }
+        if (newTime > 120 && newTime % 15 === 0) {
+          const { x, y } = spawnRandomEnemy();
+          spawnBoss(x ? x : 0, y ? y : 0);
+        }
+        if (newTime > 160) {
+          const { x, y } = spawnRandomEnemy();
+          spawnBoss(x ? x : 0, y ? y : 0);
+        }
+        if (newTime > 200 && newTime % 20) {
+          const { x, y } = spawnRandomEnemy();
+          spawnGigaEnemy(x ? x : 0, y ? y : 0);
+        }
+        if (newTime > 260) {
+          const { x, y } = spawnRandomEnemy();
+          spawnGigaEnemy(x ? x : 0, y ? y : 0);
+        }
+
         return newTime;
       });
     }, 1000);
@@ -283,30 +280,34 @@ export function GameButton({ map, source }: GameButtonProps) {
           if (checkSwordHit(swordFeature, enemyFeature)) {
             let hp = enemyFeature.get("helsepoeng") || 0;
             let swordDamage = currentFeature.get("swordDamage");
+            const enemyData = enemyFeature.get("enemyData");
             const enemyType = enemyFeature.get("type");
             const isShiny = enemyFeature.get("shiny");
-
+            let newSwordLength = swordLength;
             hp -= swordDamage;
             if (hp <= 0) {
               if (enemyType === "normal") {
                 swordDamage += 0.1;
                 if (isShiny) {
                   swordDamage += 0.4;
-                  let currentSwordLength =
-                    currentFeature.get("swordLength") || 0.015;
-                  let newSwordLength = currentSwordLength + 0.001;
+                  newSwordLength += 0.001;
                   currentFeature.set("swordLength", newSwordLength);
                 }
               } else if (enemyType === "boss") {
                 swordDamage += 5;
                 if (isShiny) {
                   swordDamage += 10;
-                  let currentSwordLength =
-                    currentFeature.get("swordLength") || 0.015;
-                  let newSwordLength = currentSwordLength + 0.015;
+                  newSwordLength += 0.005;
                   currentFeature.set("swordLength", newSwordLength);
                 }
+              } else if (enemyType == "giga") {
+                swordDamage += 15;
+                if (isShiny) {
+                  swordDamage += 30;
+                  newSwordLength += 0.01;
+                }
               }
+              currentFeature.set("swordLength", newSwordLength);
               currentFeature.set("swordDamage", swordDamage);
               swordDamage = parseFloat(swordDamage.toFixed(2));
               setCurrentDamage(swordDamage);
@@ -327,20 +328,24 @@ export function GameButton({ map, source }: GameButtonProps) {
               });
             } else {
               enemyFeature.set("helsepoeng", hp);
-              if (enemyFeature.get("type") == "boss") {
-                const bossData = enemyFeature.get("bossData");
-                if (bossData) {
-                  bossData.hp = parseFloat(hp.toFixed(2));
-                  enemyFeature.set("bossData", bossData);
-                }
-                enemyFeature.setStyle(bossStyle(enemyFeature));
-              } else {
-                const enemyData = enemyFeature.get("enemyData");
+              if (enemyType == "boss") {
                 if (enemyData) {
                   enemyData.hp = parseFloat(hp.toFixed(2));
-                  enemyFeature.set("enemyDaya", enemyData);
+                  enemyFeature.set("enemyData", enemyData);
+                }
+                enemyFeature.setStyle(bossStyle(enemyFeature));
+              } else if (enemyType === "normal") {
+                if (enemyData) {
+                  enemyData.hp = parseFloat(hp.toFixed(2));
+                  enemyFeature.set("enemyData", enemyData);
                 }
                 enemyFeature.setStyle(enemyStyle(enemyFeature));
+              } else if (enemyType === "giga") {
+                if (enemyData) {
+                  enemyData.hp = parseFloat(hp.toFixed(2));
+                  enemyFeature.set("enemyData", enemyData);
+                }
+                enemyFeature.setStyle(gigaEnemyStyle(enemyFeature));
               }
             }
           }
@@ -454,6 +459,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       const dx = playerCoords[0] - enemyCoords[0];
       const dy = playerCoords[1] - enemyCoords[1];
       const distance = Math.sqrt(dx * dx + dy * dy);
+
       if (distance < 0.003) {
         if (enemyMovementAnimationFrame !== null) {
           cancelAnimationFrame(enemyMovementAnimationFrame);
@@ -499,7 +505,7 @@ export function GameButton({ map, source }: GameButtonProps) {
             <p>poeng: {killCount}</p>
             <p>damege: {currentDamage}</p>
             <button onClick={drawPoint}>Velg spawn</button>
-            <p>Time: {timer}s</p> {/* Display timer here */}
+            <p>Time: {timer}s</p>
           </>
         ) : (
           <>

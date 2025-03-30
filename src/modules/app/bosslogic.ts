@@ -3,6 +3,115 @@ import { Point } from "ol/geom";
 import { Icon, Style, Fill, Stroke, Text } from "ol/style";
 import { enemySource } from "./addGameCharacter";
 
+const gigaEnemies = [
+  {
+    name: "Alakazam",
+    normal: {
+      hp: 100000,
+      speed: 0.000299,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/65.png",
+    },
+    shiny: {
+      hp: 1105600,
+      speed: 0.0003,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/65.png",
+    },
+    chance: 0.45,
+  },
+  {
+    name: "Machamp",
+    normal: {
+      hp: 920000,
+      speed: 0.00018,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/68.png",
+    },
+    shiny: {
+      hp: 5105600,
+      speed: 0.0002,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/68.png",
+    },
+    chance: 0.5,
+  },
+  {
+    name: "Ho-Oh",
+    normal: {
+      hp: 7302000,
+      speed: 0.00029,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/250.png",
+    },
+    shiny: {
+      hp: 999999999999,
+      speed: 0.00031,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/250.png",
+    },
+    chance: 0.05,
+  },
+];
+
+export function spawnGigaEnemy(x: number, y: number) {
+  const { sprite, hp, speed, shiny, name } = getGigaEnemy();
+
+  const gigaFeature = new Feature({
+    geometry: new Point([x, y]),
+  });
+  gigaFeature.set("enemyData", { sprite, hp, speed, shiny, name });
+  gigaFeature.set("name", name);
+  gigaFeature.set("helsepoeng", hp);
+  gigaFeature.set("type", "giga");
+  gigaFeature.set("speed", speed);
+  gigaFeature.set("shiny", shiny);
+  enemySource.addFeature(gigaFeature);
+  gigaFeature.setStyle(gigaEnemyStyle(gigaFeature));
+  const updateGigaEnemySpeed = () => {
+    const enemyData = gigaFeature.get("enemyData");
+    if (!enemyData) return;
+
+    enemyData.timeAlive = (enemyData.timeAlive || 0) + 1;
+    const speedIncreaseRate = enemyData.shiny ? 0.0000021 : 0.000001;
+    enemyData.speed += speedIncreaseRate * enemyData.timeAlive;
+
+    gigaFeature.set("speed", enemyData.speed);
+    gigaFeature.setStyle(gigaEnemyStyle(gigaFeature));
+
+    setTimeout(updateGigaEnemySpeed, 1000);
+  };
+
+  updateGigaEnemySpeed();
+}
+
+const getGigaEnemy = () => {
+  let rand = Math.random();
+  let shinyRand = Math.random();
+  let cumulativeProbability = 0;
+
+  for (const gigaEnemy of gigaEnemies) {
+    cumulativeProbability += gigaEnemy.chance;
+    if (rand < cumulativeProbability) {
+      const isShiny = shinyRand < 0.01;
+      const variant = isShiny ? gigaEnemy.shiny : gigaEnemy.normal;
+      return {
+        name: gigaEnemy.name,
+        sprite: variant.sprite,
+        hp: variant.hp,
+        speed: variant.speed,
+        shiny: isShiny,
+      };
+    }
+  }
+  return {
+    name: gigaEnemies[0].name,
+    sprite: gigaEnemies[0].normal.sprite,
+    hp: gigaEnemies[0].normal.hp,
+    speed: gigaEnemies[0].normal.speed,
+    shiny: false,
+  };
+};
 const bosses = [
   {
     name: "Lugia",
@@ -236,33 +345,67 @@ const getRandomBoss = () => {
     shiny: false,
   };
 };
+export const gigaEnemyStyle = (gigaFeature: Feature) => {
+  const { sprite, hp, shiny } = gigaFeature.get("enemyData");
 
-export const bossStyle = (bossFeature: Feature) => {
-  const { sprite, hp } = bossFeature.get("bossData");
+  const glowColor =
+    hp > 5000
+      ? "rgba(255, 0, 0, 0.8)" // Red glow for high HP
+      : hp > 2000
+        ? "rgba(255, 165, 0, 0.8)"
+        : "rgba(0, 255, 0, 0.8)";
+
   return new Style({
     image: new Icon({
       src: sprite,
-      scale: 1.2,
+      scale: shiny ? 1.7 : 1.4,
       anchor: [0.5, 0.5],
     }),
     text: new Text({
       text: `HP: ${hp}`,
-      font: "bold 12px Arial",
+      font: "bold 14px Arial",
       fill: new Fill({ color: "white" }),
       stroke: new Stroke({
-        color: "crimson",
+        color: glowColor,
+        width: 6,
+      }),
+      offsetY: 55,
+    }),
+  });
+};
+export const bossStyle = (bossFeature: Feature) => {
+  const { sprite, hp, shiny } = bossFeature.get("enemyData");
+
+  let hpColor = "lime";
+  if (hp < 5000) hpColor = "yellow";
+  if (hp < 2000) hpColor = "red";
+
+  return new Style({
+    image: new Icon({
+      src: sprite,
+      scale: shiny ? 1.6 : 1.3,
+      anchor: [0.5, 0.5],
+    }),
+    text: new Text({
+      text: `HP: ${hp}`,
+      font: "bold 14px Arial",
+      fill: new Fill({ color: hpColor }),
+      stroke: new Stroke({
+        color: shiny ? "gold" : "crimson",
         width: 5,
       }),
       offsetY: 50,
     }),
   });
 };
+
 export const enemyStyle = (enemyFeature: Feature) => {
-  const { sprite, hp } = enemyFeature.get("enemyData");
+  const { sprite, hp, shiny } = enemyFeature.get("enemyData");
+
   return new Style({
     image: new Icon({
       src: sprite,
-      scale: 1,
+      scale: shiny ? 1.3 : 1.1,
       anchor: [0.5, 0.5],
     }),
     text: new Text({
@@ -270,7 +413,7 @@ export const enemyStyle = (enemyFeature: Feature) => {
       font: "bold 12px Arial",
       fill: new Fill({ color: "white" }),
       stroke: new Stroke({
-        color: "black",
+        color: shiny ? "gold" : "black",
         width: 3,
       }),
       offsetY: 50,
@@ -284,7 +427,7 @@ export function spawnBoss(x: number, y: number) {
   const bossFeature = new Feature({
     geometry: new Point([x, y]),
   });
-  bossFeature.set("bossData", { sprite, hp, speed, shiny, name });
+  bossFeature.set("enemyData", { sprite, hp, speed, shiny, name });
   bossFeature.set("name", name);
   bossFeature.set("helsepoeng", hp);
   bossFeature.set("type", "boss");
@@ -316,6 +459,7 @@ export function spawnRandomEnemyNow(x: number, y: number) {
   randomEnemyFeature.setStyle(enemyStyle(randomEnemyFeature));
   const updateEnemySpeed = () => {
     const enemyData = randomEnemyFeature.get("enemyData");
+    if (!enemyData) return;
     if (enemyData.name === "Meowth") {
       enemyData.timeAlive += 1;
       const speedIncreaseRate = enemyData.shiny ? 0.0000021 : 0.000001;
