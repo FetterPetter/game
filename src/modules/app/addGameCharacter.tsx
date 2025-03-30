@@ -3,7 +3,7 @@ import { Feature, Map, View } from "ol";
 import VectorSource from "ol/source/Vector";
 import { Draw } from "ol/interaction";
 import { LineString, Point } from "ol/geom";
-import { Fill, Icon, Stroke, Style } from "ol/style";
+import { Fill, Icon, Stroke, Style, Text } from "ol/style";
 import VectorLayer from "ol/layer/Vector";
 import { pointToLineDistance } from "./helpPointLineDistance";
 import { dropBlood } from "./randomBloodPattern";
@@ -14,21 +14,71 @@ import {
   spawnRandomEnemyNow,
 } from "./bosslogic";
 
-export const playerStyle = (mirror: boolean = false) => {
+export const playerStyle = (mirror: boolean = false, f: Feature) => {
+  const dmg = parseFloat(f.get("swordDamage").toFixed(2));
+  const minDmg = 1;
+  const maxDmg = 50;
+
+  const normalized = Math.min(
+    Math.max((dmg - minDmg) / (maxDmg - minDmg), 0),
+    1,
+  );
+  const r = Math.floor(50 + normalized * (255 - 50));
+  const g = Math.floor(50 + normalized * (0 - 50));
+  const b = Math.floor(255 - normalized * (255 - 100));
   return new Style({
     image: new Icon({
-      src: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png`,
+      src:
+        dmg > 20
+          ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/132.png`
+          : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png`,
       scale: mirror ? [-1, 1] : [1, 1],
       anchor: [0.5, 0.5],
     }),
+    text: new Text({
+      text: `demg: ${dmg}`,
+      font: "bold 12px comic sans",
+      fill: new Fill({ color: `rgb(${r}, ${g}, ${b})` }),
+      stroke: new Stroke({
+        color: "black",
+        width: 3,
+      }),
+      offsetY: 30,
+    }),
   });
 };
-const backwardsPlayerStyle = () => {
+const backwardsPlayerStyle = (f: Feature) => {
+  const dmg = parseFloat(f.get("swordDamage").toFixed(2));
+  const minDmg = 1;
+  const maxDmg = 50;
+
+  const normalized = Math.min(
+    Math.max((dmg - minDmg) / (maxDmg - minDmg), 0),
+    1,
+  );
+
+  const r = Math.floor(50 + normalized * (255 - 50));
+  const g = Math.floor(50 + normalized * (0 - 50));
+  const b = Math.floor(255 - normalized * (255 - 100));
+
   return new Style({
     image: new Icon({
-      src: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/132.png`,
+      src:
+        dmg > 20
+          ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/132.png`
+          : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/132.png`,
       scale: 1,
       anchor: [0.5, 0.5],
+    }),
+    text: new Text({
+      text: `dmg: ${dmg}`,
+      font: "bold 12px comic sans",
+      fill: new Fill({ color: `rgb(${r}, ${g}, ${b})` }),
+      stroke: new Stroke({
+        color: "black",
+        width: 3,
+      }),
+      offsetY: 30,
     }),
   });
 };
@@ -99,6 +149,7 @@ export function GameButton({ map, source }: GameButtonProps) {
           if (newTime % 5 === 0) {
             const { x, y } = spawnRandomEnemy();
             spawnBoss(x ? x : 0, y ? y : 0);
+            spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
           }
         }
 
@@ -140,23 +191,24 @@ export function GameButton({ map, source }: GameButtonProps) {
     const view: View = map.getView();
     const extent = view.calculateExtent();
     const [minX, minY, maxX, maxY] = extent;
+    const offset = 0.001;
     let x, y;
     const edge = Math.floor(Math.random() * 4);
     switch (edge) {
       case 0:
         x = Math.random() * (maxX - minX) + minX;
-        y = maxY;
+        y = maxY + offset;
         break;
       case 1:
         x = Math.random() * (maxX - minX) + minX;
-        y = minY;
+        y = minY - offset;
         break;
       case 2:
-        x = minX;
+        x = minX - offset;
         y = Math.random() * (maxY - minY) + minY;
         break;
       case 3:
-        x = maxX;
+        x = maxX + offset;
         y = Math.random() * (maxY - minY) + minY;
         break;
     }
@@ -172,7 +224,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       e.feature!.set("swordDamage", 1);
       e.feature!.set("speed", playerSpeed);
       setCurrentFeature(e.feature!);
-      e.feature!.setStyle(playerStyle(false));
+      e.feature!.setStyle(playerStyle(false, e.feature!));
       startTimer();
     });
   }
@@ -338,19 +390,19 @@ export function GameButton({ map, source }: GameButtonProps) {
       let dx = 0,
         dy = 0;
       if (keysPressed["w"]) {
-        currentFeature.setStyle(backwardsPlayerStyle());
+        currentFeature.setStyle(backwardsPlayerStyle(currentFeature));
         dy += playerSpeed;
       }
       if (keysPressed["s"]) {
-        currentFeature.setStyle(playerStyle(false));
+        currentFeature.setStyle(playerStyle(false, currentFeature));
         dy -= playerSpeed;
       }
       if (keysPressed["a"]) {
-        currentFeature.setStyle(playerStyle(false));
+        currentFeature.setStyle(playerStyle(false, currentFeature));
         dx -= playerSpeed + 0.0001;
       }
       if (keysPressed["d"]) {
-        currentFeature.setStyle(playerStyle(true));
+        currentFeature.setStyle(playerStyle(true, currentFeature));
         dx += playerSpeed + 0.0001;
       }
       if (dx !== 0 || dy !== 0) {
@@ -382,16 +434,11 @@ export function GameButton({ map, source }: GameButtonProps) {
     ).getCoordinates();
     enemySource.forEachFeature((enemyFeature) => {
       const enemySpeed = enemyFeature.get("speed");
-      if (enemyFeature.get("name") === "Bulbasaur") {
-        console.log(enemySpeed);
-      }
-      console.log(enemySpeed);
       const enemyGeom = enemyFeature.getGeometry() as Point;
       const enemyCoords = enemyGeom.getCoordinates();
       const dx = playerCoords[0] - enemyCoords[0];
       const dy = playerCoords[1] - enemyCoords[1];
       const distance = Math.sqrt(dx * dx + dy * dy);
-
       if (distance < 0.003) {
         if (enemyMovementAnimationFrame !== null) {
           cancelAnimationFrame(enemyMovementAnimationFrame);
