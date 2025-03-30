@@ -326,6 +326,5 @@ export function spawnRandomEnemyNow(x: number, y: number) {
     }
     setTimeout(updateEnemySpeed, 1000);
   };
-
   updateEnemySpeed();
 }

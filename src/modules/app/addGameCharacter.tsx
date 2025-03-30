@@ -290,8 +290,8 @@ export function GameButton({ map, source }: GameButtonProps) {
   const moveFeature = (xCord: number, yCord: number, sprinting: boolean) => {
     if (gameOver) return;
     if (sprinting) {
-      xCord *= 1.9;
-      yCord *= 1.9;
+      xCord *= 2.2;
+      yCord *= 2.2;
     }
     const geom = currentFeature!.getGeometry() as Point;
     const coord = geom.getCoordinates();
@@ -396,6 +396,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         if (enemyMovementAnimationFrame !== null) {
           cancelAnimationFrame(enemyMovementAnimationFrame);
         }
+        dropBlood(playerCoords[0], playerCoords[1]);
         setCurrentFeature(null);
         source.clear();
         setGameOver(true);
@@ -404,7 +405,6 @@ export function GameButton({ map, source }: GameButtonProps) {
       }
       const normalizedX = distance !== 0 ? dx / distance : 0;
       const normalizedY = distance !== 0 ? dy / distance : 0;
-
       const moveX = normalizedX * (enemySpeed + 0.0001);
       const moveY = normalizedY * enemySpeed;
 
