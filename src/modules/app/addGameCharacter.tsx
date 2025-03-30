@@ -56,7 +56,6 @@ const backwardsPlayerStyle = (f: Feature) => {
     Math.max((dmg - minDmg) / (maxDmg - minDmg), 0),
     1,
   );
-
   const r = Math.floor(50 + normalized * (255 - 50));
   const g = Math.floor(50 + normalized * (0 - 50));
   const b = Math.floor(255 - normalized * (255 - 100));

@@ -62,7 +62,7 @@ const bosses = [
     },
     shiny: {
       hp: 1500000,
-      speed: 0.000259,
+      speed: 0.000299,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/143.png",
     },
@@ -166,7 +166,6 @@ const enemies = [
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/52.png",
     },
     chance: 0.04,
-    timeAlive: 0,
   },
   {
     name: "Butterfree",
