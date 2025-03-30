@@ -133,7 +133,7 @@ const bosses = [
     name: "Gyarados",
     normal: {
       hp: 12100,
-      speed: 0.000231,
+      speed: 0.000251,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/130.png",
     },
@@ -149,13 +149,13 @@ const bosses = [
     name: "Mewtwo",
     normal: {
       hp: 10500,
-      speed: 0.00021,
+      speed: 0.00027,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png",
     },
     shiny: {
       hp: 25000,
-      speed: 0.00027,
+      speed: 0.000294,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/150.png",
     },
@@ -222,7 +222,7 @@ const enemies = [
     },
     shiny: {
       hp: 150,
-      speed: 0.0002,
+      speed: 0.00021,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/1.png",
     },
@@ -232,7 +232,7 @@ const enemies = [
     name: "Beedrill",
     normal: {
       hp: 100,
-      speed: 0.00022,
+      speed: 0.00025,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/15.png",
     },
