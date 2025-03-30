@@ -253,7 +253,7 @@ const enemies = [
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/30.png",
     },
     shiny: {
-      hp: 980,
+      hp: 1980,
       speed: 0.0003,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/30.png",
@@ -263,7 +263,7 @@ const enemies = [
   {
     name: "Meowth",
     normal: {
-      hp: 750,
+      hp: 850,
       speed: 0.0001,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png",
