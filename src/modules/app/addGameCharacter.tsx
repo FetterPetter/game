@@ -602,7 +602,7 @@ export function GameButton({ map, source }: GameButtonProps) {
                   <p>?</p>
                 )}
               </div>
-              
+
               {Object.keys(killLog).length > 0 ? (
                 Object.entries(killLog).map(([enemyKey, data]) => (
                   <div key={enemyKey} className="enemy-kill">
