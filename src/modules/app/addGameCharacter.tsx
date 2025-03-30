@@ -165,12 +165,13 @@ export function GameButton({ map, source }: GameButtonProps) {
         if (newTime > 160) {
           const { x, y } = spawnRandomEnemy();
           spawnBoss(x ? x : 0, y ? y : 0);
+          spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
         }
-        if (newTime > 200 && newTime % 20) {
+        if (newTime > 230 && newTime % 60) {
           const { x, y } = spawnRandomEnemy();
           spawnGigaEnemy(x ? x : 0, y ? y : 0);
         }
-        if (newTime > 260) {
+        if (newTime > 360) {
           const { x, y } = spawnRandomEnemy();
           spawnGigaEnemy(x ? x : 0, y ? y : 0);
         }
