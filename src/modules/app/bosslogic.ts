@@ -161,7 +161,7 @@ const enemies = [
     },
     shiny: {
       hp: 1550,
-      speed: 0.00023,
+      speed: 0.0002,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/52.png",
     },
@@ -172,13 +172,13 @@ const enemies = [
     name: "Butterfree",
     normal: {
       hp: 1,
-      speed: 0.00053,
+      speed: 0.0006,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/12.png",
     },
     shiny: {
       hp: 1,
-      speed: 0.00062,
+      speed: 0.0007,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/12.png",
     },
