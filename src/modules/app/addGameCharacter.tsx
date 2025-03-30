@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Feature, Map, View } from "ol";
 import VectorSource from "ol/source/Vector";
 import { Draw } from "ol/interaction";
@@ -70,8 +70,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   const [gameOver, setGameOver] = useState(false);
   const [killCount, setKillCount] = useState(0);
   const [playerSpeed, setPlayerSpeed] = useState(0.0002);
-  const [sprintCooldown, setSprintCooldown] = useState(0);
-  const [isSprinting, setIsSprinting] = useState(false);
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const [highScore, setHighScore] = useState(() => {
     return parseInt(localStorage.getItem("highScore") || "0", 10);
@@ -79,7 +78,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   const [timer, setTimer] = useState(0);
 
   function startTimer() {
-    const timerInterval = setInterval(() => {
+    timerIntervalRef.current = setInterval(() => {
       setTimer((prevTime) => {
         const newTime = prevTime + 1;
         if (newTime > 55) {
@@ -118,7 +117,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         return newTime;
       });
     }, 1000);
-    return timerInterval;
+    return timerIntervalRef.current;
   }
 
   function checkSwordHit(sword: Feature, enemy: Feature): boolean {
@@ -397,6 +396,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         setCurrentFeature(null);
         source.clear();
         setGameOver(true);
+        clearInterval(timerIntervalRef.current!);
         return;
       }
       const normalizedX = distance !== 0 ? dx / distance : 0;
