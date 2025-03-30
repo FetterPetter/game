@@ -300,7 +300,7 @@ const getRandomEnemy = () => {
   for (const enemy of enemies) {
     cumulative += enemy.chance;
     if (rand < cumulative) {
-      const isShiny = shinyRand < 0.51;
+      const isShiny = shinyRand < 0.01;
       const variant = isShiny ? enemy.shiny : enemy.normal;
       return {
         name: enemy.name,

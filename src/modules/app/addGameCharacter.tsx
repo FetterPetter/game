@@ -280,7 +280,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     map.addInteraction(draw);
     source.once("addfeature", (e) => {
       map.removeInteraction(draw);
-      e.feature!.set("swordDamage", 1000);
+      e.feature!.set("swordDamage", 1);
       e.feature!.set("speed", playerSpeed);
       setCurrentFeature(e.feature!);
       e.feature!.setStyle(playerStyle(false, e.feature!));
