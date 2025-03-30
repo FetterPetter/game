@@ -596,7 +596,6 @@ export function GameButton({ map, source }: GameButtonProps) {
                 {killedBy ? (
                   <>
                     <img src={killedBy.sprite!} alt={killedBy.name} />
-                    <p>{killedBy.name}</p>
                   </>
                 ) : (
                   <p>?</p>
