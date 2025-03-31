@@ -133,7 +133,7 @@ const bosses = [
   {
     name: "Gyarados",
     normal: {
-      hp: 32100,
+      hp: 32000,
       speed: 0.000251,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/130.png",
