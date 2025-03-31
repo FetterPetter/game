@@ -388,14 +388,12 @@ export function GameButton({ map, source }: GameButtonProps) {
                 if (isShiny) {
                   swordDamage += 0.4;
                   newSwordLength += 0.001;
-                  currentFeature.set("swordLength", newSwordLength);
                 }
               } else if (enemyType === "boss") {
                 swordDamage += 5;
                 if (isShiny) {
                   swordDamage += 10;
                   newSwordLength += 0.005;
-                  currentFeature.set("swordLength", newSwordLength);
                 }
               } else if (enemyType == "giga") {
                 swordDamage += 15;
