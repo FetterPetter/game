@@ -41,7 +41,7 @@ const gigaEnemies = [
     name: "Ho-Oh",
     normal: {
       hp: 7302000,
-      speed: 0.00029,
+      speed: 0.0002995,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/250.png",
     },
