@@ -157,11 +157,18 @@ export function GameButton({ map, source }: GameButtonProps) {
     name: string;
     sprite: string | null;
   } | null>(null);
+  const [deathLog, setDeathLog] = useState<{
+    [key: string]: { sprite: string; count: number };
+  }>({});
   const [playerSpeed, setPlayerSpeed] = useState(0.0002);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [songActive, setSongActive] = useState(false);
   const [songIndex, setSongIndex] = useState(0);
-  const [volume, setVolume] = useState(0.15);
+  const [volume, setVolume] = useState(() => {
+    const savedVolume = localStorage.getItem("volume");
+    return savedVolume ? parseFloat(savedVolume) : 0.15;
+  });
+  const audioRef = useRef(new Audio());
   const playlist = [
     "https://kappa.vgmsite.com/soundtracks/crypt-of-the-necrodancer/dfwnidfm/02%20-%20Rhythmortis%20%28Lobby%29.mp3",
     "https://kappa.vgmsite.com/soundtracks/crypt-of-the-necrodancer/xxbsascz/01%20-%20Tombtorial%20%28Tutorial%29.mp3",
@@ -282,26 +289,36 @@ export function GameButton({ map, source }: GameButtonProps) {
   }
 
   useEffect(() => {
-    const audio = new Audio();
-    audio.volume = volume;
-    audio.loop = false;
+    audioRef.current.volume = volume;
 
     if (songActive) {
-      audio.src = playlist[songIndex];
-      audio.play();
-      audio.onended = () => {
-        setSongIndex((prevIndex) => (prevIndex + 1) % playlist.length);
+      if (audioRef.current.paused) {
+        audioRef.current.src = playlist[songIndex];
+        audioRef.current.play();
+      }
+
+      audioRef.current.onended = () => {
+        const nextIndex = (songIndex + 1) % playlist.length;
+        setSongIndex(nextIndex);
       };
     } else {
-      audio.pause();
-      audio.currentTime = 0;
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
 
     return () => {
-      audio.pause();
-      audio.currentTime = 0;
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     };
   }, [songActive, songIndex]);
+
+  useEffect(() => {
+    audioRef.current.volume = volume;
+    localStorage.setItem("volume", volume.toString());
+  }, [volume]);
+  const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setVolume(parseFloat(event.target.value));
+  };
 
   function drawPoint() {
     source.clear();
@@ -551,9 +568,9 @@ export function GameButton({ map, source }: GameButtonProps) {
       const dx = playerCoords[0] - enemyCoords[0];
       const dy = playerCoords[1] - enemyCoords[1];
       const distance = Math.sqrt(dx * dx + dy * dy);
-      const { name, sprite } = enemyFeature.get("enemyData");
+
       if (distance < 0.003) {
-        setKilledBy({ name, sprite });
+        handleDeath(enemyFeature);
         if (enemyMovementAnimationFrame !== null) {
           cancelAnimationFrame(enemyMovementAnimationFrame);
         }
@@ -589,7 +606,29 @@ export function GameButton({ map, source }: GameButtonProps) {
       }
     };
   }, [currentFeature, gameOver]);
+  useEffect(() => {
+    const savedDeathLog = localStorage.getItem("deathLog");
+    if (savedDeathLog) {
+      setDeathLog(JSON.parse(savedDeathLog));
+    }
+  }, []);
 
+  const handleDeath = (enemyFeature: Feature) => {
+    const { name, sprite, shiny } = enemyFeature.get("enemyData");
+    const enemyKey = shiny ? `${name}_shiny` : name;
+    setKilledBy({ name, sprite });
+    setDeathLog((prev) => {
+      const newDeathLog = {
+        ...prev,
+        [enemyKey]: {
+          sprite,
+          count: (prev[enemyKey]?.count || 0) + 1,
+        },
+      };
+      localStorage.setItem("deathLog", JSON.stringify(newDeathLog));
+      return newDeathLog;
+    });
+  };
   return (
     <>
       {" "}
@@ -603,9 +642,9 @@ export function GameButton({ map, source }: GameButtonProps) {
                 max="1"
                 step="0.01"
                 value={volume}
-                onChange={(e) => setVolume(parseFloat(e.target.value))}
+                onChange={handleVolumeChange}
               />
-              <span> Volume: {Math.round(volume * 100)}% </span>
+              <span> Lyd: {Math.round(volume * 100)}% </span>
             </div>
             <p>poeng: {killCount}</p>
             <p>damege: {currentDamage}</p>
@@ -641,6 +680,22 @@ export function GameButton({ map, source }: GameButtonProps) {
                 ))
               ) : (
                 <p>Noob?</p>
+              )}
+              <h2>Drept deg flest ganger:</h2>
+              {Object.entries(deathLog).length > 0 ? (
+                Object.entries(deathLog)
+                  .sort((a, b) => b[1].count - a[1].count)
+                  .slice(0, 1)
+                  .map(([enemyName, data]) => (
+                    <div key={enemyName} className="enemy-kill">
+                      <img src={data.sprite} alt={enemyName} />
+                      <p>
+                        {enemyName}: {data.count} Deaths
+                      </p>
+                    </div>
+                  ))
+              ) : (
+                <p>ingen data</p>
               )}
             </div>
           </>
