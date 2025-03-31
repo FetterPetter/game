@@ -120,6 +120,13 @@ html {
   border: 2px solid white;
 }
 
+.enemy-kill p {
+  margin: 0;
+  font-size: 16px;
+  color: white;
+  text-align: center;
+}
+
 .game-active .kill-tracker {
   opacity: 0.3;
   pointer-events: none; /* Prevent interaction */
