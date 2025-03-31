@@ -118,7 +118,7 @@ const bosses = [
     name: "Lugia",
     normal: {
       hp: 50000,
-      speed: 0.000299,
+      speed: 0.0002999,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/249.png",
     },
@@ -150,13 +150,13 @@ const bosses = [
     name: "Mewtwo",
     normal: {
       hp: 20500,
-      speed: 0.00027,
+      speed: 0.00022,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png",
     },
     shiny: {
       hp: 55000,
-      speed: 0.000294,
+      speed: 0.000274,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/150.png",
     },
