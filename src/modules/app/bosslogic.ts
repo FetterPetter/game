@@ -24,7 +24,7 @@ const gigaEnemies = [
     name: "Alakazam",
     normal: {
       hp: 100000,
-      speed: 0.000299,
+      speed: 0.000298,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/65.png",
     },
@@ -80,7 +80,7 @@ export function spawnGigaEnemy(x: number, y: number) {
     gigaFeature.set("speed", enemyData.speed);
     gigaFeature.setStyle(gigaEnemyStyle(gigaFeature));
 
-    setTimeout(updateGigaEnemySpeed, 1000);
+    setTimeout(updateGigaEnemySpeed, 100000);
   };
 
   updateGigaEnemySpeed();
@@ -117,13 +117,13 @@ const bosses = [
   {
     name: "Lugia",
     normal: {
-      hp: 50000,
+      hp: 30000,
       speed: 0.0002999,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/249.png",
     },
     shiny: {
-      hp: 155600,
+      hp: 40000,
       speed: 0.0004,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/249.png",
@@ -133,13 +133,13 @@ const bosses = [
   {
     name: "Gyarados",
     normal: {
-      hp: 32000,
+      hp: 19000,
       speed: 0.000251,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/130.png",
     },
     shiny: {
-      hp: 133900,
+      hp: 93900,
       speed: 0.00026,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/130.png",
@@ -165,7 +165,7 @@ const bosses = [
   {
     name: "Snorlax",
     normal: {
-      hp: 38000,
+      hp: 48000,
       speed: 0.000229,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/143.png",
@@ -181,13 +181,13 @@ const bosses = [
   {
     name: "Charizard",
     normal: {
-      hp: 3800,
+      hp: 13800,
       speed: 0.0002899,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png",
     },
     shiny: {
-      hp: 19000,
+      hp: 29000,
       speed: 0.00039,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png",
@@ -197,7 +197,7 @@ const bosses = [
   {
     name: "Nidoking",
     normal: {
-      hp: 18000,
+      hp: 28000,
       speed: 0.0002901,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/34.png",
@@ -264,7 +264,7 @@ const enemies = [
   {
     name: "Meowth",
     normal: {
-      hp: 850,
+      hp: 500,
       speed: 0.0001,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png",
@@ -463,7 +463,7 @@ export function spawnRandomEnemyNow(x: number, y: number) {
     if (!enemyData) return;
     if (enemyData.name === "Meowth") {
       enemyData.timeAlive += 1;
-      const speedIncreaseRate = enemyData.shiny ? 0.0000021 : 0.000001;
+      const speedIncreaseRate = enemyData.shiny ? 0.0000011 : 0.0000005;
       enemyData.speed += speedIncreaseRate * enemyData.timeAlive;
       randomEnemyFeature.set("speed", enemyData.speed);
       randomEnemyFeature.setStyle(enemyStyle(randomEnemyFeature));
