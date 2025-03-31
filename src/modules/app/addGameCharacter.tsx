@@ -165,6 +165,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     "https://kappa.vgmsite.com/soundtracks/crypt-of-the-necrodancer/dfwnidfm/02%20-%20Rhythmortis%20%28Lobby%29.mp3",
     "https://kappa.vgmsite.com/soundtracks/crypt-of-the-necrodancer/xxbsascz/01%20-%20Tombtorial%20%28Tutorial%29.mp3",
     "https://kappa.vgmsite.com/soundtracks/crypt-of-the-necrodancer/cylypazn/03%20-%20Watch%20Your%20Step%20%28Training%29.mp3",
+    "https://kappa.vgmsite.com/soundtracks/crypt-of-the-necrodancer/wtzryxlt/04%20-%20Disco%20Descent%20%281-1%29.mp3",
   ];
 
   const [highScore, setHighScore] = useState(() => {
@@ -281,16 +282,14 @@ export function GameButton({ map, source }: GameButtonProps) {
 
   useEffect(() => {
     const audio = new Audio();
-    audio.volume = 0.24;
+    audio.volume = 0.15;
     audio.loop = false;
 
     if (songActive) {
       audio.src = playlist[songIndex];
       audio.play();
-
       audio.onended = () => {
-        const nextIndex = (songIndex + 1) % playlist.length;
-        setSongIndex(nextIndex);
+        setSongIndex((prevIndex) => (prevIndex + 1) % playlist.length);
       };
     } else {
       audio.pause();
@@ -596,6 +595,11 @@ export function GameButton({ map, source }: GameButtonProps) {
       <div className="game-header">
         {!gameOver ? (
           <>
+            <div>
+              <button onClick={() => setSongActive(!songActive)}>
+                {songActive ? "Stop Musikk" : "Musikk"}
+              </button>
+            </div>
             <p>poeng: {killCount}</p>
             <p>damege: {currentDamage}</p>
             <button onClick={drawPoint}>Velg spawn</button>
