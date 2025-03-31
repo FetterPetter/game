@@ -681,7 +681,7 @@ export function GameButton({ map, source }: GameButtonProps) {
               ) : (
                 <p>Noob?</p>
               )}
-              <h2>Drept deg flest ganger:</h2>
+              <h2>Nemesis:</h2>
               {Object.entries(deathLog).length > 0 ? (
                 Object.entries(deathLog)
                   .sort((a, b) => b[1].count - a[1].count)
@@ -689,9 +689,7 @@ export function GameButton({ map, source }: GameButtonProps) {
                   .map(([enemyName, data]) => (
                     <div key={enemyName} className="enemy-kill">
                       <img src={data.sprite} alt={enemyName} />
-                      <p>
-                        {enemyName}: {data.count} Deaths
-                      </p>
+                      <p>{data.count} Deaths</p>
                     </div>
                   ))
               ) : (
