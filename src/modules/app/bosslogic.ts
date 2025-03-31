@@ -5,22 +5,6 @@ import { enemySource } from "./addGameCharacter";
 
 const gigaEnemies = [
   {
-    name: "Alakazam",
-    normal: {
-      hp: 100000,
-      speed: 0.000299,
-      sprite:
-        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/65.png",
-    },
-    shiny: {
-      hp: 1105600,
-      speed: 0.0003,
-      sprite:
-        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/65.png",
-    },
-    chance: 0.45,
-  },
-  {
     name: "Machamp",
     normal: {
       hp: 920000,
@@ -36,6 +20,23 @@ const gigaEnemies = [
     },
     chance: 0.5,
   },
+  {
+    name: "Alakazam",
+    normal: {
+      hp: 100000,
+      speed: 0.000299,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/65.png",
+    },
+    shiny: {
+      hp: 1105600,
+      speed: 0.0003,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/65.png",
+    },
+    chance: 0.45,
+  },
+
   {
     name: "Ho-Oh",
     normal: {

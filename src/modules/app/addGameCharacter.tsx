@@ -108,21 +108,38 @@ export const bloodLayer = new VectorLayer({
 });
 
 const swordStyle = (f: Feature) => {
-  const dmg = parseFloat(f.get("swordDamage").toFixed(2));
+  const length = parseFloat(f.get("swordLength"));
+  console.log(length);
   return new Style({
     stroke: new Stroke({
-      width: Math.min(3 + dmg * 0.1, 8),
-      color: getSwordColor(dmg),
+      width: Math.min(3 + length * 50, 8),
+      color: getSwordColor(length),
     }),
   });
 };
 
-function getSwordColor(damage: number) {
-  if (damage < 10) return "silver";
-  if (damage < 20) return "deepskyblue";
-  if (damage < 30) return "purple";
-  if (damage < 40) return "orange";
-  return "crimson";
+function getSwordColor(length: number) {
+  if (length < 0.015) return "white";
+  if (length < 0.016) return "#ccffcc";
+  if (length < 0.017) return "lightgreen";
+  if (length < 0.018) return "limegreen";
+  if (length < 0.019) return "#00cc66";
+  if (length < 0.02) return "teal";
+  if (length < 0.021) return "deepskyblue";
+  if (length < 0.022) return "dodgerblue";
+  if (length < 0.023) return "blue";
+  if (length < 0.024) return "mediumblue";
+  if (length < 0.025) return "darkblue";
+  if (length < 0.026) return "purple";
+  if (length < 0.027) return "blueviolet";
+  if (length < 0.028) return "darkviolet";
+  if (length < 0.029) return "indigo";
+  if (length < 0.03) return "red";
+  if (length < 0.031) return "#cc0000";
+  if (length < 0.032) return "darkred";
+  if (length < 0.033) return "#800000";
+  if (length < 0.034) return "#660000";
+  return "#8B0000";
 }
 
 interface GameButtonProps {
@@ -157,7 +174,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   useEffect(() => {
     const savedKillLog = localStorage.getItem("killLog");
     if (savedKillLog) {
-      setKillLog(JSON.parse(savedKillLog)); // Parse and set the kill log
+      setKillLog(JSON.parse(savedKillLog));
     }
   }, []);
 
@@ -264,7 +281,7 @@ export function GameButton({ map, source }: GameButtonProps) {
 
   useEffect(() => {
     const audio = new Audio();
-    audio.volume = 0.34;
+    audio.volume = 0.24;
     audio.loop = false;
 
     if (songActive) {
@@ -294,6 +311,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       map.removeInteraction(draw);
       e.feature!.set("swordDamage", 1);
       e.feature!.set("speed", playerSpeed);
+      e.feature!.set("swordLength", 0.015);
       setCurrentFeature(e.feature!);
       e.feature!.setStyle(playerStyle(false, e.feature!));
       startTimer();
@@ -311,11 +329,11 @@ export function GameButton({ map, source }: GameButtonProps) {
       currentFeature.getGeometry() as Point
     ).getCoordinates();
     const swordLength = currentFeature.get("swordLength") || 0.015;
-    const numberOfFrames = 1544;
+    const numberOfFrames = 60;
     const angleStep = (Math.PI * 2) / numberOfFrames;
 
     const swordCoordinates = Array.from({ length: numberOfFrames }, (_, i) => [
-      playerCoords[0] + swordLength * Math.cos(i * angleStep),
+      playerCoords[0] + swordLength * 1.45 * Math.cos(i * angleStep),
       playerCoords[1] + swordLength * Math.sin(i * angleStep),
     ]);
     const swordFeature = new Feature({
@@ -592,7 +610,7 @@ export function GameButton({ map, source }: GameButtonProps) {
             <p>highscore: {highScore} </p>
             <div className="kill-tracker">
               <div className="killed-by">
-                <h2>Drept av</h2>
+                <h2>Drept av {killedBy?.name}</h2>
                 {killedBy ? (
                   <>
                     <img src={killedBy.sprite!} alt={killedBy.name} />
@@ -601,7 +619,6 @@ export function GameButton({ map, source }: GameButtonProps) {
                   <p>?</p>
                 )}
               </div>
-
               {Object.keys(killLog).length > 0 ? (
                 Object.entries(killLog).map(([enemyKey, data]) => (
                   <div key={enemyKey} className="enemy-kill">
