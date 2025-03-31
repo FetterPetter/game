@@ -161,6 +161,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [songActive, setSongActive] = useState(false);
   const [songIndex, setSongIndex] = useState(0);
+  const [volume, setVolume] = useState(0.15);
   const playlist = [
     "https://kappa.vgmsite.com/soundtracks/crypt-of-the-necrodancer/dfwnidfm/02%20-%20Rhythmortis%20%28Lobby%29.mp3",
     "https://kappa.vgmsite.com/soundtracks/crypt-of-the-necrodancer/xxbsascz/01%20-%20Tombtorial%20%28Tutorial%29.mp3",
@@ -282,7 +283,7 @@ export function GameButton({ map, source }: GameButtonProps) {
 
   useEffect(() => {
     const audio = new Audio();
-    audio.volume = 0.15;
+    audio.volume = volume;
     audio.loop = false;
 
     if (songActive) {
@@ -596,9 +597,15 @@ export function GameButton({ map, source }: GameButtonProps) {
         {!gameOver ? (
           <>
             <div>
-              <button onClick={() => setSongActive(!songActive)}>
-                {songActive ? "Stop Musikk" : "Musikk"}
-              </button>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={volume}
+                onChange={(e) => setVolume(parseFloat(e.target.value))}
+              />
+              <span> Volume: {Math.round(volume * 100)}% </span>
             </div>
             <p>poeng: {killCount}</p>
             <p>damege: {currentDamage}</p>
