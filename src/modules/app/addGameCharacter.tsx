@@ -23,9 +23,12 @@ type KillLog = {
   };
 };
 
-export const playerStyle = (mirror: boolean = false, f: Feature) => {
+export const playerStyle = (
+  mirror: boolean = false,
+  f: Feature,
+  canSprint: boolean,
+) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
-  const canSprint = f.get("canSprint");
 
   const normalized = Math.min(
     Math.max((dmg - minDmg) / (maxDmg - minDmg), 0),
@@ -59,9 +62,9 @@ const maxDmg = 500;
 export const SCREEN = window.innerWidth;
 export const BASE_WIDTH = 1920;
 export let BASE_SCALE = SCREEN / BASE_WIDTH;
-const backwardsPlayerStyle = (f: Feature) => {
+const backwardsPlayerStyle = (f: Feature, canSprint: boolean) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
-  const canSprint = f.get("canSprint");
+
   const normalized = Math.min(
     Math.max((dmg - minDmg) / (maxDmg - minDmg), 0),
     1,
@@ -154,6 +157,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   const [gameOver, setGameOver] = useState(false);
   const [killLog, setKillLog] = useState<KillLog>({});
   const [killCount, setKillCount] = useState(0);
+  const [canSprint, setCanSprint] = useState(true);
   const [killedBy, setKilledBy] = useState<{
     name: string;
     sprite: string | null;
@@ -353,7 +357,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       e.feature!.set("swordLength", 0.015);
       e.feature!.set("canSprint", true);
       setCurrentFeature(e.feature!);
-      e.feature!.setStyle(playerStyle(false, e.feature!));
+      e.feature!.setStyle(playerStyle(false, e.feature!, canSprint));
       startTimer();
       setSongActive(true);
     });
@@ -508,6 +512,7 @@ export function GameButton({ map, source }: GameButtonProps) {
 
     let animationFrameId: number | null = null;
     let isSprinting = false;
+
     let canSprint = true;
     const handleKeyDown = (event: KeyboardEvent) => {
       const normalizedKey = event.key.toLowerCase();
@@ -522,9 +527,11 @@ export function GameButton({ map, source }: GameButtonProps) {
       if (event.key === "Shift" && canSprint) {
         isSprinting = true;
         canSprint = false;
+        setCanSprint(canSprint);
         currentFeature.set("canSprint", canSprint);
         setTimeout(() => {
           canSprint = true;
+          setCanSprint(canSprint);
           currentFeature.set("canSprint", canSprint);
         }, 2000);
         setTimeout(() => {
@@ -544,19 +551,21 @@ export function GameButton({ map, source }: GameButtonProps) {
         dy = 0;
       console.log(keysPressed);
       if (keysPressed["w"] || keysPressed["arrowup"]) {
-        currentFeature.setStyle(backwardsPlayerStyle(currentFeature));
+        currentFeature.setStyle(
+          backwardsPlayerStyle(currentFeature, canSprint),
+        );
         dy += playerSpeed;
       }
       if (keysPressed["s"] || keysPressed["arrowdown"]) {
-        currentFeature.setStyle(playerStyle(false, currentFeature));
+        currentFeature.setStyle(playerStyle(false, currentFeature, canSprint));
         dy -= playerSpeed;
       }
       if (keysPressed["a"] || keysPressed["arrowleft"]) {
-        currentFeature.setStyle(playerStyle(false, currentFeature));
+        currentFeature.setStyle(playerStyle(false, currentFeature, canSprint));
         dx -= playerSpeed + 0.0001;
       }
       if (keysPressed["d"] || keysPressed["arrowright"]) {
-        currentFeature.setStyle(playerStyle(true, currentFeature));
+        currentFeature.setStyle(playerStyle(true, currentFeature, canSprint));
         dx += playerSpeed + 0.0001;
       }
       if (dx !== 0 || dy !== 0) {
