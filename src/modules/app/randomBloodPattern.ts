@@ -6,11 +6,11 @@ export const generateRandomBloodShape = (x: number, y: number) => {
   const numBlobs = Math.floor(Math.random() * 3) + 4;
 
   const blobs = Array.from({ length: numBlobs }, () => {
-    const numVertices = Math.floor(Math.random() * 2) + 3;
+    const numVertices = Math.floor(Math.random() * 2) + 6;
     const blobPoints: [number, number][] = [];
 
     for (let i = 0; i < numVertices; i++) {
-      const baseAngle = (i / numVertices) * 3 * Math.PI;
+      const baseAngle = (i / numVertices) * 5 * Math.PI;
       const angle = baseAngle + (Math.random() - 0.5) * 2.5;
 
       const vertexRadius = 0.0012 + Math.random() * 0.003;
