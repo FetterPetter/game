@@ -24,16 +24,14 @@ type KillLog = {
 };
 export const playerStyle = (mirror: boolean = false, f: Feature) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
-  const minDmg = 1;
-  const maxDmg = 100;
 
   const normalized = Math.min(
     Math.max((dmg - minDmg) / (maxDmg - minDmg), 0),
     1,
   );
-  const r = Math.floor(50 + normalized * (255 - 50));
-  const g = Math.floor(50 + normalized * (0 - 50));
-  const b = Math.floor(255 - normalized * (255 - 100));
+  const r = 255;
+  const g = Math.floor(255 * (1 - normalized));
+  const b = Math.floor(255 * (1 - normalized));
   return new Style({
     image: new Icon({
       src:
@@ -55,21 +53,21 @@ export const playerStyle = (mirror: boolean = false, f: Feature) => {
     }),
   });
 };
+const minDmg = 1;
+const maxDmg = 500;
 export const SCREEN = window.innerWidth;
 export const BASE_WIDTH = 1920;
 export let BASE_SCALE = SCREEN / BASE_WIDTH;
 const backwardsPlayerStyle = (f: Feature) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
-  const minDmg = 1;
-  const maxDmg = 100;
 
   const normalized = Math.min(
     Math.max((dmg - minDmg) / (maxDmg - minDmg), 0),
     1,
   );
-  const r = Math.floor(50 + normalized * (255 - 50));
-  const g = Math.floor(50 + normalized * (0 - 50));
-  const b = Math.floor(255 - normalized * (255 - 100));
+  const r = 255;
+  const g = Math.floor(255 * (1 - normalized));
+  const b = Math.floor(255 * (1 - normalized));
 
   return new Style({
     image: new Icon({
@@ -142,7 +140,7 @@ function getSwordColor(length: number) {
   if (length < 0.034) return "darkred";
   if (length < 0.035) return "#800000";
   if (length < 0.036) return "#660000";
-  return "#8B0000";
+  return "#660000";
 }
 
 interface GameButtonProps {
@@ -163,7 +161,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   const [deathLog, setDeathLog] = useState<{
     [key: string]: { sprite: string; count: number };
   }>({});
-  const [playerSpeed, setPlayerSpeed] = useState(0.0002);
+  const playerSpeed = 0.0002;
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [songActive, setSongActive] = useState(false);
   const [songIndex, setSongIndex] = useState(0);
@@ -669,7 +667,7 @@ export function GameButton({ map, source }: GameButtonProps) {
               />
               <span> Lyd: {Math.round(volume * 100)}% </span>
             </div>
-            <p>poeng: {killCount}</p>
+            <p>Poeng: {killCount}</p>
             <p>damege: {currentDamage}</p>
             <button onClick={drawPoint}>Velg spawn</button>
             <p>Time: {timer}s</p>
@@ -678,6 +676,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         ) : (
           <>
             <p>du taptse :-( {killCount}</p>
+            <p>damege: {currentDamage}</p>
             <button onClick={() => window.location.reload()}>Restart</button>
             <p>tid: {timer}s</p>
             <p>highscore: {highScore} </p>

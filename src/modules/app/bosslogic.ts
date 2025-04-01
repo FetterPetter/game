@@ -375,9 +375,12 @@ export const gigaEnemyStyle = (gigaFeature: Feature) => {
 export const bossStyle = (bossFeature: Feature) => {
   const { sprite, hp, shiny } = bossFeature.get("enemyData");
   const bossScale = BASE_SCALE * 1.2;
-  let hpColor = "lime";
-  if (hp < 5000) hpColor = "yellow";
-  if (hp < 2000) hpColor = "red";
+  const minHp = 1;
+  const maxHp = 10000;
+  const normalized = Math.min(Math.max((hp - minHp) / (maxHp - minHp), 0), 1);
+  const r = Math.floor(255 * (1 - normalized));
+  const g = 255;
+  const b = Math.floor(255 * (1 - normalized));
 
   return new Style({
     image: new Icon({
@@ -388,10 +391,10 @@ export const bossStyle = (bossFeature: Feature) => {
     text: new Text({
       text: `HP: ${hp}`,
       font: "bold 14px Arial",
-      fill: new Fill({ color: hpColor }),
+      fill: new Fill({ color: `rgb(${r}, ${g}, ${b})` }),
       stroke: new Stroke({
         color: shiny ? "gold" : "crimson",
-        width: 5,
+        width: shiny ? 6 : 4,
       }),
       offsetY: 50,
     }),
@@ -400,6 +403,12 @@ export const bossStyle = (bossFeature: Feature) => {
 
 export const enemyStyle = (enemyFeature: Feature) => {
   const { sprite, hp, shiny } = enemyFeature.get("enemyData");
+  const minHp = 1;
+  const maxHp = 2000;
+  const normalized = Math.min(Math.max((hp - minHp) / (maxHp - minHp), 0), 1);
+  const r = Math.floor(255 * (1 - normalized));
+  const g = 255;
+  const b = Math.floor(255 * (1 - normalized));
 
   return new Style({
     image: new Icon({
@@ -410,10 +419,10 @@ export const enemyStyle = (enemyFeature: Feature) => {
     text: new Text({
       text: `HP: ${hp}`,
       font: "bold 12px Arial",
-      fill: new Fill({ color: "white" }),
+      fill: new Fill({ color: shiny ? `rgb(${r}, ${g}, ${b})` : "white" }),
       stroke: new Stroke({
         color: shiny ? "gold" : "black",
-        width: 3,
+        width: shiny ? 3 : 1,
       }),
       offsetY: 50,
     }),
