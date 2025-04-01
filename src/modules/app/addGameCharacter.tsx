@@ -23,8 +23,6 @@ type KillLog = {
   };
 };
 export const playerStyle = (mirror: boolean = false, f: Feature) => {
-  const screen = window.innerWidth;
-  let baseScale = screen / BASE_WIDTH;
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
   const minDmg = 1;
   const maxDmg = 100;
@@ -42,7 +40,7 @@ export const playerStyle = (mirror: boolean = false, f: Feature) => {
         dmg > 100
           ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/132.png`
           : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png`,
-      scale: mirror ? [-baseScale, baseScale] : baseScale,
+      scale: mirror ? [-BASE_SCALE, BASE_SCALE] : BASE_SCALE,
       anchor: [0.5, 0.5],
     }),
     text: new Text({
@@ -57,10 +55,10 @@ export const playerStyle = (mirror: boolean = false, f: Feature) => {
     }),
   });
 };
+export const SCREEN = window.innerWidth;
 export const BASE_WIDTH = 1920;
+export let BASE_SCALE = SCREEN / BASE_WIDTH;
 const backwardsPlayerStyle = (f: Feature) => {
-  const screen = window.innerWidth;
-  let baseScale = screen / BASE_WIDTH;
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
   const minDmg = 1;
   const maxDmg = 100;
@@ -79,7 +77,7 @@ const backwardsPlayerStyle = (f: Feature) => {
         dmg > 100
           ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/132.png`
           : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/132.png`,
-      scale: baseScale,
+      scale: BASE_SCALE,
       anchor: [0.5, 0.5],
     }),
     text: new Text({
