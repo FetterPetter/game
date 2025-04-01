@@ -194,12 +194,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     timerIntervalRef.current = setInterval(() => {
       setTimer((prevTime) => {
         const newTime = prevTime + 1;
-
         if (newTime % 0.5 === 0) {
-          const { x, y } = spawnRandomEnemy();
-          spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
-        }
-        if (newTime > 30 && newTime % 2 === 0) {
           const { x, y } = spawnRandomEnemy();
           spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
         }
@@ -211,26 +206,40 @@ export function GameButton({ map, source }: GameButtonProps) {
           const { x, y } = spawnRandomEnemy();
           spawnBoss(x ? x : 0, y ? y : 0);
         }
-        if (newTime > 150 && newTime % 30 === 0) {
+        if (newTime > 28) {
+          if (newTime % 30 === 0) {
+            const { x, y } = spawnRandomEnemy();
+            spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
+          }
+        }
+        if (newTime > 140) {
+          if (newTime % 30 === 0) {
+            const { x, y } = spawnRandomEnemy();
+            spawnBoss(x ? x : 0, y ? y : 0);
+          }
+        }
+        if (newTime > 160) {
+          if (newTime % 15 === 0) {
+            const { x, y } = spawnRandomEnemy();
+            spawnBoss(x ? x : 0, y ? y : 0);
+            spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
+          }
+        }
+        if (newTime > 230) {
           const { x, y } = spawnRandomEnemy();
           spawnBoss(x ? x : 0, y ? y : 0);
         }
-        if (newTime > 160 && newTime % 15 === 0) {
-          const { x, y } = spawnRandomEnemy();
-          spawnBoss(x ? x : 0, y ? y : 0);
-          spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
+        if (newTime > 350) {
+          if (newTime % 60 === 0) {
+            const { x, y } = spawnRandomEnemy();
+            spawnGigaEnemy(x ? x : 0, y ? y : 0);
+          }
         }
-        if (newTime > 230 && newTime % 1) {
-          const { x, y } = spawnRandomEnemy();
-          spawnBoss(x ? x : 0, y ? y : 0);
-        }
-        if (newTime > 360 && newTime % 60 === 0) {
-          const { x, y } = spawnRandomEnemy();
-          spawnGigaEnemy(x ? x : 0, y ? y : 0);
-        }
-        if (newTime > 450 && newTime % 30 === 0) {
-          const { x, y } = spawnRandomEnemy();
-          spawnGigaEnemy(x ? x : 0, y ? y : 0);
+        if (newTime > 450) {
+          if (newTime % 30 === 0) {
+            const { x, y } = spawnRandomEnemy();
+            spawnGigaEnemy(x ? x : 0, y ? y : 0);
+          }
           if (newTime % 0.5 === 0) {
             const { x, y } = spawnRandomEnemy();
             spawnBoss(x ? x : 0, y ? y : 0);

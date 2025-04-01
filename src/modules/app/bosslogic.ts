@@ -90,7 +90,6 @@ const getGigaEnemy = () => {
   let rand = Math.random();
   let shinyRand = Math.random();
   let cumulativeProbability = 0;
-
   for (const gigaEnemy of gigaEnemies) {
     cumulativeProbability += gigaEnemy.chance;
     if (rand < cumulativeProbability) {
