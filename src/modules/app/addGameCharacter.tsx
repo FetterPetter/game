@@ -40,7 +40,7 @@ export const playerStyle = (mirror: boolean = false, f: Feature) => {
         dmg > 100
           ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/132.png`
           : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png`,
-      scale: mirror ? [-1, 1] : [1, 1],
+      scale: mirror ? [-0.7, 0.7] : [0.7, 0.7],
       anchor: [0.5, 0.5],
     }),
     text: new Text({
@@ -74,7 +74,7 @@ const backwardsPlayerStyle = (f: Feature) => {
         dmg > 100
           ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/132.png`
           : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/132.png`,
-      scale: 1,
+      scale: 0.7,
       anchor: [0.5, 0.5],
     }),
     text: new Text({

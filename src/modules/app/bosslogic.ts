@@ -359,7 +359,7 @@ export const gigaEnemyStyle = (gigaFeature: Feature) => {
   return new Style({
     image: new Icon({
       src: sprite,
-      scale: shiny ? 1.7 : 1.4,
+      scale: shiny ? 1.3 : 1.1,
       anchor: [0.5, 0.5],
     }),
     text: new Text({
@@ -384,7 +384,7 @@ export const bossStyle = (bossFeature: Feature) => {
   return new Style({
     image: new Icon({
       src: sprite,
-      scale: shiny ? 1.6 : 1.3,
+      scale: shiny ? 1.2 : 1,
       anchor: [0.5, 0.5],
     }),
     text: new Text({
@@ -406,7 +406,7 @@ export const enemyStyle = (enemyFeature: Feature) => {
   return new Style({
     image: new Icon({
       src: sprite,
-      scale: shiny ? 1.3 : 1.1,
+      scale: shiny ? 0.9 : 0.7,
       anchor: [0.5, 0.5],
     }),
     text: new Text({
