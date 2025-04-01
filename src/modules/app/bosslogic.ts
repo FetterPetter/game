@@ -1,7 +1,7 @@
 import { Feature } from "ol";
 import { Point } from "ol/geom";
 import { Icon, Style, Fill, Stroke, Text } from "ol/style";
-import { BASE_SCALE, BASE_WIDTH, enemySource } from "./addGameCharacter";
+import { BASE_SCALE, enemySource } from "./addGameCharacter";
 
 const gigaEnemies = [
   {
