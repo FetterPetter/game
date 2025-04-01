@@ -1,7 +1,7 @@
 import { Feature } from "ol";
 import { Point } from "ol/geom";
 import { Icon, Style, Fill, Stroke, Text } from "ol/style";
-import { enemySource } from "./addGameCharacter";
+import { BASE_WIDTH, enemySource } from "./addGameCharacter";
 
 const gigaEnemies = [
   {
@@ -233,13 +233,13 @@ const enemies = [
     name: "Beedrill",
     normal: {
       hp: 200,
-      speed: 0.00025,
+      speed: 0.000247,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/15.png",
     },
     shiny: {
       hp: 4300,
-      speed: 0.00028,
+      speed: 0.000277,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/15.png",
     },
@@ -264,7 +264,7 @@ const enemies = [
   {
     name: "Meowth",
     normal: {
-      hp: 500,
+      hp: 800,
       speed: 0.0001,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png",
@@ -348,7 +348,7 @@ const getRandomBoss = () => {
 export const gigaEnemyStyle = (gigaFeature: Feature) => {
   const { sprite, hp, shiny } = gigaFeature.get("enemyData");
   const screen = window.innerWidth;
-  let baseScale = screen > 1600 ? 1.4 : 1.2;
+  let baseScale = (screen / BASE_WIDTH) * 1.5;
   const glowColor =
     hp > 5000
       ? "rgba(255, 0, 0, 0.8)"
@@ -377,7 +377,7 @@ export const gigaEnemyStyle = (gigaFeature: Feature) => {
 export const bossStyle = (bossFeature: Feature) => {
   const { sprite, hp, shiny } = bossFeature.get("enemyData");
   const screen = window.innerWidth;
-  let baseScale = screen > 1600 ? 1.3 : 1;
+  let baseScale = (screen / BASE_WIDTH) * 1.2;
   let hpColor = "lime";
   if (hp < 5000) hpColor = "yellow";
   if (hp < 2000) hpColor = "red";
@@ -404,7 +404,7 @@ export const bossStyle = (bossFeature: Feature) => {
 export const enemyStyle = (enemyFeature: Feature) => {
   const { sprite, hp, shiny } = enemyFeature.get("enemyData");
   const screen = window.innerWidth;
-  let baseScale = screen > 1600 ? 1 : 0.8;
+  let baseScale = screen / BASE_WIDTH;
   return new Style({
     image: new Icon({
       src: sprite,

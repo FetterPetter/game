@@ -24,7 +24,7 @@ type KillLog = {
 };
 export const playerStyle = (mirror: boolean = false, f: Feature) => {
   const screen = window.innerWidth;
-  let baseScale = screen > 1600 ? 1 : 0.8;
+  let baseScale = screen / BASE_WIDTH;
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
   const minDmg = 1;
   const maxDmg = 100;
@@ -57,9 +57,10 @@ export const playerStyle = (mirror: boolean = false, f: Feature) => {
     }),
   });
 };
+export const BASE_WIDTH = 1920;
 const backwardsPlayerStyle = (f: Feature) => {
   const screen = window.innerWidth;
-  let baseScale = screen > 1600 ? 1 : 0.8;
+  let baseScale = screen / BASE_WIDTH;
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
   const minDmg = 1;
   const maxDmg = 100;
@@ -588,12 +589,13 @@ export function GameButton({ map, source }: GameButtonProps) {
         if (enemyMovementAnimationFrame !== null) {
           cancelAnimationFrame(enemyMovementAnimationFrame);
         }
+        clearInterval(timerIntervalRef.current!);
         dropBlood(playerCoords[0], playerCoords[1]);
         setCurrentFeature(null);
         source.clear();
         setGameOver(true);
         setSongActive(false);
-        clearInterval(timerIntervalRef.current!);
+
         return;
       }
       const normalizedX = distance !== 0 ? dx / distance : 0;
