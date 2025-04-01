@@ -119,26 +119,26 @@ const swordStyle = (f: Feature) => {
 };
 
 function getSwordColor(length: number) {
-  if (length < 0.015) return "white";
-  if (length < 0.016) return "#ccffcc";
-  if (length < 0.017) return "lightgreen";
-  if (length < 0.018) return "limegreen";
-  if (length < 0.019) return "#00cc66";
-  if (length < 0.02) return "teal";
-  if (length < 0.021) return "deepskyblue";
-  if (length < 0.022) return "dodgerblue";
-  if (length < 0.023) return "blue";
-  if (length < 0.024) return "mediumblue";
-  if (length < 0.025) return "darkblue";
-  if (length < 0.026) return "purple";
-  if (length < 0.027) return "blueviolet";
-  if (length < 0.028) return "darkviolet";
-  if (length < 0.029) return "indigo";
-  if (length < 0.03) return "red";
-  if (length < 0.031) return "#cc0000";
-  if (length < 0.032) return "darkred";
-  if (length < 0.033) return "#800000";
-  if (length < 0.034) return "#660000";
+  if (length < 0.016) return "white";
+  if (length < 0.017) return "#ccffcc";
+  if (length < 0.018) return "lightgreen";
+  if (length < 0.019) return "limegreen";
+  if (length < 0.02) return "#00cc66";
+  if (length < 0.021) return "teal";
+  if (length < 0.022) return "deepskyblue";
+  if (length < 0.023) return "dodgerblue";
+  if (length < 0.024) return "blue";
+  if (length < 0.025) return "mediumblue";
+  if (length < 0.026) return "darkblue";
+  if (length < 0.027) return "purple";
+  if (length < 0.028) return "blueviolet";
+  if (length < 0.029) return "darkviolet";
+  if (length < 0.03) return "indigo";
+  if (length < 0.031) return "red";
+  if (length < 0.032) return "#cc0000";
+  if (length < 0.033) return "darkred";
+  if (length < 0.034) return "#800000";
+  if (length < 0.035) return "#660000";
   return "#8B0000";
 }
 
