@@ -23,6 +23,8 @@ type KillLog = {
   };
 };
 export const playerStyle = (mirror: boolean = false, f: Feature) => {
+  const screen = window.innerWidth;
+  let baseScale = screen > 1600 ? 1 : 0.8;
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
   const minDmg = 1;
   const maxDmg = 100;
@@ -40,7 +42,7 @@ export const playerStyle = (mirror: boolean = false, f: Feature) => {
         dmg > 100
           ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/132.png`
           : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png`,
-      scale: mirror ? [-0.7, 0.7] : [0.7, 0.7],
+      scale: mirror ? [-baseScale, baseScale] : baseScale,
       anchor: [0.5, 0.5],
     }),
     text: new Text({
@@ -56,6 +58,8 @@ export const playerStyle = (mirror: boolean = false, f: Feature) => {
   });
 };
 const backwardsPlayerStyle = (f: Feature) => {
+  const screen = window.innerWidth;
+  let baseScale = screen > 1600 ? 1 : 0.8;
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
   const minDmg = 1;
   const maxDmg = 100;
@@ -74,7 +78,7 @@ const backwardsPlayerStyle = (f: Feature) => {
         dmg > 100
           ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/132.png`
           : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/132.png`,
-      scale: 0.7,
+      scale: baseScale,
       anchor: [0.5, 0.5],
     }),
     text: new Text({
@@ -109,7 +113,7 @@ export const bloodLayer = new VectorLayer({
 
 const swordStyle = (f: Feature) => {
   const length = parseFloat(f.get("swordLength"));
-  console.log(length);
+
   return new Style({
     stroke: new Stroke({
       width: Math.min(3 + length * 50, 8),
@@ -122,23 +126,23 @@ function getSwordColor(length: number) {
   if (length < 0.016) return "white";
   if (length < 0.017) return "#ccffcc";
   if (length < 0.018) return "lightgreen";
-  if (length < 0.019) return "limegreen";
-  if (length < 0.02) return "#00cc66";
-  if (length < 0.021) return "teal";
-  if (length < 0.022) return "deepskyblue";
-  if (length < 0.023) return "dodgerblue";
-  if (length < 0.024) return "blue";
-  if (length < 0.025) return "mediumblue";
-  if (length < 0.026) return "darkblue";
-  if (length < 0.027) return "purple";
-  if (length < 0.028) return "blueviolet";
-  if (length < 0.029) return "darkviolet";
-  if (length < 0.03) return "indigo";
-  if (length < 0.031) return "red";
-  if (length < 0.032) return "#cc0000";
-  if (length < 0.033) return "darkred";
-  if (length < 0.034) return "#800000";
-  if (length < 0.035) return "#660000";
+  if (length < 0.02) return "limegreen";
+  if (length < 0.021) return "#00cc66";
+  if (length < 0.022) return "teal";
+  if (length < 0.023) return "deepskyblue";
+  if (length < 0.024) return "dodgerblue";
+  if (length < 0.025) return "blue";
+  if (length < 0.026) return "mediumblue";
+  if (length < 0.027) return "darkblue";
+  if (length < 0.028) return "purple";
+  if (length < 0.029) return "blueviolet";
+  if (length < 0.03) return "darkviolet";
+  if (length < 0.031) return "indigo";
+  if (length < 0.032) return "red";
+  if (length < 0.033) return "#cc0000";
+  if (length < 0.034) return "darkred";
+  if (length < 0.035) return "#800000";
+  if (length < 0.036) return "#660000";
   return "#8B0000";
 }
 

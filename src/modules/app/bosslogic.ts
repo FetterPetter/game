@@ -323,7 +323,6 @@ const getRandomBoss = () => {
   let rand = Math.random();
   let shinyRand = Math.random();
   let cumulativeProbability = 0;
-
   for (const boss of bosses) {
     cumulativeProbability += boss.chance;
     if (rand < cumulativeProbability) {
@@ -348,10 +347,11 @@ const getRandomBoss = () => {
 };
 export const gigaEnemyStyle = (gigaFeature: Feature) => {
   const { sprite, hp, shiny } = gigaFeature.get("enemyData");
-
+  const screen = window.innerWidth;
+  let baseScale = screen > 1600 ? 1.4 : 1.2;
   const glowColor =
     hp > 5000
-      ? "rgba(255, 0, 0, 0.8)" // Red glow for high HP
+      ? "rgba(255, 0, 0, 0.8)"
       : hp > 2000
         ? "rgba(255, 165, 0, 0.8)"
         : "rgba(0, 255, 0, 0.8)";
@@ -359,7 +359,7 @@ export const gigaEnemyStyle = (gigaFeature: Feature) => {
   return new Style({
     image: new Icon({
       src: sprite,
-      scale: shiny ? 1.3 : 1.1,
+      scale: shiny ? baseScale * 1.2 : baseScale,
       anchor: [0.5, 0.5],
     }),
     text: new Text({
@@ -376,7 +376,8 @@ export const gigaEnemyStyle = (gigaFeature: Feature) => {
 };
 export const bossStyle = (bossFeature: Feature) => {
   const { sprite, hp, shiny } = bossFeature.get("enemyData");
-
+  const screen = window.innerWidth;
+  let baseScale = screen > 1600 ? 1.3 : 1;
   let hpColor = "lime";
   if (hp < 5000) hpColor = "yellow";
   if (hp < 2000) hpColor = "red";
@@ -384,7 +385,7 @@ export const bossStyle = (bossFeature: Feature) => {
   return new Style({
     image: new Icon({
       src: sprite,
-      scale: shiny ? 1.2 : 1,
+      scale: shiny ? baseScale * 1.2 : baseScale,
       anchor: [0.5, 0.5],
     }),
     text: new Text({
@@ -402,11 +403,12 @@ export const bossStyle = (bossFeature: Feature) => {
 
 export const enemyStyle = (enemyFeature: Feature) => {
   const { sprite, hp, shiny } = enemyFeature.get("enemyData");
-
+  const screen = window.innerWidth;
+  let baseScale = screen > 1600 ? 1 : 0.8;
   return new Style({
     image: new Icon({
       src: sprite,
-      scale: shiny ? 0.9 : 0.7,
+      scale: shiny ? baseScale * 1.2 : baseScale,
       anchor: [0.5, 0.5],
     }),
     text: new Text({
