@@ -3,17 +3,17 @@ import { Feature } from "ol";
 import { bloodSource } from "./addGameCharacter";
 
 export const generateRandomBloodShape = (x: number, y: number) => {
-  const numBlobs = Math.floor(Math.random() * 3) + 2;
+  const numBlobs = Math.floor(Math.random() * 4) + 4;
 
   const blobs = Array.from({ length: numBlobs }, () => {
-    const numVertices = Math.floor(Math.random() * 2) + 3;
+    const numVertices = Math.floor(Math.random() * 3) + 3;
     const blobPoints: [number, number][] = [];
 
     for (let i = 0; i < numVertices; i++) {
       const baseAngle = (i / numVertices) * 3 * Math.PI;
-      const angle = baseAngle + (Math.random() - 0.5) * 2.3;
+      const angle = baseAngle + (Math.random() - 0.5) * 2.5;
 
-      const vertexRadius = 0.0012 + Math.random() * 0.003;
+      const vertexRadius = 0.0014 + Math.random() * 0.0033;
 
       const dx = vertexRadius * Math.cos(angle);
       const dy = vertexRadius * Math.sin(angle);
