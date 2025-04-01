@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { Map, View } from "ol";
 import TileLayer from "ol/layer/Tile";
 import { OSM, XYZ } from "ol/source";
-import { fromLonLat, useGeographic } from "ol/proj";
+import { useGeographic } from "ol/proj";
 
 import "ol/ol.css";
 import {

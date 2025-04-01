@@ -22,8 +22,10 @@ type KillLog = {
     count: number;
   };
 };
+
 export const playerStyle = (mirror: boolean = false, f: Feature) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
+  const canSprint = f.get("canSprint");
 
   const normalized = Math.min(
     Math.max((dmg - minDmg) / (maxDmg - minDmg), 0),
@@ -34,10 +36,9 @@ export const playerStyle = (mirror: boolean = false, f: Feature) => {
   const b = Math.floor(255 * (1 - normalized));
   return new Style({
     image: new Icon({
-      src:
-        dmg > 100
-          ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/132.png`
-          : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png`,
+      src: !canSprint
+        ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/132.png`
+        : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png`,
       scale: mirror ? [-BASE_SCALE, BASE_SCALE] : BASE_SCALE,
       anchor: [0.5, 0.5],
     }),
@@ -60,7 +61,7 @@ export const BASE_WIDTH = 1920;
 export let BASE_SCALE = SCREEN / BASE_WIDTH;
 const backwardsPlayerStyle = (f: Feature) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
-
+  const canSprint = f.get("canSprint");
   const normalized = Math.min(
     Math.max((dmg - minDmg) / (maxDmg - minDmg), 0),
     1,
@@ -71,10 +72,9 @@ const backwardsPlayerStyle = (f: Feature) => {
 
   return new Style({
     image: new Icon({
-      src:
-        dmg > 100
-          ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/132.png`
-          : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/132.png`,
+      src: !canSprint
+        ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/132.png`
+        : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/132.png`,
       scale: BASE_SCALE,
       anchor: [0.5, 0.5],
     }),
@@ -351,6 +351,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       e.feature!.set("swordDamage", 1);
       e.feature!.set("speed", playerSpeed);
       e.feature!.set("swordLength", 0.015);
+      e.feature!.set("canSprint", true);
       setCurrentFeature(e.feature!);
       e.feature!.setStyle(playerStyle(false, e.feature!));
       startTimer();
@@ -520,8 +521,10 @@ export function GameButton({ map, source }: GameButtonProps) {
       if (event.key === "Shift" && canSprint) {
         isSprinting = true;
         canSprint = false;
+        currentFeature.set("canSprint", canSprint);
         setTimeout(() => {
           canSprint = true;
+          currentFeature.set("canSprint", canSprint);
         }, 2000);
         setTimeout(() => {
           isSprinting = false;
