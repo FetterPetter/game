@@ -682,14 +682,13 @@ export function GameButton({ map, source }: GameButtonProps) {
               <span> Lyd: {Math.round(volume * 100)}% </span>
             </div>
             <p>Poeng: {killCount}</p>
-            <p>damege: {currentDamage}</p>
             <button onClick={drawPoint}>Velg spawn</button>
             <p>Time: {timer}s</p>
             <p>highscore: {highScore} </p>
           </>
         ) : (
           <>
-            <p>du taptse :-( {killCount}</p>
+            <p>{killCount}</p>
             <p>damege: {currentDamage}</p>
             <button onClick={() => window.location.reload()}>Restart</button>
             <p>tid: {timer}s</p>
@@ -714,7 +713,7 @@ export function GameButton({ map, source }: GameButtonProps) {
                   </div>
                 ))
               ) : (
-                <p>Noob?</p>
+                <p>Taptse?</p>
               )}
               <h3>Nemesis:</h3>
               {Object.entries(deathLog).length > 0 ? (
