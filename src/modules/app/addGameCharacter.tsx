@@ -505,6 +505,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   useEffect(() => {
     if (!currentFeature || gameOver) return;
     const keysPressed: { [key: string]: boolean } = {};
+
     let animationFrameId: number | null = null;
     let isSprinting = false;
     let canSprint = true;
@@ -541,19 +542,20 @@ export function GameButton({ map, source }: GameButtonProps) {
       if (!currentFeature) return;
       let dx = 0,
         dy = 0;
-      if (keysPressed["w"]) {
+      console.log(keysPressed);
+      if (keysPressed["w"] || keysPressed["arrowup"]) {
         currentFeature.setStyle(backwardsPlayerStyle(currentFeature));
         dy += playerSpeed;
       }
-      if (keysPressed["s"]) {
+      if (keysPressed["s"] || keysPressed["arrowdown"]) {
         currentFeature.setStyle(playerStyle(false, currentFeature));
         dy -= playerSpeed;
       }
-      if (keysPressed["a"]) {
+      if (keysPressed["a"] || keysPressed["arrowleft"]) {
         currentFeature.setStyle(playerStyle(false, currentFeature));
         dx -= playerSpeed + 0.0001;
       }
-      if (keysPressed["d"]) {
+      if (keysPressed["d"] || keysPressed["arrowright"]) {
         currentFeature.setStyle(playerStyle(true, currentFeature));
         dx += playerSpeed + 0.0001;
       }
