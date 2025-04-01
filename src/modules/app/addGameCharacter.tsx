@@ -582,7 +582,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       const dy = playerCoords[1] - enemyCoords[1];
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance < 0.003) {
+      if (distance < 0.002) {
         handleDeath(enemyFeature);
         if (enemyMovementAnimationFrame !== null) {
           cancelAnimationFrame(enemyMovementAnimationFrame);
