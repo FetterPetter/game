@@ -116,7 +116,7 @@ const bosses = [
   {
     name: "Lugia",
     normal: {
-      hp: 30000,
+      hp: 20000,
       speed: 31,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/249.png",
@@ -132,7 +132,7 @@ const bosses = [
   {
     name: "Gyarados",
     normal: {
-      hp: 19000,
+      hp: 14000,
       speed: 27.9,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/130.png",
@@ -148,7 +148,7 @@ const bosses = [
   {
     name: "Mewtwo",
     normal: {
-      hp: 20500,
+      hp: 17500,
       speed: 24.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png",
@@ -164,7 +164,7 @@ const bosses = [
   {
     name: "Snorlax",
     normal: {
-      hp: 48000,
+      hp: 28000,
       speed: 25.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/143.png",
@@ -196,7 +196,7 @@ const bosses = [
   {
     name: "Nidoking",
     normal: {
-      hp: 28000,
+      hp: 25000,
       speed: 31,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/34.png",
