@@ -15,6 +15,7 @@ import {
   spawnGigaEnemy,
   spawnRandomEnemyNow,
 } from "./bosslogic";
+import { transform } from "ol/proj";
 
 type KillLog = {
   [enemyName: string]: {
@@ -123,26 +124,26 @@ const swordStyle = (f: Feature) => {
 };
 
 function getSwordColor(length: number) {
-  if (length < 0.016) return "white";
-  if (length < 0.017) return "#ccffcc";
-  if (length < 0.018) return "lightgreen";
-  if (length < 0.02) return "limegreen";
-  if (length < 0.021) return "#00cc66";
-  if (length < 0.022) return "teal";
-  if (length < 0.023) return "deepskyblue";
-  if (length < 0.024) return "dodgerblue";
-  if (length < 0.025) return "blue";
-  if (length < 0.026) return "mediumblue";
-  if (length < 0.027) return "darkblue";
-  if (length < 0.028) return "purple";
-  if (length < 0.029) return "blueviolet";
-  if (length < 0.03) return "darkviolet";
-  if (length < 0.031) return "indigo";
-  if (length < 0.032) return "red";
-  if (length < 0.033) return "#cc0000";
-  if (length < 0.034) return "darkred";
-  if (length < 0.035) return "#800000";
-  if (length < 0.036) return "#660000";
+  if (length < 3100) return "white";
+  if (length < 3200) return "#ccffcc";
+  if (length < 3500) return "lightgreen";
+  if (length < 3800) return "limegreen";
+  if (length < 4100) return "#00cc66";
+  if (length < 4400) return "teal";
+  if (length < 4700) return "deepskyblue";
+  if (length < 5000) return "dodgerblue";
+  if (length < 5300) return "blue";
+  if (length < 5600) return "mediumblue";
+  if (length < 5900) return "darkblue";
+  if (length < 6200) return "purple";
+  if (length < 6500) return "blueviolet";
+  if (length < 6800) return "darkviolet";
+  if (length < 7100) return "indigo";
+  if (length < 7400) return "red";
+  if (length < 7700) return "#cc0000";
+  if (length < 8000) return "darkred";
+  if (length < 8300) return "#800000";
+  if (length < 8600) return "#660000";
   return "#660000";
 }
 
@@ -165,7 +166,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   const [deathLog, setDeathLog] = useState<{
     [key: string]: { sprite: string; count: number };
   }>({});
-  const playerSpeed = 0.0002;
+  const playerSpeed = 22;
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [songActive, setSongActive] = useState(false);
   const [songIndex, setSongIndex] = useState(0);
@@ -354,7 +355,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       map.removeInteraction(draw);
       e.feature!.set("swordDamage", 1);
       e.feature!.set("speed", playerSpeed);
-      e.feature!.set("swordLength", 0.015);
+      e.feature!.set("swordLength", 3000);
       e.feature!.set("canSprint", true);
       setCurrentFeature(e.feature!);
       e.feature!.setStyle(playerStyle(false, e.feature!, canSprint));
@@ -372,14 +373,21 @@ export function GameButton({ map, source }: GameButtonProps) {
     const playerCoords = (
       currentFeature.getGeometry() as Point
     ).getCoordinates();
-    const swordLength = currentFeature.get("swordLength") || 0.015;
+    const swordLength = currentFeature.get("swordLength");
     const numberOfFrames = 60;
     const angleStep = (Math.PI * 2) / numberOfFrames;
 
-    const swordCoordinates = Array.from({ length: numberOfFrames }, (_, i) => [
-      playerCoords[0] + swordLength * 1.45 * Math.cos(i * angleStep),
-      playerCoords[1] + swordLength * Math.sin(i * angleStep),
-    ]);
+    const playerCoords3857 = transform(playerCoords, "EPSG:4326", "EPSG:3857");
+
+    const swordCoordinates = Array.from({ length: numberOfFrames }, (_, i) => {
+      const angle = i * angleStep;
+
+      const x = playerCoords3857[0] + swordLength * Math.cos(angle);
+      const y = playerCoords3857[1] + swordLength * Math.sin(angle);
+
+      return transform([x, y], "EPSG:3857", "EPSG:4326");
+    });
+
     const swordFeature = new Feature({
       geometry: new LineString([playerCoords, swordCoordinates[0]]),
     });
@@ -394,12 +402,10 @@ export function GameButton({ map, source }: GameButtonProps) {
       if (!startTime) startTime = timestamp;
 
       const progress = (timestamp - startTime) / animationDuration;
-
       if (progress < 1) {
         const frameIndex = Math.floor(progress * numberOfFrames);
         const newSwordCoords = [playerCoords, swordCoordinates[frameIndex]];
         swordFeature.getGeometry()!.setCoordinates(newSwordCoords);
-
         enemySource.forEachFeature((enemyFeature) => {
           if (checkSwordHit(swordFeature, enemyFeature)) {
             let hp = enemyFeature.get("helsepoeng") || 0;
@@ -414,19 +420,19 @@ export function GameButton({ map, source }: GameButtonProps) {
                 swordDamage += 0.1;
                 if (isShiny) {
                   swordDamage += 0.4;
-                  newSwordLength += 0.001;
+                  newSwordLength += 300;
                 }
               } else if (enemyType === "boss") {
                 swordDamage += 5;
                 if (isShiny) {
                   swordDamage += 10;
-                  newSwordLength += 0.005;
+                  newSwordLength += 1300;
                 }
               } else if (enemyType == "giga") {
                 swordDamage += 15;
                 if (isShiny) {
                   swordDamage += 30;
-                  newSwordLength += 0.01;
+                  newSwordLength += 1500;
                 }
               }
               currentFeature.set("swordLength", newSwordLength);
@@ -493,16 +499,22 @@ export function GameButton({ map, source }: GameButtonProps) {
     }));
   };
 
-  const moveFeature = (xCord: number, yCord: number, sprinting: boolean) => {
+  const moveFeature = (
+    metersX: number,
+    metersY: number,
+    sprinting: boolean,
+  ) => {
     if (gameOver) return;
     if (sprinting) {
-      xCord *= 2.2;
-      yCord *= 2.2;
+      metersX *= 2.2;
+      metersY *= 2.2;
     }
     const geom = currentFeature!.getGeometry() as Point;
     const coord = geom.getCoordinates();
-    const newCoord = [coord[0] + xCord, coord[1] + yCord];
-
+    let [x, y] = transform(coord, "EPSG:4326", "EPSG:3857");
+    x += metersX;
+    y += metersY;
+    const newCoord = transform([x, y], "EPSG:3857", "EPSG:4326");
     geom.setCoordinates(newCoord);
     map.getView().setCenter(newCoord);
   };
@@ -562,11 +574,11 @@ export function GameButton({ map, source }: GameButtonProps) {
       }
       if (keysPressed["a"] || keysPressed["arrowleft"]) {
         currentFeature.setStyle(playerStyle(false, currentFeature, canSprint));
-        dx -= playerSpeed + 0.0001;
+        dx -= playerSpeed; //+ 0.0001;
       }
       if (keysPressed["d"] || keysPressed["arrowright"]) {
         currentFeature.setStyle(playerStyle(true, currentFeature, canSprint));
-        dx += playerSpeed + 0.0001;
+        dx += playerSpeed; //+ 0.0001;
       }
       if (dx !== 0 || dy !== 0) {
         moveFeature(dx, dy, isSprinting);
@@ -592,18 +604,24 @@ export function GameButton({ map, source }: GameButtonProps) {
 
   const moveEnemies = () => {
     if (!currentFeature || gameOver) return;
+
     const playerCoords = (
       currentFeature.getGeometry() as Point
     ).getCoordinates();
+    const playerCoords3857 = transform(playerCoords, "EPSG:4326", "EPSG:3857");
+
     enemySource.forEachFeature((enemyFeature) => {
       const enemySpeed = enemyFeature.get("speed");
       const enemyGeom = enemyFeature.getGeometry() as Point;
       const enemyCoords = enemyGeom.getCoordinates();
-      const dx = playerCoords[0] - enemyCoords[0];
-      const dy = playerCoords[1] - enemyCoords[1];
+
+      const enemyCoords3857 = transform(enemyCoords, "EPSG:4326", "EPSG:3857");
+
+      const dx = playerCoords3857[0] - enemyCoords3857[0];
+      const dy = playerCoords3857[1] - enemyCoords3857[1];
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance < 0.002) {
+      if (distance < 300) {
         handleDeath(enemyFeature);
         if (enemyMovementAnimationFrame !== null) {
           cancelAnimationFrame(enemyMovementAnimationFrame);
@@ -614,18 +632,25 @@ export function GameButton({ map, source }: GameButtonProps) {
         source.clear();
         setGameOver(true);
         setSongActive(false);
-
         return;
       }
+
       const normalizedX = distance !== 0 ? dx / distance : 0;
       const normalizedY = distance !== 0 ? dy / distance : 0;
-      const moveX = normalizedX * (enemySpeed + 0.0001);
+      const moveX = normalizedX * enemySpeed;
       const moveY = normalizedY * enemySpeed;
 
-      enemyGeom.setCoordinates([
-        enemyCoords[0] + moveX,
-        enemyCoords[1] + moveY,
-      ]);
+      const newEnemyCoords3857 = [
+        enemyCoords3857[0] + moveX,
+        enemyCoords3857[1] + moveY,
+      ];
+
+      const newEnemyCoords = transform(
+        newEnemyCoords3857,
+        "EPSG:3857",
+        "EPSG:4326",
+      );
+      enemyGeom.setCoordinates(newEnemyCoords);
     });
 
     enemyMovementAnimationFrame = requestAnimationFrame(moveEnemies);
