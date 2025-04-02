@@ -16,6 +16,7 @@ import {
   spawnRandomEnemyNow,
 } from "./bosslogic";
 import { transform } from "ol/proj";
+import RestartButton from "./restartButton";
 
 type KillLog = {
   [enemyName: string]: {
@@ -269,6 +270,13 @@ export function GameButton({ map, source }: GameButtonProps) {
       });
     }, 1000);
     return timerIntervalRef.current;
+  }
+
+  function stopTimer() {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null; // Reset the ref to ensure the interval is cleared
+    }
   }
 
   function checkSwordHit(sword: Feature, enemy: Feature): boolean {
@@ -626,7 +634,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         if (enemyMovementAnimationFrame !== null) {
           cancelAnimationFrame(enemyMovementAnimationFrame);
         }
-        clearInterval(timerIntervalRef.current!);
+        stopTimer();
         dropBlood(playerCoords[0], playerCoords[1]);
         setCurrentFeature(null);
         source.clear();
@@ -689,6 +697,20 @@ export function GameButton({ map, source }: GameButtonProps) {
       return newDeathLog;
     });
   };
+  useEffect(() => {
+    if (currentFeature) return;
+
+    const handleSpacebarPress = (event: KeyboardEvent) => {
+      if (event.key === " ") {
+        window.removeEventListener("keydown", handleSpacebarPress);
+        drawPoint();
+      }
+    };
+    window.addEventListener("keydown", handleSpacebarPress);
+    return () => {
+      window.removeEventListener("keydown", handleSpacebarPress);
+    };
+  }, [currentFeature]);
   return (
     <>
       {" "}
@@ -715,7 +737,8 @@ export function GameButton({ map, source }: GameButtonProps) {
           <>
             <p>{killCount}</p>
             <p>damege: {currentDamage}</p>
-            <button onClick={() => window.location.reload()}>Restart</button>
+            <RestartButton />
+
             <p>tid: {timer}s</p>
             <p>highscore: {highScore} </p>
             <div className="kill-tracker">
