@@ -156,10 +156,18 @@ interface GameButtonProps {
 export function GameButton({ map, source }: GameButtonProps) {
   const [currentFeature, setCurrentFeature] = useState<Feature | null>(null);
   const [currentDamage, setCurrentDamage] = useState(1);
+  const [dashUnlocked, setDashUnlocked] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [killLog, setKillLog] = useState<KillLog>({});
   const [killCount, setKillCount] = useState(0);
+  const [swingSpeed, setSwingSpeed] = useState(1000);
   const [canSprint, setCanSprint] = useState(true);
+  const [playerXP, setPlayerXP] = useState(0);
+  const [playerLevel, setPlayerLevel] = useState(1);
+  const [speedUpgrades, setSpeedUpgrades] = useState(0);
+  const [cooldownUpgrades, setCooldownUpgrades] = useState(0);
+  const [gamePaused, setGamePaused] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
   const [killedBy, setKilledBy] = useState<{
     name: string;
     sprite: string | null;
@@ -167,7 +175,8 @@ export function GameButton({ map, source }: GameButtonProps) {
   const [deathLog, setDeathLog] = useState<{
     [key: string]: { sprite: string; count: number };
   }>({});
-  const playerSpeed = 22;
+  const [playerSpeed, setPlayerSpeed] = useState(22);
+
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [songActive, setSongActive] = useState(false);
   const [songIndex, setSongIndex] = useState(0);
@@ -193,11 +202,28 @@ export function GameButton({ map, source }: GameButtonProps) {
       setKillLog(JSON.parse(savedKillLog));
     }
   }, []);
+  useEffect(() => {
+    if (!gamePaused && currentFeature) {
+      startTimer();
+    } else {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+    }
+
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+    };
+  }, [gamePaused, currentFeature]);
 
   function startTimer() {
     timerIntervalRef.current = setInterval(() => {
       setTimer((prevTime) => {
         const newTime = prevTime + 1;
+
         if (newTime % 0.5 === 0) {
           const { x, y } = spawnRandomEnemy();
           spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
@@ -272,10 +298,35 @@ export function GameButton({ map, source }: GameButtonProps) {
     return timerIntervalRef.current;
   }
 
+  useEffect(() => {
+    if (playerLevel > 1) {
+      setGamePaused(true);
+      dialogRef.current?.showModal();
+    }
+  }, [playerLevel]);
+  const [, forceRender] = useState(0);
+  const handleLevelUpChoice = (choice: "speed" | "cooldown" | "dash") => {
+    if (choice === "speed") {
+      setPlayerSpeed((prev) => prev + 1);
+      setSpeedUpgrades((prev) => prev + 1);
+    } else if (choice === "cooldown") {
+      setSwingSpeed((prev) => Math.max(1, prev - 50));
+      setCooldownUpgrades((prev) => prev + 1);
+    } else if (choice === "dash") {
+      if (!dashUnlocked) {
+        setDashUnlocked(true);
+      }
+    }
+    forceRender((prev) => prev + 1);
+    setGamePaused(false);
+
+    dialogRef.current?.close();
+  };
+
   function stopTimer() {
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
-      timerIntervalRef.current = null; // Reset the ref to ensure the interval is cleared
+      timerIntervalRef.current = null;
     }
   }
 
@@ -372,17 +423,43 @@ export function GameButton({ map, source }: GameButtonProps) {
     });
   }
 
-  let isSwordActive = false;
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    if (songActive) {
+      intervalRef.current = setInterval(() => {
+        if (!gamePaused) {
+          swordSwing();
+        }
+      }, swingSpeed);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    }
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [songActive, gamePaused]);
+
+  function levelUp() {
+    setPlayerLevel((prevLevel) => prevLevel + 1);
+  }
+
+  function getXPRequiredForLevel(level: number) {
+    const baseXP = 10;
+    const multiplier = 1.5;
+    return Math.floor(baseXP * Math.pow(multiplier, level - 1));
+  }
 
   function swordSwing() {
-    if (!currentFeature || gameOver) return;
-    if (isSwordActive) return;
-    isSwordActive = true;
+    if (!currentFeature || gameOver || gamePaused) return;
     const playerCoords = (
       currentFeature.getGeometry() as Point
     ).getCoordinates();
     const swordLength = currentFeature.get("swordLength");
-    const numberOfFrames = 60;
+    const numberOfFrames = 244;
     const angleStep = (Math.PI * 2) / numberOfFrames;
 
     const playerCoords3857 = transform(playerCoords, "EPSG:4326", "EPSG:3857");
@@ -404,7 +481,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     swordFeature.setStyle(swordStyle(currentFeature));
 
     let startTime: number | null = null;
-    const animationDuration = 420;
+    const animationDuration = 520;
 
     const animationStep = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
@@ -450,8 +527,24 @@ export function GameButton({ map, source }: GameButtonProps) {
               const enemyCoord = (
                 enemyFeature.getGeometry() as Point
               ).getCoordinates();
+
               dropBlood(enemyCoord[0], enemyCoord[1]);
               handleEnemyKilled(enemyFeature);
+              const enemyXp = enemyFeature.get("xp");
+              setPlayerXP((prevXP) => {
+                const newXP = prevXP + enemyXp;
+
+                if (newXP >= getXPRequiredForLevel(playerLevel + 1)) {
+                  levelUp();
+                }
+                console.log("current xp: " + newXP);
+                console.log(
+                  "du trenger: " +
+                    (getXPRequiredForLevel(playerLevel + 1) - newXP),
+                );
+                return newXP;
+              });
+
               enemySource.removeFeature(enemyFeature);
 
               setKillCount((prev) => {
@@ -489,9 +582,9 @@ export function GameButton({ map, source }: GameButtonProps) {
         requestAnimationFrame(animationStep);
       } else {
         source.removeFeature(swordFeature);
-        isSwordActive = false;
       }
     };
+
     requestAnimationFrame(animationStep);
   }
 
@@ -512,7 +605,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     metersY: number,
     sprinting: boolean,
   ) => {
-    if (gameOver) return;
+    if (gameOver || gamePaused) return;
     if (sprinting) {
       metersX *= 2.2;
       metersY *= 2.2;
@@ -527,9 +620,8 @@ export function GameButton({ map, source }: GameButtonProps) {
     map.getView().setCenter(newCoord);
   };
   useEffect(() => {
-    if (!currentFeature || gameOver) return;
+    if (!currentFeature || gameOver || gamePaused) return;
     const keysPressed: { [key: string]: boolean } = {};
-
     let animationFrameId: number | null = null;
     let isSprinting = false;
 
@@ -541,10 +633,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         movePlayerSmoothly();
       }
 
-      if (event.key === " ") {
-        swordSwing();
-      }
-      if (event.key === "Shift" && canSprint) {
+      if (event.key === " " && canSprint && dashUnlocked) {
         isSprinting = true;
         canSprint = false;
         setCanSprint(canSprint);
@@ -566,10 +655,9 @@ export function GameButton({ map, source }: GameButtonProps) {
     };
 
     const movePlayerSmoothly = () => {
-      if (!currentFeature) return;
+      if (!currentFeature || gamePaused) return;
       let dx = 0,
         dy = 0;
-      console.log(keysPressed);
       if (keysPressed["w"] || keysPressed["arrowup"]) {
         currentFeature.setStyle(
           backwardsPlayerStyle(currentFeature, canSprint),
@@ -582,11 +670,11 @@ export function GameButton({ map, source }: GameButtonProps) {
       }
       if (keysPressed["a"] || keysPressed["arrowleft"]) {
         currentFeature.setStyle(playerStyle(false, currentFeature, canSprint));
-        dx -= playerSpeed; //+ 0.0001;
+        dx -= playerSpeed;
       }
       if (keysPressed["d"] || keysPressed["arrowright"]) {
         currentFeature.setStyle(playerStyle(true, currentFeature, canSprint));
-        dx += playerSpeed; //+ 0.0001;
+        dx += playerSpeed;
       }
       if (dx !== 0 || dy !== 0) {
         moveFeature(dx, dy, isSprinting);
@@ -607,11 +695,11 @@ export function GameButton({ map, source }: GameButtonProps) {
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [currentFeature, gameOver]);
+  }, [currentFeature, gameOver, playerSpeed, gamePaused, dashUnlocked]);
   let enemyMovementAnimationFrame: number | null = null;
 
   const moveEnemies = () => {
-    if (!currentFeature || gameOver) return;
+    if (!currentFeature || gameOver || gamePaused) return;
 
     const playerCoords = (
       currentFeature.getGeometry() as Point
@@ -673,7 +761,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         cancelAnimationFrame(enemyMovementAnimationFrame);
       }
     };
-  }, [currentFeature, gameOver]);
+  }, [currentFeature, gameOver, gamePaused]);
   useEffect(() => {
     const savedDeathLog = localStorage.getItem("deathLog");
     if (savedDeathLog) {
@@ -697,20 +785,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       return newDeathLog;
     });
   };
-  useEffect(() => {
-    if (currentFeature) return;
 
-    const handleSpacebarPress = (event: KeyboardEvent) => {
-      if (event.key === " ") {
-        window.removeEventListener("keydown", handleSpacebarPress);
-        drawPoint();
-      }
-    };
-    window.addEventListener("keydown", handleSpacebarPress);
-    return () => {
-      window.removeEventListener("keydown", handleSpacebarPress);
-    };
-  }, [currentFeature]);
   return (
     <>
       {" "}
@@ -728,6 +803,9 @@ export function GameButton({ map, source }: GameButtonProps) {
               />
               <span> Lyd: {Math.round(volume * 100)}% </span>
             </div>
+            <button onClick={() => setGamePaused((prev) => !prev)}>
+              {gamePaused ? "Resume Game" : "Pause Game"}
+            </button>
             <p>Poeng: {killCount}</p>
             <button onClick={drawPoint}>Velg spawn</button>
             <p>Time: {timer}s</p>
@@ -781,6 +859,27 @@ export function GameButton({ map, source }: GameButtonProps) {
           </>
         )}
       </div>
+      <dialog ref={dialogRef} className="level-up-dialog">
+        <div className="modal-content">
+          <h2>Level Up!</h2>
+          <button
+            onClick={() => handleLevelUpChoice("speed")}
+            disabled={speedUpgrades >= 5}
+          >
+            Speed +{speedUpgrades} {speedUpgrades >= 5 ? "(Maxed)" : ""}
+          </button>
+          <button onClick={() => handleLevelUpChoice("cooldown")}>
+            Sword cooldown+{cooldownUpgrades}
+          </button>
+          <button
+            onClick={() => handleLevelUpChoice("dash")}
+            disabled={dashUnlocked}
+            className={dashUnlocked ? "disabled" : ""}
+          >
+            {dashUnlocked ? "Dash Ability Unlocked" : "Unlock Dash Ability"}
+          </button>
+        </div>
+      </dialog>
     </>
   );
 }

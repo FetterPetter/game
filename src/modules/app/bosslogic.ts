@@ -6,6 +6,7 @@ import { BASE_SCALE, enemySource } from "./addGameCharacter";
 const gigaEnemies = [
   {
     name: "Machamp",
+    xp: 800,
     normal: {
       hp: 920000,
       speed: 20.005,
@@ -22,6 +23,7 @@ const gigaEnemies = [
   },
   {
     name: "Alakazam",
+    xp: 599,
     normal: {
       hp: 100000,
       speed: 33.119422,
@@ -39,6 +41,7 @@ const gigaEnemies = [
 
   {
     name: "Ho-Oh",
+    xp: 1500,
     normal: {
       hp: 7302000,
       speed: 33.28,
@@ -56,7 +59,7 @@ const gigaEnemies = [
 ];
 
 export function spawnGigaEnemy(x: number, y: number) {
-  const { sprite, hp, speed, shiny, name } = getGigaEnemy();
+  const { sprite, hp, speed, shiny, name, xp } = getGigaEnemy();
 
   const gigaFeature = new Feature({
     geometry: new Point([x, y]),
@@ -67,6 +70,7 @@ export function spawnGigaEnemy(x: number, y: number) {
   gigaFeature.set("type", "giga");
   gigaFeature.set("speed", speed);
   gigaFeature.set("shiny", shiny);
+  gigaFeature.set("xp", shiny ? xp * 10 : xp);
   enemySource.addFeature(gigaFeature);
   gigaFeature.setStyle(gigaEnemyStyle(gigaFeature));
   const updateGigaEnemySpeed = () => {
@@ -100,6 +104,7 @@ const getGigaEnemy = () => {
         sprite: variant.sprite,
         hp: variant.hp,
         speed: variant.speed,
+        xp: gigaEnemy.xp,
         shiny: isShiny,
       };
     }
@@ -109,12 +114,14 @@ const getGigaEnemy = () => {
     sprite: gigaEnemies[0].normal.sprite,
     hp: gigaEnemies[0].normal.hp,
     speed: gigaEnemies[0].normal.speed,
+    xp: gigaEnemies[0].xp,
     shiny: false,
   };
 };
 const bosses = [
   {
     name: "Lugia",
+    xp: 390,
     normal: {
       hp: 20000,
       speed: 31,
@@ -131,6 +138,7 @@ const bosses = [
   },
   {
     name: "Gyarados",
+    xp: 187,
     normal: {
       hp: 14000,
       speed: 27.9,
@@ -147,6 +155,7 @@ const bosses = [
   },
   {
     name: "Mewtwo",
+    xp: 190,
     normal: {
       hp: 17500,
       speed: 24.5,
@@ -163,6 +172,7 @@ const bosses = [
   },
   {
     name: "Snorlax",
+    xp: 220,
     normal: {
       hp: 28000,
       speed: 25.5,
@@ -179,6 +189,7 @@ const bosses = [
   },
   {
     name: "Charizard",
+    xp: 230,
     normal: {
       hp: 13800,
       speed: 32.2,
@@ -195,6 +206,7 @@ const bosses = [
   },
   {
     name: "Nidoking",
+    xp: 200,
     normal: {
       hp: 25000,
       speed: 31,
@@ -214,6 +226,7 @@ const bosses = [
 const enemies = [
   {
     name: "Bulbasaur",
+    xp: 1,
     normal: {
       hp: 20,
       speed: 22,
@@ -230,6 +243,7 @@ const enemies = [
   },
   {
     name: "Beedrill",
+    xp: 10,
     normal: {
       hp: 200,
       speed: 27.5,
@@ -246,6 +260,7 @@ const enemies = [
   },
   {
     name: "Nidorina",
+    xp: 22,
     normal: {
       hp: 180,
       speed: 31,
@@ -262,6 +277,7 @@ const enemies = [
   },
   {
     name: "Meowth",
+    xp: 30,
     normal: {
       hp: 800,
       speed: 11.1,
@@ -278,6 +294,7 @@ const enemies = [
   },
   {
     name: "Butterfree",
+    xp: 50,
     normal: {
       hp: 1,
       speed: 54.5,
@@ -307,6 +324,7 @@ const getRandomEnemy = () => {
         sprite: variant.sprite,
         hp: variant.hp,
         speed: variant.speed,
+        xp: enemy.xp,
         shiny: isShiny,
       };
     }
@@ -315,6 +333,7 @@ const getRandomEnemy = () => {
     sprite: enemies[0].normal.sprite,
     hp: enemies[0].normal.hp,
     speed: enemies[0].normal.speed,
+    xp: enemies[0].xp,
     shiny: false,
   };
 };
@@ -332,6 +351,7 @@ const getRandomBoss = () => {
         sprite: variant.sprite,
         hp: variant.hp,
         speed: variant.speed,
+        xp: boss.xp,
         shiny: isShiny,
       };
     }
@@ -341,6 +361,7 @@ const getRandomBoss = () => {
     sprite: bosses[0].normal.sprite,
     hp: bosses[0].normal.hp,
     speed: bosses[0].normal.speed,
+    xp: bosses[0].xp,
     shiny: false,
   };
 };
@@ -430,23 +451,24 @@ export const enemyStyle = (enemyFeature: Feature) => {
 };
 
 export function spawnBoss(x: number, y: number) {
-  const { sprite, hp, speed, shiny, name } = getRandomBoss();
+  const { sprite, hp, speed, shiny, name, xp } = getRandomBoss();
 
   const bossFeature = new Feature({
     geometry: new Point([x, y]),
   });
-  bossFeature.set("enemyData", { sprite, hp, speed, shiny, name });
+  bossFeature.set("enemyData", { sprite, hp, speed, shiny, name, xp });
   bossFeature.set("name", name);
   bossFeature.set("helsepoeng", hp);
   bossFeature.set("type", "boss");
   bossFeature.set("speed", speed);
   bossFeature.set("shiny", shiny);
+  bossFeature.set("xp", shiny ? xp * 10 : xp);
   enemySource.addFeature(bossFeature);
   bossFeature.setStyle(bossStyle(bossFeature));
 }
 
 export function spawnRandomEnemyNow(x: number, y: number) {
-  const { sprite, hp, speed, shiny, name } = getRandomEnemy();
+  const { sprite, hp, speed, shiny, name, xp } = getRandomEnemy();
   const randomEnemyFeature = new Feature({
     geometry: new Point([x ? x : 0, y ? y : 0]),
   });
@@ -456,6 +478,7 @@ export function spawnRandomEnemyNow(x: number, y: number) {
     speed,
     shiny,
     name,
+    xp,
     timeAlive: 0,
   });
   randomEnemyFeature.set("name", name);
@@ -463,6 +486,7 @@ export function spawnRandomEnemyNow(x: number, y: number) {
   randomEnemyFeature.set("type", "normal");
   randomEnemyFeature.set("speed", speed);
   randomEnemyFeature.set("shiny", shiny);
+  randomEnemyFeature.set("xp", shiny ? xp * 10 : xp);
   enemySource.addFeature(randomEnemyFeature);
   randomEnemyFeature.setStyle(enemyStyle(randomEnemyFeature));
   const updateEnemySpeed = () => {
