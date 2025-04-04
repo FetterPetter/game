@@ -6,7 +6,7 @@ import { BASE_SCALE, enemySource } from "./addGameCharacter";
 const gigaEnemies = [
   {
     name: "Machamp",
-    xp: 800,
+    xp: 1800,
     normal: {
       hp: 920000,
       speed: 20.005,
@@ -23,7 +23,7 @@ const gigaEnemies = [
   },
   {
     name: "Alakazam",
-    xp: 599,
+    xp: 1599,
     normal: {
       hp: 100000,
       speed: 33.119422,
@@ -41,7 +41,7 @@ const gigaEnemies = [
 
   {
     name: "Ho-Oh",
-    xp: 1500,
+    xp: 2500,
     normal: {
       hp: 7302000,
       speed: 33.28,
@@ -70,7 +70,7 @@ export function spawnGigaEnemy(x: number, y: number) {
   gigaFeature.set("type", "giga");
   gigaFeature.set("speed", speed);
   gigaFeature.set("shiny", shiny);
-  gigaFeature.set("xp", shiny ? xp * 10 : xp);
+  gigaFeature.set("xp", shiny ? xp * 15 : xp);
   enemySource.addFeature(gigaFeature);
   gigaFeature.setStyle(gigaEnemyStyle(gigaFeature));
   const updateGigaEnemySpeed = () => {
@@ -121,7 +121,7 @@ const getGigaEnemy = () => {
 const bosses = [
   {
     name: "Lugia",
-    xp: 390,
+    xp: 990,
     normal: {
       hp: 20000,
       speed: 31,
@@ -138,7 +138,7 @@ const bosses = [
   },
   {
     name: "Gyarados",
-    xp: 187,
+    xp: 232,
     normal: {
       hp: 14000,
       speed: 27.9,
@@ -155,7 +155,7 @@ const bosses = [
   },
   {
     name: "Mewtwo",
-    xp: 190,
+    xp: 290,
     normal: {
       hp: 17500,
       speed: 24.5,
@@ -172,7 +172,7 @@ const bosses = [
   },
   {
     name: "Snorlax",
-    xp: 220,
+    xp: 520,
     normal: {
       hp: 28000,
       speed: 25.5,
@@ -189,7 +189,7 @@ const bosses = [
   },
   {
     name: "Charizard",
-    xp: 230,
+    xp: 630,
     normal: {
       hp: 13800,
       speed: 32.2,
@@ -206,7 +206,7 @@ const bosses = [
   },
   {
     name: "Nidoking",
-    xp: 200,
+    xp: 500,
     normal: {
       hp: 25000,
       speed: 31,
@@ -226,7 +226,7 @@ const bosses = [
 const enemies = [
   {
     name: "Bulbasaur",
-    xp: 1,
+    xp: 5,
     normal: {
       hp: 20,
       speed: 22,
@@ -243,7 +243,7 @@ const enemies = [
   },
   {
     name: "Beedrill",
-    xp: 10,
+    xp: 20,
     normal: {
       hp: 200,
       speed: 27.5,
@@ -260,7 +260,7 @@ const enemies = [
   },
   {
     name: "Nidorina",
-    xp: 22,
+    xp: 30,
     normal: {
       hp: 180,
       speed: 31,
@@ -277,7 +277,7 @@ const enemies = [
   },
   {
     name: "Meowth",
-    xp: 30,
+    xp: 50,
     normal: {
       hp: 500,
       speed: 11.1,

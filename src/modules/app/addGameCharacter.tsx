@@ -607,7 +607,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     const bulletCoords = (bullet.getGeometry() as Point).getCoordinates();
     const enemyCoords = (enemyFeature.getGeometry() as Point).getCoordinates();
     const swordLength = currentFeature.get("swordLength");
-    const hitRadius = 0.003;
+    const hitRadius = 0.019;
 
     const distance = Math.hypot(
       bulletCoords[0] - enemyCoords[0],
@@ -883,7 +883,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     map.getView().setCenter(newCoord);
   };
   useEffect(() => {
-    if (!currentFeature || gameOver || gamePaused) {
+    if (!currentFeature || gameOver) {
       return;
     }
     const keysPressed: { [key: string]: boolean } = {};
@@ -897,7 +897,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         movePlayerSmoothly();
       }
 
-      if (event.key === " " && canSprint && dashUnlocked) {
+      if (event.key === " " && canSprint && dashUnlocked && !gamePaused) {
         isSprinting = true;
         canSprint = false;
         setCanSprint(canSprint);
