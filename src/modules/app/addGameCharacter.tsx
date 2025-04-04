@@ -18,6 +18,7 @@ import {
 import { transform } from "ol/proj";
 import RestartButton from "./restartButton";
 import CircleStyle from "ol/style/Circle";
+import { FloatingPopup } from "./floatingPopUp";
 
 type KillLog = {
   [enemyName: string]: {
@@ -32,7 +33,6 @@ export const playerStyle = (
   canSprint: boolean,
 ) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
-  const shootDmg = parseFloat(f.get("shootDamage").toFixed(2));
 
   const normalized = Math.min(
     Math.max((dmg - minDmg) / (maxDmg - minDmg), 0),
@@ -50,7 +50,7 @@ export const playerStyle = (
       anchor: [0.5, 0.5],
     }),
     text: new Text({
-      text: `sword: ${dmg}, shoot: ${shootDmg}`,
+      text: `dmg: ${dmg}`,
       font: "bold 12px comic sans",
       fill: new Fill({ color: `rgb(${r}, ${g}, ${b})` }),
       stroke: new Stroke({
@@ -68,7 +68,7 @@ export const BASE_WIDTH = 1920;
 export let BASE_SCALE = SCREEN / BASE_WIDTH;
 const backwardsPlayerStyle = (f: Feature, canSprint: boolean) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
-  const shootDmg = parseFloat(f.get("shootDamage").toFixed(2));
+
   const normalized = Math.min(
     Math.max((dmg - minDmg) / (maxDmg - minDmg), 0),
     1,
@@ -86,7 +86,7 @@ const backwardsPlayerStyle = (f: Feature, canSprint: boolean) => {
       anchor: [0.5, 0.5],
     }),
     text: new Text({
-      text: `sword: ${dmg}, shoot: ${shootDmg}`,
+      text: `dmg: ${dmg}`,
       font: "bold 12px comic sans",
       fill: new Fill({ color: `rgb(${r}, ${g}, ${b})` }),
       stroke: new Stroke({
@@ -166,10 +166,12 @@ interface GameButtonProps {
 export function GameButton({ map, source }: GameButtonProps) {
   const [currentFeature, setCurrentFeature] = useState<Feature | null>(null);
   const [currentDamage, setCurrentDamage] = useState(1);
-  const [currentShootDamage, setCurrentShootDamage] = useState(10);
+
   const [dashUnlocked, setDashUnlocked] = useState(false);
   const [shinyKillCount, setShinyKillCount] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [shootOnDash, setShootOnDash] = useState(false);
+  const [doubleShootOnDash, setDoubleShootOnDash] = useState(false);
   const [killLog, setKillLog] = useState<KillLog>({});
   const [killCount, setKillCount] = useState(0);
   const [swingSpeed, setSwingSpeed] = useState(1000);
@@ -322,7 +324,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   }, [playerLevel]);
   const [, forceRender] = useState(0);
   const handleLevelUpChoice = (
-    choice: "speed" | "cooldown" | "dash" | "autoShoot",
+    choice: "speed" | "cooldown" | "dash" | "autoShoot" | "shootOnDash",
   ) => {
     if (choice === "speed") {
       setPlayerSpeed((prev) => prev + 1);
@@ -343,6 +345,17 @@ export function GameButton({ map, source }: GameButtonProps) {
         setAutoUpgrades((prev) => prev + 1);
       }
     }
+    if (
+      choice === "shootOnDash" &&
+      dashUnlocked &&
+      autoUpgrades > 2 &&
+      !shootOnDash
+    ) {
+      setShootOnDash(true);
+    } else if (choice === "shootOnDash" && dashUnlocked && shootOnDash) {
+      setDoubleShootOnDash(true);
+    }
+
     forceRender((prev) => prev + 1);
     setGamePaused(false);
 
@@ -354,10 +367,16 @@ export function GameButton({ map, source }: GameButtonProps) {
 
     autoShootIntervalRef.current = setInterval(() => {
       if (!gamePaused && !gameOver) {
-        const maxShots = Math.min(shinyKillCount + 1, 5);
-        for (let i = 0; i < maxShots; i++) {
+        if (autoUpgrades >= 2) {
           shootBullet();
         }
+        if (autoUpgrades >= 4) {
+          shootBullet();
+        }
+        if (autoUpgrades >= 6) {
+          shootBullet();
+        }
+        shootBullet();
       }
     }, autoShootCooldown);
   }
@@ -385,17 +404,6 @@ export function GameButton({ map, source }: GameButtonProps) {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
     }
-  }
-
-  function checkBulletHit(bullet: Feature, enemy: Feature): boolean {
-    const bulletCoords = (bullet.getGeometry() as Point).getCoordinates();
-    const enemyCoords = (enemy.getGeometry() as Point).getCoordinates();
-    const hitRadius = 0.0075;
-    const distance = Math.sqrt(
-      Math.pow(bulletCoords[0] - enemyCoords[0], 2) +
-        Math.pow(bulletCoords[1] - enemyCoords[1], 2),
-    );
-    return distance < hitRadius;
   }
 
   function checkSwordHit(sword: Feature, enemy: Feature): boolean {
@@ -481,7 +489,6 @@ export function GameButton({ map, source }: GameButtonProps) {
     source.once("addfeature", (e) => {
       map.removeInteraction(draw);
       e.feature!.set("swordDamage", 1);
-      e.feature!.set("shootDamage", 10);
       e.feature!.set("speed", playerSpeed);
       e.feature!.set("swordLength", 3000);
       e.feature!.set("canSprint", true);
@@ -490,6 +497,19 @@ export function GameButton({ map, source }: GameButtonProps) {
       startTimer();
       setSongActive(true);
     });
+  }
+
+  const [popups, setPopups] = useState<
+    { id: number; x: number; y: number; text: string }[]
+  >([]);
+
+  function showPopup(text: string, x: number, y: number) {
+    const id = Date.now() + Math.random();
+    setPopups((prev) => [...prev, { id, x, y, text }]);
+
+    setTimeout(() => {
+      setPopups((prev) => prev.filter((p) => p.id !== id));
+    }, 1000);
   }
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -532,148 +552,157 @@ export function GameButton({ map, source }: GameButtonProps) {
     const bulletFeature = new Feature({
       geometry: new Point(playerCoords),
     });
-
-    if (source) {
-      source.addFeature(bulletFeature);
-      bulletFeature.setStyle(bulletStyle);
-    }
-
+    source.addFeature(bulletFeature);
+    bulletFeature.setStyle(bulletStyle);
     moveBullet(bulletFeature);
   }
 
   function moveBullet(bullet: Feature) {
-    if (!currentFeature) return;
+    const bulletCoords = (bullet.getGeometry() as Point).getCoordinates();
+
     const angle = Math.random() * 2 * Math.PI;
-    const speed = 0.0029;
-    const interval = 20;
-    const bulletGeometry = bullet.getGeometry();
-    if (!(bulletGeometry instanceof Point)) {
-      return;
-    }
-    let bulletCoords = bulletGeometry.getCoordinates();
 
-    const moveInterval = setInterval(() => {
-      if (gameOver || gamePaused) {
-        clearInterval(moveInterval);
-        return;
-      }
+    const bulletDistance = 0.09;
 
-      bulletCoords = [
-        bulletCoords[0] + Math.cos(angle) * speed,
-        bulletCoords[1] + Math.sin(angle) * speed,
-      ];
+    const targetCoords = [
+      bulletCoords[0] + bulletDistance * Math.cos(angle),
+      bulletCoords[1] + bulletDistance * Math.sin(angle),
+    ];
 
-      bulletGeometry.setCoordinates(bulletCoords);
+    const speed = 0.0055;
+    const deltaX = targetCoords[0] - bulletCoords[0];
+    const deltaY = targetCoords[1] - bulletCoords[1];
+    const distance = Math.hypot(deltaX, deltaY);
+
+    if (distance === 0) return;
+
+    const stepX = (deltaX / distance) * speed;
+    const stepY = (deltaY / distance) * speed;
+
+    const interval = setInterval(() => {
+      const currentCoords = (bullet.getGeometry() as Point).getCoordinates();
+      const newCoords = [currentCoords[0] + stepX, currentCoords[1] + stepY];
+
+      (bullet.getGeometry() as Point).setCoordinates(newCoords);
       enemySource.forEachFeature((enemyFeature) => {
-        if (checkBulletHit(bullet, enemyFeature)) {
-          let hp = enemyFeature.get("helsepoeng") || 0;
-          let shootDamage = currentFeature.get("shootDamage");
-          const enemyData = enemyFeature.get("enemyData");
-          const enemyType = enemyFeature.get("type");
-          const isShiny = enemyFeature.get("shiny");
-
-          hp -= shootDamage;
-          if (hp <= 0) {
-            if (enemyType === "normal") {
-              shootDamage += 1.1;
-              if (isShiny) {
-                shootDamage += 2.4;
-                setShinyKillCount((prev) => {
-                  const newKillCount = prev + 1;
-
-                  if (newKillCount > 5) {
-                    shootDamage += 5;
-                  }
-                  return newKillCount;
-                });
-              }
-            } else if (enemyType === "boss") {
-              shootDamage += 7;
-              setShinyKillCount((prev) => {
-                const newKillCount = prev + 2;
-
-                if (newKillCount > 5) {
-                  shootDamage += 10;
-                }
-                return newKillCount;
-              });
-            } else if (enemyType == "giga") {
-              shootDamage += 25;
-              if (isShiny) {
-                shootDamage += 40;
-                setShinyKillCount((prev) => {
-                  const newKillCount = prev + 3;
-
-                  if (newKillCount > 5) {
-                    shootDamage += 20;
-                  }
-                  return newKillCount;
-                });
-              }
-            }
-            currentFeature.set("shootDamage", shootDamage);
-            shootDamage = parseFloat(shootDamage.toFixed(2));
-            setCurrentShootDamage(shootDamage);
-            const enemyCoord = (
-              enemyFeature.getGeometry() as Point
-            ).getCoordinates();
-            dropBlood(enemyCoord[0], enemyCoord[1]);
-            handleEnemyKilled(enemyFeature);
-            const enemyXp = enemyFeature.get("xp");
-            setPlayerXP((prevXP) => {
-              const newXP = prevXP + enemyXp;
-              if (newXP >= getXPRequiredForLevel(playerLevel + 1)) {
-                levelUp();
-              }
-              console.log("current xp: " + newXP);
-              console.log(
-                "du trenger: " +
-                  (getXPRequiredForLevel(playerLevel + 1) - newXP),
-              );
-              return newXP;
-            });
-
-            enemySource.removeFeature(enemyFeature);
-
-            setKillCount((prev) => {
-              const newKillCount = prev + 1;
-              if (newKillCount > highScore) {
-                setHighScore(newKillCount);
-                localStorage.setItem("highScore", newKillCount.toString());
-              }
-              return newKillCount;
-            });
-          } else {
-            enemyFeature.set("helsepoeng", hp);
-            if (enemyType == "boss") {
-              if (enemyData) {
-                enemyData.hp = parseFloat(hp.toFixed(2));
-                enemyFeature.set("enemyData", enemyData);
-              }
-              enemyFeature.setStyle(bossStyle(enemyFeature));
-            } else if (enemyType === "normal") {
-              if (enemyData) {
-                enemyData.hp = parseFloat(hp.toFixed(2));
-                enemyFeature.set("enemyData", enemyData);
-              }
-              enemyFeature.setStyle(enemyStyle(enemyFeature));
-            } else if (enemyType === "giga") {
-              if (enemyData) {
-                enemyData.hp = parseFloat(hp.toFixed(2));
-                enemyFeature.set("enemyData", enemyData);
-              }
-              enemyFeature.setStyle(gigaEnemyStyle(enemyFeature));
-            }
-          }
+        if (handleBulletCollision(bullet, enemyFeature)) {
+          source.removeFeature(bullet);
+          clearInterval(interval);
         }
       });
+      const newDistance = Math.hypot(
+        targetCoords[0] - newCoords[0],
+        targetCoords[1] - newCoords[1],
+      );
 
-      setTimeout(() => {
-        if (source) {
-          source.removeFeature(bullet);
+      if (newDistance < speed && bullet) {
+        source.removeFeature(bullet);
+        clearInterval(interval);
+      }
+    }, 16);
+  }
+
+  function handleBulletCollision(bullet: Feature, enemyFeature: Feature) {
+    if (!currentFeature) return;
+    const bulletCoords = (bullet.getGeometry() as Point).getCoordinates();
+    const enemyCoords = (enemyFeature.getGeometry() as Point).getCoordinates();
+    const swordLength = currentFeature.get("swordLength");
+    const hitRadius = 0.003;
+
+    const distance = Math.hypot(
+      bulletCoords[0] - enemyCoords[0],
+      bulletCoords[1] - enemyCoords[1],
+    );
+
+    if (distance < hitRadius) {
+      const screenCoords = map.getPixelFromCoordinate(enemyCoords);
+      let hp = enemyFeature.get("helsepoeng") || 0;
+      let swordDamage = 0;
+      const enemyData = enemyFeature.get("enemyData");
+      const enemyType = enemyFeature.get("type");
+      const isShiny = enemyFeature.get("shiny");
+      let newSwordLength = swordLength;
+      const featureDmg = currentFeature.get("swordDamage") + 20;
+      hp -= featureDmg;
+      if (hp <= 0) {
+        if (enemyType === "normal") {
+          swordDamage += 1;
+          if (isShiny) {
+            swordDamage += 5;
+            newSwordLength += 300;
+          }
+        } else if (enemyType === "boss") {
+          swordDamage += 10;
+          if (isShiny) {
+            swordDamage += 20;
+            newSwordLength += 1300;
+          }
+        } else if (enemyType == "giga") {
+          swordDamage += 20;
+          if (isShiny) {
+            swordDamage += 50;
+            newSwordLength += 1500;
+          }
         }
-      }, 1000);
-    }, interval);
+        const newDamage = swordDamage + featureDmg - 20;
+        currentFeature.set("swordLength", newSwordLength);
+        currentFeature.set("swordDamage", parseFloat(newDamage.toFixed(2)));
+
+        setCurrentDamage(parseFloat(newDamage.toFixed(2)));
+
+        dropBlood(enemyCoords[0], enemyCoords[1]);
+        handleEnemyKilled(enemyFeature);
+        const enemyXp = enemyFeature.get("xp");
+        setPlayerXP((prevXP) => {
+          const newXP = prevXP + enemyXp;
+
+          if (newXP >= getXPRequiredForLevel(playerLevel + 1)) {
+            levelUp();
+          }
+          console.log("current xp: " + newXP);
+          console.log(
+            "du trenger: " + (getXPRequiredForLevel(playerLevel + 1) - newXP),
+          );
+          return newXP;
+        });
+
+        showPopup(`+${swordDamage} Dmg`, screenCoords[0], screenCoords[1]);
+        enemySource.removeFeature(enemyFeature);
+
+        setKillCount((prev) => {
+          const newKillCount = prev + 1;
+          if (newKillCount > highScore) {
+            setHighScore(newKillCount);
+            localStorage.setItem("highScore", newKillCount.toString());
+          }
+          return newKillCount;
+        });
+      } else {
+        enemyFeature.set("helsepoeng", hp);
+        if (enemyType == "boss") {
+          if (enemyData) {
+            enemyData.hp = parseFloat(hp.toFixed(2));
+            enemyFeature.set("enemyData", enemyData);
+          }
+          enemyFeature.setStyle(bossStyle(enemyFeature));
+        } else if (enemyType === "normal") {
+          if (enemyData) {
+            enemyData.hp = parseFloat(hp.toFixed(2));
+            enemyFeature.set("enemyData", enemyData);
+          }
+          enemyFeature.setStyle(enemyStyle(enemyFeature));
+        } else if (enemyType === "giga") {
+          if (enemyData) {
+            enemyData.hp = parseFloat(hp.toFixed(2));
+            enemyFeature.set("enemyData", enemyData);
+          }
+          enemyFeature.setStyle(gigaEnemyStyle(enemyFeature));
+        }
+      }
+      return true;
+    }
+
+    return false;
   }
 
   function swordSwing() {
@@ -716,13 +745,18 @@ export function GameButton({ map, source }: GameButtonProps) {
         swordFeature.getGeometry()!.setCoordinates(newSwordCoords);
         enemySource.forEachFeature((enemyFeature) => {
           if (checkSwordHit(swordFeature, enemyFeature)) {
+            const enemyCoord = (
+              enemyFeature.getGeometry() as Point
+            ).getCoordinates();
+            const screenCoords = map.getPixelFromCoordinate(enemyCoord);
             let hp = enemyFeature.get("helsepoeng") || 0;
-            let swordDamage = currentFeature.get("swordDamage");
+            let swordDamage = 0;
             const enemyData = enemyFeature.get("enemyData");
             const enemyType = enemyFeature.get("type");
             const isShiny = enemyFeature.get("shiny");
             let newSwordLength = swordLength;
-            hp -= swordDamage;
+            const featureDmg = currentFeature.get("swordDamage");
+            hp -= featureDmg;
             if (hp <= 0) {
               if (enemyType === "normal") {
                 swordDamage += 0.1;
@@ -743,13 +777,14 @@ export function GameButton({ map, source }: GameButtonProps) {
                   newSwordLength += 1500;
                 }
               }
+              const newDamage = swordDamage + featureDmg;
               currentFeature.set("swordLength", newSwordLength);
-              currentFeature.set("swordDamage", swordDamage);
-              swordDamage = parseFloat(swordDamage.toFixed(2));
-              setCurrentDamage(swordDamage);
-              const enemyCoord = (
-                enemyFeature.getGeometry() as Point
-              ).getCoordinates();
+              currentFeature.set(
+                "swordDamage",
+                parseFloat(newDamage.toFixed(2)),
+              );
+
+              setCurrentDamage(parseFloat(newDamage.toFixed(2)));
 
               dropBlood(enemyCoord[0], enemyCoord[1]);
               handleEnemyKilled(enemyFeature);
@@ -768,6 +803,11 @@ export function GameButton({ map, source }: GameButtonProps) {
                 return newXP;
               });
 
+              showPopup(
+                `+${swordDamage} Dmg`,
+                screenCoords[0],
+                screenCoords[1],
+              );
               enemySource.removeFeature(enemyFeature);
 
               setKillCount((prev) => {
@@ -861,6 +901,13 @@ export function GameButton({ map, source }: GameButtonProps) {
         canSprint = false;
         setCanSprint(canSprint);
         currentFeature.set("canSprint", canSprint);
+        if (shootOnDash) {
+          shootBullet();
+        }
+        if (doubleShootOnDash) {
+          shootBullet();
+          setTimeout(() => shootBullet(), 100);
+        }
         setTimeout(() => {
           canSprint = true;
           setCanSprint(canSprint);
@@ -918,7 +965,14 @@ export function GameButton({ map, source }: GameButtonProps) {
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [currentFeature, gameOver, playerSpeed, gamePaused, dashUnlocked]);
+  }, [
+    currentFeature,
+    gameOver,
+    playerSpeed,
+    gamePaused,
+    dashUnlocked,
+    shootOnDash,
+  ]);
   let enemyMovementAnimationFrame: number | null = null;
 
   const moveEnemies = () => {
@@ -1108,6 +1162,21 @@ export function GameButton({ map, source }: GameButtonProps) {
             {dashUnlocked ? "Dash Ability Unlocked" : "Unlock Dash Ability"}
           </button>
           <button
+            onClick={() => handleLevelUpChoice("shootOnDash")}
+            disabled={
+              !dashUnlocked ||
+              autoUpgrades <= 2 ||
+              (shootOnDash && doubleShootOnDash)
+            }
+            className={shootOnDash || doubleShootOnDash ? "disabled" : ""}
+          >
+            {doubleShootOnDash
+              ? "More Shoot on Dash Unlocked"
+              : shootOnDash
+                ? "Unlock More Shoot on dash"
+                : "Unlock Shoot on Dash"}
+          </button>
+          <button
             onClick={() => handleLevelUpChoice("autoShoot")}
             className={autoShoot ? "upgrade" : ""}
             disabled={autoUpgrades >= 6}
@@ -1120,6 +1189,14 @@ export function GameButton({ map, source }: GameButtonProps) {
           </button>
         </div>
       </dialog>
+      {popups.map((popup) => (
+        <FloatingPopup
+          key={popup.id}
+          x={popup.x}
+          y={popup.y}
+          text={popup.text}
+        />
+      ))}
     </>
   );
 }
