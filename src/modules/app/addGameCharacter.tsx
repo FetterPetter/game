@@ -17,6 +17,7 @@ import {
 } from "./bosslogic";
 import { transform } from "ol/proj";
 import RestartButton from "./restartButton";
+import CircleStyle from "ol/style/Circle";
 
 type KillLog = {
   [enemyName: string]: {
@@ -31,6 +32,7 @@ export const playerStyle = (
   canSprint: boolean,
 ) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
+  const shootDmg = parseFloat(f.get("shootDamage").toFixed(2));
 
   const normalized = Math.min(
     Math.max((dmg - minDmg) / (maxDmg - minDmg), 0),
@@ -48,7 +50,7 @@ export const playerStyle = (
       anchor: [0.5, 0.5],
     }),
     text: new Text({
-      text: `dmg: ${dmg}`,
+      text: `sword: ${dmg}, shoot: ${shootDmg}`,
       font: "bold 12px comic sans",
       fill: new Fill({ color: `rgb(${r}, ${g}, ${b})` }),
       stroke: new Stroke({
@@ -66,7 +68,7 @@ export const BASE_WIDTH = 1920;
 export let BASE_SCALE = SCREEN / BASE_WIDTH;
 const backwardsPlayerStyle = (f: Feature, canSprint: boolean) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
-
+  const shootDmg = parseFloat(f.get("shootDamage").toFixed(2));
   const normalized = Math.min(
     Math.max((dmg - minDmg) / (maxDmg - minDmg), 0),
     1,
@@ -84,7 +86,7 @@ const backwardsPlayerStyle = (f: Feature, canSprint: boolean) => {
       anchor: [0.5, 0.5],
     }),
     text: new Text({
-      text: `dmg: ${dmg}`,
+      text: `sword: ${dmg}, shoot: ${shootDmg}`,
       font: "bold 12px comic sans",
       fill: new Fill({ color: `rgb(${r}, ${g}, ${b})` }),
       stroke: new Stroke({
@@ -123,6 +125,14 @@ const swordStyle = (f: Feature) => {
     }),
   });
 };
+const bulletStyle = () => {
+  return new Style({
+    image: new CircleStyle({
+      radius: 5,
+      fill: new Fill({ color: "red" }),
+    }),
+  });
+};
 
 function getSwordColor(length: number) {
   if (length < 3100) return "white";
@@ -156,7 +166,9 @@ interface GameButtonProps {
 export function GameButton({ map, source }: GameButtonProps) {
   const [currentFeature, setCurrentFeature] = useState<Feature | null>(null);
   const [currentDamage, setCurrentDamage] = useState(1);
+  const [currentShootDamage, setCurrentShootDamage] = useState(10);
   const [dashUnlocked, setDashUnlocked] = useState(false);
+  const [shinyKillCount, setShinyKillCount] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [killLog, setKillLog] = useState<KillLog>({});
   const [killCount, setKillCount] = useState(0);
@@ -165,9 +177,13 @@ export function GameButton({ map, source }: GameButtonProps) {
   const [playerXP, setPlayerXP] = useState(0);
   const [playerLevel, setPlayerLevel] = useState(1);
   const [speedUpgrades, setSpeedUpgrades] = useState(0);
+  const [autoShootCooldown, setAutoShootCooldown] = useState(2000);
+  const [autoUpgrades, setAutoUpgrades] = useState(0);
   const [cooldownUpgrades, setCooldownUpgrades] = useState(0);
   const [gamePaused, setGamePaused] = useState(false);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const [autoShoot, setAutoShoot] = useState(false);
+  const autoShootIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [killedBy, setKilledBy] = useState<{
     name: string;
     sprite: string | null;
@@ -305,7 +321,9 @@ export function GameButton({ map, source }: GameButtonProps) {
     }
   }, [playerLevel]);
   const [, forceRender] = useState(0);
-  const handleLevelUpChoice = (choice: "speed" | "cooldown" | "dash") => {
+  const handleLevelUpChoice = (
+    choice: "speed" | "cooldown" | "dash" | "autoShoot",
+  ) => {
     if (choice === "speed") {
       setPlayerSpeed((prev) => prev + 1);
       setSpeedUpgrades((prev) => prev + 1);
@@ -316,6 +334,14 @@ export function GameButton({ map, source }: GameButtonProps) {
       if (!dashUnlocked) {
         setDashUnlocked(true);
       }
+    } else if (choice === "autoShoot") {
+      if (!autoShoot) {
+        setAutoShoot(true);
+        startAutoShooting();
+      } else {
+        setAutoShootCooldown((prev) => Math.max(500, prev - 250));
+        setAutoUpgrades((prev) => prev + 1);
+      }
     }
     forceRender((prev) => prev + 1);
     setGamePaused(false);
@@ -323,11 +349,53 @@ export function GameButton({ map, source }: GameButtonProps) {
     dialogRef.current?.close();
   };
 
+  function startAutoShooting() {
+    if (autoShootIntervalRef.current || gamePaused) return; // Prevent duplicate intervals
+
+    autoShootIntervalRef.current = setInterval(() => {
+      if (!gamePaused && !gameOver) {
+        const maxShots = Math.min(shinyKillCount + 1, 5);
+        for (let i = 0; i < maxShots; i++) {
+          shootBullet();
+        }
+      }
+    }, autoShootCooldown);
+  }
+
+  function stopAutoShooting() {
+    if (autoShootIntervalRef.current) {
+      clearInterval(autoShootIntervalRef.current);
+      autoShootIntervalRef.current = null;
+    }
+  }
+
+  useEffect(() => {
+    if (autoShoot) {
+      if (gamePaused) {
+        stopAutoShooting();
+      } else {
+        stopAutoShooting();
+        startAutoShooting();
+      }
+    }
+  }, [autoShootCooldown, gamePaused, autoShoot, shinyKillCount]);
+
   function stopTimer() {
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
     }
+  }
+
+  function checkBulletHit(bullet: Feature, enemy: Feature): boolean {
+    const bulletCoords = (bullet.getGeometry() as Point).getCoordinates();
+    const enemyCoords = (enemy.getGeometry() as Point).getCoordinates();
+    const hitRadius = 0.0075;
+    const distance = Math.sqrt(
+      Math.pow(bulletCoords[0] - enemyCoords[0], 2) +
+        Math.pow(bulletCoords[1] - enemyCoords[1], 2),
+    );
+    return distance < hitRadius;
   }
 
   function checkSwordHit(sword: Feature, enemy: Feature): boolean {
@@ -413,6 +481,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     source.once("addfeature", (e) => {
       map.removeInteraction(draw);
       e.feature!.set("swordDamage", 1);
+      e.feature!.set("shootDamage", 10);
       e.feature!.set("speed", playerSpeed);
       e.feature!.set("swordLength", 3000);
       e.feature!.set("canSprint", true);
@@ -451,6 +520,160 @@ export function GameButton({ map, source }: GameButtonProps) {
     const baseXP = 10;
     const multiplier = 1.5;
     return Math.floor(baseXP * Math.pow(multiplier, level - 1));
+  }
+
+  function shootBullet() {
+    if (!currentFeature || gameOver || gamePaused) return;
+
+    const playerCoords = (
+      currentFeature.getGeometry() as Point
+    ).getCoordinates();
+
+    const bulletFeature = new Feature({
+      geometry: new Point(playerCoords),
+    });
+
+    if (source) {
+      source.addFeature(bulletFeature);
+      bulletFeature.setStyle(bulletStyle);
+    }
+
+    moveBullet(bulletFeature);
+  }
+
+  function moveBullet(bullet: Feature) {
+    if (!currentFeature) return;
+    const angle = Math.random() * 2 * Math.PI;
+    const speed = 0.0029;
+    const interval = 20;
+    const bulletGeometry = bullet.getGeometry();
+    if (!(bulletGeometry instanceof Point)) {
+      return;
+    }
+    let bulletCoords = bulletGeometry.getCoordinates();
+
+    const moveInterval = setInterval(() => {
+      if (gameOver || gamePaused) {
+        clearInterval(moveInterval);
+        return;
+      }
+
+      bulletCoords = [
+        bulletCoords[0] + Math.cos(angle) * speed,
+        bulletCoords[1] + Math.sin(angle) * speed,
+      ];
+
+      bulletGeometry.setCoordinates(bulletCoords);
+      enemySource.forEachFeature((enemyFeature) => {
+        if (checkBulletHit(bullet, enemyFeature)) {
+          let hp = enemyFeature.get("helsepoeng") || 0;
+          let shootDamage = currentFeature.get("shootDamage");
+          const enemyData = enemyFeature.get("enemyData");
+          const enemyType = enemyFeature.get("type");
+          const isShiny = enemyFeature.get("shiny");
+
+          hp -= shootDamage;
+          if (hp <= 0) {
+            if (enemyType === "normal") {
+              shootDamage += 1.1;
+              if (isShiny) {
+                shootDamage += 2.4;
+                setShinyKillCount((prev) => {
+                  const newKillCount = prev + 1;
+
+                  if (newKillCount > 5) {
+                    shootDamage += 5;
+                  }
+                  return newKillCount;
+                });
+              }
+            } else if (enemyType === "boss") {
+              shootDamage += 7;
+              setShinyKillCount((prev) => {
+                const newKillCount = prev + 2;
+
+                if (newKillCount > 5) {
+                  shootDamage += 10;
+                }
+                return newKillCount;
+              });
+            } else if (enemyType == "giga") {
+              shootDamage += 25;
+              if (isShiny) {
+                shootDamage += 40;
+                setShinyKillCount((prev) => {
+                  const newKillCount = prev + 3;
+
+                  if (newKillCount > 5) {
+                    shootDamage += 20;
+                  }
+                  return newKillCount;
+                });
+              }
+            }
+            currentFeature.set("shootDamage", shootDamage);
+            shootDamage = parseFloat(shootDamage.toFixed(2));
+            setCurrentShootDamage(shootDamage);
+            const enemyCoord = (
+              enemyFeature.getGeometry() as Point
+            ).getCoordinates();
+            dropBlood(enemyCoord[0], enemyCoord[1]);
+            handleEnemyKilled(enemyFeature);
+            const enemyXp = enemyFeature.get("xp");
+            setPlayerXP((prevXP) => {
+              const newXP = prevXP + enemyXp;
+              if (newXP >= getXPRequiredForLevel(playerLevel + 1)) {
+                levelUp();
+              }
+              console.log("current xp: " + newXP);
+              console.log(
+                "du trenger: " +
+                  (getXPRequiredForLevel(playerLevel + 1) - newXP),
+              );
+              return newXP;
+            });
+
+            enemySource.removeFeature(enemyFeature);
+
+            setKillCount((prev) => {
+              const newKillCount = prev + 1;
+              if (newKillCount > highScore) {
+                setHighScore(newKillCount);
+                localStorage.setItem("highScore", newKillCount.toString());
+              }
+              return newKillCount;
+            });
+          } else {
+            enemyFeature.set("helsepoeng", hp);
+            if (enemyType == "boss") {
+              if (enemyData) {
+                enemyData.hp = parseFloat(hp.toFixed(2));
+                enemyFeature.set("enemyData", enemyData);
+              }
+              enemyFeature.setStyle(bossStyle(enemyFeature));
+            } else if (enemyType === "normal") {
+              if (enemyData) {
+                enemyData.hp = parseFloat(hp.toFixed(2));
+                enemyFeature.set("enemyData", enemyData);
+              }
+              enemyFeature.setStyle(enemyStyle(enemyFeature));
+            } else if (enemyType === "giga") {
+              if (enemyData) {
+                enemyData.hp = parseFloat(hp.toFixed(2));
+                enemyFeature.set("enemyData", enemyData);
+              }
+              enemyFeature.setStyle(gigaEnemyStyle(enemyFeature));
+            }
+          }
+        }
+      });
+
+      setTimeout(() => {
+        if (source) {
+          source.removeFeature(bullet);
+        }
+      }, 1000);
+    }, interval);
   }
 
   function swordSwing() {
@@ -722,6 +945,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         if (enemyMovementAnimationFrame !== null) {
           cancelAnimationFrame(enemyMovementAnimationFrame);
         }
+        stopAutoShooting();
         stopTimer();
         dropBlood(playerCoords[0], playerCoords[1]);
         setCurrentFeature(null);
@@ -882,6 +1106,17 @@ export function GameButton({ map, source }: GameButtonProps) {
             className={dashUnlocked ? "disabled" : ""}
           >
             {dashUnlocked ? "Dash Ability Unlocked" : "Unlock Dash Ability"}
+          </button>
+          <button
+            onClick={() => handleLevelUpChoice("autoShoot")}
+            className={autoShoot ? "upgrade" : ""}
+            disabled={autoUpgrades >= 6}
+          >
+            {autoShoot
+              ? autoUpgrades >= 6
+                ? "Auto-Shoot Maxed"
+                : `Reduce Auto-Shoot Cooldown (${autoShootCooldown / 1000}s) + ${autoUpgrades}`
+              : "Unlock Auto-Shoot"}{" "}
           </button>
         </div>
       </dialog>
