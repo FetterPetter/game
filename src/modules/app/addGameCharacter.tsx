@@ -31,6 +31,7 @@ export const playerStyle = (
   mirror: boolean = false,
   f: Feature,
   canSprint: boolean,
+  level: number,
 ) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
 
@@ -50,7 +51,7 @@ export const playerStyle = (
       anchor: [0.5, 0.5],
     }),
     text: new Text({
-      text: `dmg: ${dmg}`,
+      text: `dmg: ${dmg} Lvl: ${level}`,
       font: "bold 12px comic sans",
       fill: new Fill({ color: `rgb(${r}, ${g}, ${b})` }),
       stroke: new Stroke({
@@ -66,7 +67,11 @@ const maxDmg = 500;
 export const SCREEN = window.innerWidth;
 export const BASE_WIDTH = 1920;
 export let BASE_SCALE = SCREEN / BASE_WIDTH;
-const backwardsPlayerStyle = (f: Feature, canSprint: boolean) => {
+const backwardsPlayerStyle = (
+  f: Feature,
+  canSprint: boolean,
+  level: number,
+) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
 
   const normalized = Math.min(
@@ -86,7 +91,7 @@ const backwardsPlayerStyle = (f: Feature, canSprint: boolean) => {
       anchor: [0.5, 0.5],
     }),
     text: new Text({
-      text: `dmg: ${dmg}`,
+      text: `dmg: ${dmg} Lvl: ${level}`,
       font: "bold 12px comic sans",
       fill: new Fill({ color: `rgb(${r}, ${g}, ${b})` }),
       stroke: new Stroke({
@@ -176,7 +181,11 @@ export function GameButton({ map, source }: GameButtonProps) {
   const [killCount, setKillCount] = useState(0);
   const [swingSpeed, setSwingSpeed] = useState(1000);
   const [canSprint, setCanSprint] = useState(true);
+  const canSprintRef = useRef(canSprint);
+  const lastDirection = useRef<"front" | "back">("front");
+  const lastMirror = useRef<boolean>(false);
   const [playerXP, setPlayerXP] = useState(0);
+  const [megaShootOnDash, setMegaShootOnDash] = useState(false);
   const [playerLevel, setPlayerLevel] = useState(1);
   const [speedUpgrades, setSpeedUpgrades] = useState(0);
   const [autoShootCooldown, setAutoShootCooldown] = useState(2000);
@@ -493,7 +502,9 @@ export function GameButton({ map, source }: GameButtonProps) {
       e.feature!.set("swordLength", 3000);
       e.feature!.set("canSprint", true);
       setCurrentFeature(e.feature!);
-      e.feature!.setStyle(playerStyle(false, e.feature!, canSprint));
+      e.feature!.setStyle(
+        playerStyle(false, e.feature!, canSprint, playerLevel),
+      );
       startTimer();
       setSongActive(true);
     });
@@ -851,6 +862,10 @@ export function GameButton({ map, source }: GameButtonProps) {
     requestAnimationFrame(animationStep);
   }
 
+  useEffect(() => {
+    canSprintRef.current = canSprint;
+  }, [canSprint]);
+
   const handleEnemyKilled = (enemyFeature: Feature) => {
     const { name, sprite, shiny } = enemyFeature.get("enemyData");
     const enemyKey = shiny ? `${name}_shiny` : name;
@@ -889,7 +904,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     const keysPressed: { [key: string]: boolean } = {};
     let animationFrameId: number | null = null;
     let isSprinting = false;
-    let canSprint = true;
+    let letCanSprint = true;
     const handleKeyDown = (event: KeyboardEvent) => {
       const normalizedKey = event.key.toLowerCase();
       keysPressed[normalizedKey] = true;
@@ -899,9 +914,9 @@ export function GameButton({ map, source }: GameButtonProps) {
 
       if (event.key === " " && canSprint && dashUnlocked && !gamePaused) {
         isSprinting = true;
-        canSprint = false;
-        setCanSprint(canSprint);
-        currentFeature.set("canSprint", canSprint);
+        letCanSprint = false;
+        setCanSprint(false);
+        currentFeature.set("canSprint", false);
         if (shootOnDash) {
           shootBullet();
         }
@@ -910,9 +925,9 @@ export function GameButton({ map, source }: GameButtonProps) {
           setTimeout(() => shootBullet(), 100);
         }
         setTimeout(() => {
-          canSprint = true;
-          setCanSprint(canSprint);
-          currentFeature.set("canSprint", canSprint);
+          letCanSprint = true;
+          setCanSprint(true);
+          currentFeature.set("canSprint", true);
         }, 2000);
         setTimeout(() => {
           isSprinting = false;
@@ -930,23 +945,36 @@ export function GameButton({ map, source }: GameButtonProps) {
       let dx = 0,
         dy = 0;
       if (keysPressed["w"] || keysPressed["arrowup"]) {
+        lastDirection.current = "back";
+        lastMirror.current = false;
         currentFeature.setStyle(
-          backwardsPlayerStyle(currentFeature, canSprint),
+          backwardsPlayerStyle(currentFeature, letCanSprint, playerLevel),
         );
         dy += playerSpeed;
-      }
-      if (keysPressed["s"] || keysPressed["arrowdown"]) {
-        currentFeature.setStyle(playerStyle(false, currentFeature, canSprint));
+      } else if (keysPressed["s"] || keysPressed["arrowdown"]) {
+        lastDirection.current = "front";
+        lastMirror.current = false;
+        currentFeature.setStyle(
+          playerStyle(false, currentFeature, letCanSprint, playerLevel),
+        );
         dy -= playerSpeed;
       }
+
       if (keysPressed["a"] || keysPressed["arrowleft"]) {
-        currentFeature.setStyle(playerStyle(false, currentFeature, canSprint));
+        lastMirror.current = false;
+        currentFeature.setStyle(
+          playerStyle(false, currentFeature, letCanSprint, playerLevel),
+        );
         dx -= playerSpeed;
       }
       if (keysPressed["d"] || keysPressed["arrowright"]) {
-        currentFeature.setStyle(playerStyle(true, currentFeature, canSprint));
+        lastMirror.current = true;
+        currentFeature.setStyle(
+          playerStyle(true, currentFeature, letCanSprint, playerLevel),
+        );
         dx += playerSpeed;
       }
+
       if (dx !== 0 || (dy !== 0 && !gamePaused)) {
         moveFeature(dx, dy, isSprinting);
       }
@@ -974,6 +1002,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     gamePaused,
     dashUnlocked,
     shootOnDash,
+    playerLevel,
   ]);
   let enemyMovementAnimationFrame: number | null = null;
 
@@ -1065,6 +1094,23 @@ export function GameButton({ map, source }: GameButtonProps) {
       return newDeathLog;
     });
   };
+  useEffect(() => {
+    if (!currentFeature) return;
+    console.log("Updating style with canSprint:", canSprint);
+
+    const direction = lastDirection.current;
+    const mirror = lastMirror.current;
+
+    if (direction === "back") {
+      currentFeature.setStyle(
+        backwardsPlayerStyle(currentFeature, canSprint, playerLevel),
+      );
+    } else {
+      currentFeature.setStyle(
+        playerStyle(mirror, currentFeature, canSprint, playerLevel),
+      );
+    }
+  }, [canSprint, currentFeature, playerLevel]);
 
   return (
     <>
