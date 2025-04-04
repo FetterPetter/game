@@ -4,7 +4,7 @@ const RestartButton = () => {
   useEffect(() => {
     setTimeout(() => {
       window.addEventListener("keydown", handleSpacebarPress);
-    }, 50);
+    }, 1000);
     const handleSpacebarPress = (event: KeyboardEvent) => {
       if (event.key === " ") {
         window.location.reload();

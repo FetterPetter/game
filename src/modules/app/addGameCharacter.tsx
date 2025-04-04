@@ -807,7 +807,12 @@ export function GameButton({ map, source }: GameButtonProps) {
               {gamePaused ? "Resume Game" : "Pause Game"}
             </button>
             <p>Poeng: {killCount}</p>
-            <button onClick={drawPoint}>Velg spawn</button>
+            {!currentFeature ? (
+              <button onClick={drawPoint}>Velg spawn</button>
+            ) : (
+              <p>lykke til</p>
+            )}
+
             <p>Time: {timer}s</p>
             <p>highscore: {highScore} </p>
           </>
