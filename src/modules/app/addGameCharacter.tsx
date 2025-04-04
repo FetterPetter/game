@@ -883,11 +883,12 @@ export function GameButton({ map, source }: GameButtonProps) {
     map.getView().setCenter(newCoord);
   };
   useEffect(() => {
-    if (!currentFeature || gameOver || gamePaused) return;
+    if (!currentFeature || gameOver || gamePaused) {
+      return;
+    }
     const keysPressed: { [key: string]: boolean } = {};
     let animationFrameId: number | null = null;
     let isSprinting = false;
-
     let canSprint = true;
     const handleKeyDown = (event: KeyboardEvent) => {
       const normalizedKey = event.key.toLowerCase();
@@ -946,7 +947,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         currentFeature.setStyle(playerStyle(true, currentFeature, canSprint));
         dx += playerSpeed;
       }
-      if (dx !== 0 || dy !== 0) {
+      if (dx !== 0 || (dy !== 0 && !gamePaused)) {
         moveFeature(dx, dy, isSprinting);
       }
 
@@ -961,6 +962,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
+
       if (animationFrameId !== null) {
         cancelAnimationFrame(animationFrameId);
       }

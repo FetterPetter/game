@@ -279,13 +279,13 @@ const enemies = [
     name: "Meowth",
     xp: 30,
     normal: {
-      hp: 800,
+      hp: 500,
       speed: 11.1,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png",
     },
     shiny: {
-      hp: 2550,
+      hp: 1550,
       speed: 22.3,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/52.png",
