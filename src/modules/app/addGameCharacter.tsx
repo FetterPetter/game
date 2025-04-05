@@ -1008,12 +1008,12 @@ export function GameButton({ map, source }: GameButtonProps) {
         if (doubleShootOnDash) {
           setTimeout(() => shootBullet(), 50);
           setTimeout(() => shootBullet(), 100);
-          if (dashUpgrades >= 5) {
+          if (dashUpgrades >= 10) {
             setTimeout(() => shootBullet(), 150);
             setTimeout(() => shootBullet(), 200);
             setTimeout(() => shootBullet(), 250);
           }
-          if (dashUpgrades >= 10) {
+          if (dashUpgrades >= 15) {
             setTimeout(() => shootBullet(), 300);
             setTimeout(() => shootBullet(), 350);
             setTimeout(() => shootBullet(), 400);
