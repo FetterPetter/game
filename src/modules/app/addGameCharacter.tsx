@@ -171,9 +171,9 @@ interface GameButtonProps {
 export function GameButton({ map, source }: GameButtonProps) {
   const [currentFeature, setCurrentFeature] = useState<Feature | null>(null);
   const [currentDamage, setCurrentDamage] = useState(1);
-
+  const [movingEnemies, setMovingEnemies] = useState(true);
   const [dashUnlocked, setDashUnlocked] = useState(false);
-  const [shinyKillCount, setShinyKillCount] = useState(0);
+  const [levelUpsQueued, setLevelUpsQueued] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [shootOnDash, setShootOnDash] = useState(false);
   const [doubleShootOnDash, setDoubleShootOnDash] = useState(false);
@@ -326,11 +326,22 @@ export function GameButton({ map, source }: GameButtonProps) {
   }
 
   useEffect(() => {
-    if (playerLevel > 1) {
+    if (gamePaused) {
+      setMovingEnemies(false);
+    } else if (!gamePaused) {
+      const timeout = setTimeout(() => {
+        setMovingEnemies(true);
+      }, 200);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [gamePaused]);
+  useEffect(() => {
+    if (levelUpsQueued > 0 && !dialogRef.current?.open) {
       setGamePaused(true);
       dialogRef.current?.showModal();
     }
-  }, [playerLevel]);
+  }, [levelUpsQueued]);
   const [, forceRender] = useState(0);
   const handleLevelUpChoice = (
     choice: "speed" | "cooldown" | "dash" | "autoShoot" | "shootOnDash",
@@ -365,14 +376,21 @@ export function GameButton({ map, source }: GameButtonProps) {
       setDoubleShootOnDash(true);
     }
 
+    setLevelUpsQueued((prev) => prev - 1);
+
+    if (levelUpsQueued - 1 > 0) {
+      dialogRef.current?.showModal();
+    } else {
+      setGamePaused(false);
+    }
+
     forceRender((prev) => prev + 1);
-    setGamePaused(false);
 
     dialogRef.current?.close();
   };
 
   function startAutoShooting() {
-    if (autoShootIntervalRef.current || gamePaused) return; // Prevent duplicate intervals
+    if (autoShootIntervalRef.current || gamePaused) return;
 
     autoShootIntervalRef.current = setInterval(() => {
       if (!gamePaused && !gameOver) {
@@ -406,7 +424,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         startAutoShooting();
       }
     }
-  }, [autoShootCooldown, gamePaused, autoShoot, shinyKillCount]);
+  }, [autoShootCooldown, gamePaused, autoShoot]);
 
   function stopTimer() {
     if (timerIntervalRef.current) {
@@ -543,10 +561,6 @@ export function GameButton({ map, source }: GameButtonProps) {
     };
   }, [songActive, gamePaused]);
 
-  function levelUp() {
-    setPlayerLevel((prevLevel) => prevLevel + 1);
-  }
-
   function getXPRequiredForLevel(level: number) {
     const baseXP = 10;
     const multiplier = 1.5;
@@ -665,15 +679,21 @@ export function GameButton({ map, source }: GameButtonProps) {
         handleEnemyKilled(enemyFeature);
         const enemyXp = enemyFeature.get("xp");
         setPlayerXP((prevXP) => {
-          const newXP = prevXP + enemyXp;
+          let newXP = prevXP + enemyXp;
+          let tempLevel = playerLevel;
+          let levelsToAdd = 0;
 
-          if (newXP >= getXPRequiredForLevel(playerLevel + 1)) {
-            levelUp();
+          while (newXP >= getXPRequiredForLevel(tempLevel + 1)) {
+            newXP -= getXPRequiredForLevel(tempLevel + 1);
+            tempLevel++;
+            levelsToAdd++;
           }
-          console.log("current xp: " + newXP);
-          console.log(
-            "du trenger: " + (getXPRequiredForLevel(playerLevel + 1) - newXP),
-          );
+
+          if (levelsToAdd > 0) {
+            setLevelUpsQueued((prev) => prev + levelsToAdd);
+          }
+
+          setPlayerLevel(tempLevel);
           return newXP;
         });
 
@@ -801,16 +821,21 @@ export function GameButton({ map, source }: GameButtonProps) {
               handleEnemyKilled(enemyFeature);
               const enemyXp = enemyFeature.get("xp");
               setPlayerXP((prevXP) => {
-                const newXP = prevXP + enemyXp;
+                let newXP = prevXP + enemyXp;
+                let tempLevel = playerLevel;
+                let levelsToAdd = 0;
 
-                if (newXP >= getXPRequiredForLevel(playerLevel + 1)) {
-                  levelUp();
+                while (newXP >= getXPRequiredForLevel(tempLevel + 1)) {
+                  newXP -= getXPRequiredForLevel(tempLevel + 1);
+                  tempLevel++;
+                  levelsToAdd++;
                 }
-                console.log("current xp: " + newXP);
-                console.log(
-                  "du trenger: " +
-                    (getXPRequiredForLevel(playerLevel + 1) - newXP),
-                );
+
+                if (levelsToAdd > 0) {
+                  setLevelUpsQueued((prev) => prev + levelsToAdd);
+                }
+
+                setPlayerLevel(tempLevel); // if not already inside levelUp
                 return newXP;
               });
 
@@ -941,7 +966,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     };
 
     const movePlayerSmoothly = () => {
-      if (!currentFeature || gamePaused) return;
+      if (!currentFeature) return;
       let dx = 0,
         dy = 0;
       if (keysPressed["w"] || keysPressed["arrowup"]) {
@@ -978,8 +1003,9 @@ export function GameButton({ map, source }: GameButtonProps) {
       if (dx !== 0 || (dy !== 0 && !gamePaused)) {
         moveFeature(dx, dy, isSprinting);
       }
-
-      animationFrameId = requestAnimationFrame(movePlayerSmoothly);
+      if (!gamePaused) {
+        animationFrameId = requestAnimationFrame(movePlayerSmoothly);
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -1008,6 +1034,7 @@ export function GameButton({ map, source }: GameButtonProps) {
 
   const moveEnemies = () => {
     if (!currentFeature || gameOver || gamePaused) return;
+    if (!movingEnemies) return;
 
     const playerCoords = (
       currentFeature.getGeometry() as Point
@@ -1025,7 +1052,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       const dy = playerCoords3857[1] - enemyCoords3857[1];
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance < 300) {
+      if (distance < 350) {
         handleDeath(enemyFeature);
         if (enemyMovementAnimationFrame !== null) {
           cancelAnimationFrame(enemyMovementAnimationFrame);
@@ -1061,7 +1088,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     enemyMovementAnimationFrame = requestAnimationFrame(moveEnemies);
   };
   useEffect(() => {
-    if (gameOver) return;
+    if (gameOver || !movingEnemies) return;
 
     enemyMovementAnimationFrame = requestAnimationFrame(moveEnemies);
 
@@ -1070,7 +1097,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         cancelAnimationFrame(enemyMovementAnimationFrame);
       }
     };
-  }, [currentFeature, gameOver, gamePaused]);
+  }, [currentFeature, gameOver, gamePaused, movingEnemies]);
   useEffect(() => {
     const savedDeathLog = localStorage.getItem("deathLog");
     if (savedDeathLog) {
