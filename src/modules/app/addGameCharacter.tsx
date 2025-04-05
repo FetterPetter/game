@@ -986,6 +986,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         return;
       }
       if (animationFrameId === null) {
+        resetMovement();
         movePlayerSmoothly();
       }
 
