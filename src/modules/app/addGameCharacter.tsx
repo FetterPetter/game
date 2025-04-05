@@ -279,7 +279,7 @@ export function GameButton({ map, source }: GameButtonProps) {
             spawnRandomEnemyNow(x || 0, y || 0, newTime);
           }
         }
-        if (newTime >= 60 && newTime) {
+        if (newTime >= 60) {
           const elapsed = newTime - 60;
           const midInterval = Math.max(15 - Math.floor(elapsed / 2), 1);
           if (newTime % midInterval === 0) {
@@ -287,7 +287,7 @@ export function GameButton({ map, source }: GameButtonProps) {
             spawnRandomMidEnemyNow(x || 0, y || 0, newTime);
           }
         }
-        if (newTime >= 90 && newTime <= 200) {
+        if (newTime >= 90) {
           const elapsed = newTime - 90;
           const bossInterval = Math.max(60 - elapsed, 1);
           if (newTime % bossInterval === 0) {
@@ -668,7 +668,7 @@ export function GameButton({ map, source }: GameButtonProps) {
           swordDamage += 1;
           if (isShiny) {
             swordDamage += 5;
-            newSwordLength += 300;
+            newSwordLength += 350;
           }
         } else if (enemyType === "mid") {
           swordDamage += 5;
@@ -819,13 +819,13 @@ export function GameButton({ map, source }: GameButtonProps) {
                 swordDamage += 0.1;
                 if (isShiny) {
                   swordDamage += 0.4;
-                  newSwordLength += 300;
+                  newSwordLength += 350;
                 }
               } else if (enemyType === "mid") {
                 swordDamage += 1;
                 if (isShiny) {
                   swordDamage += 5;
-                  newSwordLength += 600;
+                  newSwordLength += 650;
                 }
               } else if (enemyType === "boss") {
                 swordDamage += 5;
@@ -1017,7 +1017,7 @@ export function GameButton({ map, source }: GameButtonProps) {
             setTimeout(() => shootBullet(), 200);
             setTimeout(() => shootBullet(), 250);
           }
-          if (dashUpgrades >= 12) {
+          if (dashUpgrades >= 10) {
             setTimeout(() => shootBullet(), 300);
             setTimeout(() => shootBullet(), 350);
             setTimeout(() => shootBullet(), 400);
