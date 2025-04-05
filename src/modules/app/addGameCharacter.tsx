@@ -358,6 +358,9 @@ export function GameButton({ map, source }: GameButtonProps) {
   ) => {
     if (choice === "damage") {
       setCurrentDamage((prev) => prev + 10);
+      let newDamage = currentFeature!.get("swordDamage");
+      newDamage += 10;
+      currentFeature!.set("swordDamage", parseFloat(newDamage.toFixed(2)));
     }
     if (choice === "dashCooldown") {
       setDashCooldown((prev) => Math.max(500, prev - 85));
@@ -392,6 +395,7 @@ export function GameButton({ map, source }: GameButtonProps) {
 
     if (levelUpsQueued - 1 > 0) {
       dialogRef.current?.showModal();
+      resetMovement();
     } else {
       startTimer();
       setGamePaused(false);
