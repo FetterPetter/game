@@ -961,6 +961,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     const newCoord = transform([x, y], "EPSG:3857", "EPSG:4326");
     geom.setCoordinates(newCoord);
     map.getView().setCenter(newCoord);
+    resetMovement();
   };
   useEffect(() => {
     if (!currentFeature || gameOver) {
@@ -973,6 +974,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       const normalizedKey = event.key.toLowerCase();
       keysPressed[normalizedKey] = true;
       if (gamePaused) {
+        delete keysPressed[normalizedKey];
         resetMovement();
         dx = 0;
         dy = 0;

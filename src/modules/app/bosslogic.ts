@@ -384,13 +384,13 @@ const enemies = [
     xp: 50,
     normal: {
       hp: 1,
-      speed: 56.5,
+      speed: 54.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/12.png",
     },
     shiny: {
       hp: 1,
-      speed: 66.5,
+      speed: 64.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/12.png",
     },
