@@ -9,13 +9,13 @@ const gigaEnemies = [
     xp: 1800,
     normal: {
       hp: 920000,
-      speed: 20.005,
+      speed: 33.005,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/68.png",
     },
     shiny: {
       hp: 5105600,
-      speed: 22.2278,
+      speed: 35.2278,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/68.png",
     },
@@ -26,13 +26,13 @@ const gigaEnemies = [
     xp: 1599,
     normal: {
       hp: 100000,
-      speed: 33.119422,
+      speed: 35.119422,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/65.png",
     },
     shiny: {
       hp: 1105600,
-      speed: 33.3417,
+      speed: 37.3417,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/65.png",
     },
@@ -44,13 +44,13 @@ const gigaEnemies = [
     xp: 2500,
     normal: {
       hp: 7302000,
-      speed: 33.28,
+      speed: 39.28,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/250.png",
     },
     shiny: {
       hp: 999999999999,
-      speed: 34.45,
+      speed: 47.45,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/250.png",
     },
@@ -124,13 +124,13 @@ const bosses = [
     xp: 990,
     normal: {
       hp: 20000,
-      speed: 31,
+      speed: 37,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/249.png",
     },
     shiny: {
       hp: 40000,
-      speed: 44.5,
+      speed: 47.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/249.png",
     },
@@ -141,13 +141,13 @@ const bosses = [
     xp: 232,
     normal: {
       hp: 14000,
-      speed: 27.9,
+      speed: 31.9,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/130.png",
     },
     shiny: {
       hp: 93900,
-      speed: 28.9,
+      speed: 35.9,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/130.png",
     },
@@ -158,13 +158,13 @@ const bosses = [
     xp: 290,
     normal: {
       hp: 17500,
-      speed: 24.5,
+      speed: 34.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png",
     },
     shiny: {
       hp: 55000,
-      speed: 30.5,
+      speed: 35.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/150.png",
     },
@@ -175,13 +175,13 @@ const bosses = [
     xp: 520,
     normal: {
       hp: 28000,
-      speed: 25.5,
+      speed: 30.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/143.png",
     },
     shiny: {
       hp: 2500000,
-      speed: 30,
+      speed: 32,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/143.png",
     },
@@ -192,13 +192,13 @@ const bosses = [
     xp: 630,
     normal: {
       hp: 13800,
-      speed: 32.2,
+      speed: 36.2,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png",
     },
     shiny: {
       hp: 29000,
-      speed: 43.3,
+      speed: 44.3,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png",
     },

@@ -171,6 +171,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   const [levelUpsQueued, setLevelUpsQueued] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [shootOnDash, setShootOnDash] = useState(false);
+  const [dashCooldown, setDashCooldown] = useState(2000);
   const [doubleShootOnDash, setDoubleShootOnDash] = useState(false);
   const [killLog, setKillLog] = useState<KillLog>({});
   const [killCount, setKillCount] = useState(0);
@@ -184,6 +185,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   const [playerXP, setPlayerXP] = useState(0);
   const [playerLevel, setPlayerLevel] = useState(0);
   const [speedUpgrades, setSpeedUpgrades] = useState(0);
+  const [dashUpgrades, setDashUpgrades] = useState(0);
   const [autoShootCooldown, setAutoShootCooldown] = useState(2000);
   const [autoUpgrades, setAutoUpgrades] = useState(0);
   const [cooldownUpgrades, setCooldownUpgrades] = useState(0);
@@ -348,13 +350,23 @@ export function GameButton({ map, source }: GameButtonProps) {
   }, [levelUpsQueued]);
   const [, forceRender] = useState(0);
   const handleLevelUpChoice = (
-    choice: "speed" | "cooldown" | "dash" | "autoShoot" | "shootOnDash",
+    choice:
+      | "speed"
+      | "cooldown"
+      | "dash"
+      | "autoShoot"
+      | "shootOnDash"
+      | "dashCooldown",
   ) => {
+    if (choice === "dashCooldown") {
+      setDashCooldown((prev) => Math.max(200, prev - 100));
+      setDashUpgrades((prev) => prev + 1);
+    }
     if (choice === "speed") {
-      setPlayerSpeed((prev) => prev + 1);
+      setPlayerSpeed((prev) => prev + 0.5);
       setSpeedUpgrades((prev) => prev + 1);
     } else if (choice === "cooldown") {
-      setSwingSpeed((prev) => Math.max(1, prev - 50));
+      setSwingSpeed((prev) => Math.max(250, prev - 50));
       setCooldownUpgrades((prev) => prev + 1);
     } else if (choice === "dash") {
       if (!dashUnlocked) {
@@ -369,12 +381,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         setAutoUpgrades((prev) => prev + 1);
       }
     }
-    if (
-      choice === "shootOnDash" &&
-      dashUnlocked &&
-      autoUpgrades > 2 &&
-      !shootOnDash
-    ) {
+    if (choice === "shootOnDash" && dashUnlocked && !shootOnDash) {
       setShootOnDash(true);
     } else if (choice === "shootOnDash" && dashUnlocked && shootOnDash) {
       setDoubleShootOnDash(true);
@@ -977,12 +984,12 @@ export function GameButton({ map, source }: GameButtonProps) {
         if (doubleShootOnDash) {
           setTimeout(() => shootBullet(), 50);
           setTimeout(() => shootBullet(), 100);
-          if (autoUpgrades >= 5) {
+          if (dashUpgrades >= 5) {
             setTimeout(() => shootBullet(), 150);
             setTimeout(() => shootBullet(), 200);
             setTimeout(() => shootBullet(), 250);
           }
-          if (autoUpgrades >= 10) {
+          if (dashUpgrades >= 10) {
             setTimeout(() => shootBullet(), 300);
             setTimeout(() => shootBullet(), 350);
             setTimeout(() => shootBullet(), 400);
@@ -994,7 +1001,7 @@ export function GameButton({ map, source }: GameButtonProps) {
           setCanSprint(true);
           canRun = true;
           currentFeature.set("canSprint", true);
-        }, 2000);
+        }, dashCooldown);
 
         setTimeout(() => {
           isSprinting = false;
@@ -1279,36 +1286,47 @@ export function GameButton({ map, source }: GameButtonProps) {
         <div className="modal-content">
           <h2>Level Up!</h2>
           <button
-            onClick={() => handleLevelUpChoice("speed")}
-            disabled={speedUpgrades >= 5}
-          >
-            Speed +{speedUpgrades} {speedUpgrades >= 5 ? "(Maxed)" : ""}
-          </button>
-          <button onClick={() => handleLevelUpChoice("cooldown")}>
-            Sword cooldown+{cooldownUpgrades}
-          </button>
-          <button
             onClick={() => handleLevelUpChoice("dash")}
             disabled={dashUnlocked}
             className={dashUnlocked ? "disabled" : ""}
           >
-            {dashUnlocked ? "Dash Ability Unlocked" : "Unlock Dash Ability"}
+            {dashUnlocked ? "Dash Unlocked" : "Unlock Dash"}
           </button>
           <button
             onClick={() => handleLevelUpChoice("shootOnDash")}
-            disabled={
-              !dashUnlocked ||
-              autoUpgrades <= 2 ||
-              (shootOnDash && doubleShootOnDash)
-            }
+            disabled={!dashUnlocked || (shootOnDash && doubleShootOnDash)}
             className={shootOnDash || doubleShootOnDash ? "disabled" : ""}
           >
             {doubleShootOnDash
               ? "More Shoot on Dash Unlocked"
               : shootOnDash
-                ? "Unlock More Shoot on dash"
-                : "Unlock Shoot on Dash"}
+                ? "Unlock More Shoot on Dash"
+                : "Shoot on Dash"}
           </button>
+          <button
+            onClick={() => handleLevelUpChoice("dashCooldown")}
+            disabled={!dashUnlocked || dashUpgrades >= 18} // Disable if dash is not unlocked or upgrades are 18 or more
+          >
+            {dashUpgrades < 18
+              ? `Reduce Dash Cooldown +${dashUpgrades}`
+              : "Maxed Dash Cooldown"}{" "}
+            {/* Display 'Maxed Dash Cooldown' if upgrades are 18 or more */}
+          </button>
+          <button
+            onClick={() => handleLevelUpChoice("speed")}
+            disabled={speedUpgrades >= 5}
+          >
+            Speed +{speedUpgrades} {speedUpgrades >= 5 ? "(Maxed)" : ""}
+          </button>
+          <button
+            onClick={() => handleLevelUpChoice("cooldown")}
+            disabled={cooldownUpgrades >= 15}
+          >
+            {cooldownUpgrades < 15
+              ? `Sword cooldown +${cooldownUpgrades}`
+              : "Maxed Sword Cooldown"}
+          </button>
+
           <button
             onClick={() => handleLevelUpChoice("autoShoot")}
             className={autoShoot ? "upgrade" : ""}
