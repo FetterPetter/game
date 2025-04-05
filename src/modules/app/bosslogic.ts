@@ -227,13 +227,13 @@ const midEnemies = [
     name: "Ivysaur",
     xp: 50,
     normal: {
-      hp: 400,
+      hp: 555,
       speed: 25,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/2.png",
     },
     shiny: {
-      hp: 4000,
+      hp: 5555,
       speed: 28,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/2.png",
@@ -261,14 +261,14 @@ const midEnemies = [
     name: "Wartortle",
     xp: 60,
     normal: {
-      hp: 500,
+      hp: 750,
       speed: 28,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/8.png",
     },
     shiny: {
       speed: 31,
-      hp: 5000,
+      hp: 7500,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/8.png",
     },
