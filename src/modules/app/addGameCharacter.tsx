@@ -961,7 +961,6 @@ export function GameButton({ map, source }: GameButtonProps) {
     const newCoord = transform([x, y], "EPSG:3857", "EPSG:4326");
     geom.setCoordinates(newCoord);
     map.getView().setCenter(newCoord);
-    resetMovement();
   };
   useEffect(() => {
     if (!currentFeature || gameOver) {
