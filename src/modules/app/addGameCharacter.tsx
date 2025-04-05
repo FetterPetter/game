@@ -360,7 +360,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       setCurrentDamage((prev) => prev + 10);
     }
     if (choice === "dashCooldown") {
-      setDashCooldown((prev) => Math.max(200, prev - 100));
+      setDashCooldown((prev) => Math.max(500, prev - 85));
       setDashUpgrades((prev) => prev + 1);
     }
     if (choice === "speed") {
