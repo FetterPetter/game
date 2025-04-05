@@ -296,7 +296,7 @@ const midEnemies = [
     xp: 60,
     normal: {
       hp: 400,
-      speed: 38,
+      speed: 35,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/19.png",
     },

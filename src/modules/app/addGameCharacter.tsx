@@ -279,16 +279,16 @@ export function GameButton({ map, source }: GameButtonProps) {
             spawnRandomEnemyNow(x || 0, y || 0, newTime);
           }
         }
-        if (newTime >= 30 && newTime) {
-          const elapsed = newTime - 30;
+        if (newTime >= 60 && newTime) {
+          const elapsed = newTime - 60;
           const midInterval = Math.max(15 - Math.floor(elapsed / 2), 1);
           if (newTime % midInterval === 0) {
             const { x, y } = spawnRandomEnemy();
             spawnRandomMidEnemyNow(x || 0, y || 0, newTime);
           }
         }
-        if (newTime >= 60 && newTime <= 200) {
-          const elapsed = newTime - 60;
+        if (newTime >= 90 && newTime <= 200) {
+          const elapsed = newTime - 90;
           const bossInterval = Math.max(60 - elapsed, 1);
           if (newTime % bossInterval === 0) {
             const { x, y } = spawnRandomEnemy();
@@ -296,22 +296,22 @@ export function GameButton({ map, source }: GameButtonProps) {
           }
         }
 
-        if (newTime >= 180) {
-          const elapsed = newTime - 180;
+        if (newTime >= 200) {
+          const elapsed = newTime - 200;
           const gigaInterval = Math.max(60 - Math.floor(elapsed / 2), 1);
           if (newTime % gigaInterval === 0) {
             const { x, y } = spawnRandomEnemy();
             spawnGigaEnemy(x || 0, y || 0, newTime);
           }
         }
-        if (newTime >= 200) {
+        if (newTime >= 300) {
           const extraSpawns = Math.floor((newTime - 30) / 15);
           for (let i = 0; i < extraSpawns; i++) {
             const { x, y } = spawnRandomEnemy();
             spawnBoss(x || 0, y || 0, newTime);
           }
         }
-        if (newTime >= 300) {
+        if (newTime >= 400) {
           const extraSpawns = Math.floor((newTime - 30) / 15);
           for (let i = 0; i < extraSpawns; i++) {
             const { x, y } = spawnRandomEnemy();
