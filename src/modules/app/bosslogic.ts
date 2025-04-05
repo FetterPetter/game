@@ -245,13 +245,13 @@ const midEnemies = [
     xp: 55,
     normal: {
       hp: 100,
-      speed: 40,
+      speed: 42,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/17.png",
     },
     shiny: {
       hp: 1000,
-      speed: 49,
+      speed: 52,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/17.png",
     },
