@@ -559,6 +559,9 @@ export function GameButton({ map, source }: GameButtonProps) {
         if (!gamePaused) {
           swordSwing();
         }
+        if (cooldownUpgrades >= 15) {
+          swordSwing();
+        }
       }, swingSpeed);
     } else {
       if (intervalRef.current) {
