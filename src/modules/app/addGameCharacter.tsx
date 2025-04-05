@@ -304,7 +304,7 @@ export function GameButton({ map, source }: GameButtonProps) {
             spawnGigaEnemy(x || 0, y || 0, newTime);
           }
         }
-        if (newTime >= 300) {
+        if (newTime >= 200) {
           const extraSpawns = Math.floor((newTime - 30) / 15);
           for (let i = 0; i < extraSpawns; i++) {
             const { x, y } = spawnRandomEnemy();
