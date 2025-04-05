@@ -192,13 +192,13 @@ const bosses = [
     xp: 200,
     normal: {
       hp: 13800,
-      speed: 36.2,
+      speed: 33.2,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png",
     },
     shiny: {
       hp: 29000,
-      speed: 44.3,
+      speed: 39.3,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png",
     },
@@ -384,13 +384,13 @@ const enemies = [
     xp: 50,
     normal: {
       hp: 1,
-      speed: 54.5,
+      speed: 56.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/12.png",
     },
     shiny: {
       hp: 1,
-      speed: 64.5,
+      speed: 66.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/12.png",
     },
