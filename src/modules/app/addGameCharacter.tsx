@@ -21,6 +21,7 @@ import { transform } from "ol/proj";
 import RestartButton from "./restartButton";
 import CircleStyle from "ol/style/Circle";
 import { FloatingPopup } from "./floatingPopUp";
+import { usePreventSpacebarClick } from "./usePreventSpacebarClick";
 
 type KillLog = {
   [enemyName: string]: {
@@ -166,6 +167,7 @@ interface GameButtonProps {
 }
 
 export function GameButton({ map, source }: GameButtonProps) {
+  usePreventSpacebarClick();
   const [currentFeature, setCurrentFeature] = useState<Feature | null>(null);
   const [currentDamage, setCurrentDamage] = useState(1);
   const [movingEnemies, setMovingEnemies] = useState(true);
@@ -195,6 +197,10 @@ export function GameButton({ map, source }: GameButtonProps) {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const [autoShoot, setAutoShoot] = useState(false);
   const autoShootIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  let dx = 0,
+    dy = 0;
+  let canRun = true;
+  let isSprinting = false;
   const [killedBy, setKilledBy] = useState<{
     name: string;
     sprite: string | null;
@@ -248,6 +254,10 @@ export function GameButton({ map, source }: GameButtonProps) {
   const resetMovement = () => {
     setIsRunning(false);
     setCanSprint(true);
+    dx = 0;
+    dy = 0;
+    canRun = true;
+    isSprinting = false;
     if (sprintCooldownTimer.current !== null) {
       clearTimeout(sprintCooldownTimer.current);
       sprintCooldownTimer.current = null;
@@ -263,7 +273,7 @@ export function GameButton({ map, source }: GameButtonProps) {
           spawnRandomEnemyNow(x || 0, y || 0, newTime);
         }
         if (newTime >= 30) {
-          const extraSpawns = Math.floor((newTime - 30) / 15); // +1 spawn every 15s
+          const extraSpawns = Math.floor((newTime - 30) / 15);
           for (let i = 0; i < extraSpawns; i++) {
             const { x, y } = spawnRandomEnemy();
             spawnRandomEnemyNow(x || 0, y || 0, newTime);
@@ -318,6 +328,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   useEffect(() => {
     if (gamePaused) {
       setMovingEnemies(false);
+      resetMovement();
     } else if (!gamePaused) {
       const timeout = setTimeout(() => {
         setMovingEnemies(true);
@@ -329,6 +340,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   useEffect(() => {
     if (levelUpsQueued > 0 && !dialogRef.current?.open) {
       setGamePaused(true);
+      stopTimer();
       dialogRef.current?.showModal();
     }
   }, [levelUpsQueued]);
@@ -340,8 +352,12 @@ export function GameButton({ map, source }: GameButtonProps) {
       | "dash"
       | "autoShoot"
       | "shootOnDash"
-      | "dashCooldown",
+      | "dashCooldown"
+      | "damage",
   ) => {
+    if (choice === "damage") {
+      dialogRef.current?.close();
+    }
     if (choice === "dashCooldown") {
       setDashCooldown((prev) => Math.max(200, prev - 100));
       setDashUpgrades((prev) => prev + 1);
@@ -376,6 +392,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     if (levelUpsQueued - 1 > 0) {
       dialogRef.current?.showModal();
     } else {
+      startTimer();
       setGamePaused(false);
     }
 
@@ -841,7 +858,6 @@ export function GameButton({ map, source }: GameButtonProps) {
                   tempLevel++;
                   levelsToAdd++;
                 }
-
                 if (levelsToAdd > 0) {
                   setLevelUpsQueued((prev) => prev + levelsToAdd);
                 }
@@ -950,10 +966,6 @@ export function GameButton({ map, source }: GameButtonProps) {
     }
     const keysPressed: { [key: string]: boolean } = {};
     let animationFrameId: number | null = null;
-    let dx = 0,
-      dy = 0;
-    let canRun = true;
-    let isSprinting = false;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       const normalizedKey = event.key.toLowerCase();
@@ -1037,6 +1049,18 @@ export function GameButton({ map, source }: GameButtonProps) {
 
     const movePlayerSmoothly = () => {
       if (!currentFeature) return;
+      if (gamePaused) {
+        resetMovement();
+        dx = 0;
+        dy = 0;
+        canRun = true;
+        isSprinting = false;
+        if (animationFrameId !== null) {
+          cancelAnimationFrame(animationFrameId);
+        }
+        return;
+      }
+
       dx = 0;
       dy = 0;
       if (keysPressed["w"] || keysPressed["arrowup"]) {
@@ -1208,7 +1232,6 @@ export function GameButton({ map, source }: GameButtonProps) {
 
     const direction = lastDirection.current;
     const mirror = lastMirror.current;
-
     if (direction === "back") {
       currentFeature.setStyle(backwardsPlayerStyle(currentFeature, canSprint));
     } else {
@@ -1322,7 +1345,6 @@ export function GameButton({ map, source }: GameButtonProps) {
             {dashUpgrades < 18
               ? `Reduce Dash Cooldown +${dashUpgrades}`
               : "Maxed Dash Cooldown"}{" "}
-            {/* Display 'Maxed Dash Cooldown' if upgrades are 18 or more */}
           </button>
           <button
             onClick={() => handleLevelUpChoice("speed")}
@@ -1349,6 +1371,12 @@ export function GameButton({ map, source }: GameButtonProps) {
                 ? "Auto-Shoot Maxed"
                 : `Reduce Auto-Shoot Cooldown (${autoShootCooldown / 1000}s) + ${autoUpgrades}`
               : "Unlock Auto-Shoot"}{" "}
+          </button>
+          <button
+            onClick={() => handleLevelUpChoice("damage")}
+            className="damage-upgrade"
+          >
+            Jeg trenger ikke upgrades
           </button>
         </div>
       </dialog>

@@ -87,25 +87,8 @@ export function spawnGigaEnemy(x: number, y: number, timer: number) {
   gigaEnemyFeature.set("speed", scaledSpeed);
   gigaEnemyFeature.set("shiny", shiny);
   gigaEnemyFeature.set("xp", shiny ? scaledXp * 10 : scaledXp);
-
   enemySource.addFeature(gigaEnemyFeature);
-
   gigaEnemyFeature.setStyle(gigaEnemyStyle(gigaEnemyFeature));
-  const updateGigaEnemySpeed = () => {
-    const enemyData = gigaEnemyFeature.get("enemyData");
-    if (!enemyData) return;
-
-    enemyData.timeAlive = (enemyData.timeAlive || 0) + 1;
-    const speedIncreaseRate = enemyData.shiny ? 0.2 : 0.05;
-    enemyData.speed += speedIncreaseRate * enemyData.timeAlive;
-
-    gigaEnemyFeature.set("speed", enemyData.speed);
-    gigaEnemyFeature.setStyle(gigaEnemyStyle(gigaEnemyFeature));
-
-    setTimeout(updateGigaEnemySpeed, 100000);
-  };
-
-  updateGigaEnemySpeed();
 }
 
 const getGigaEnemy = () => {
@@ -142,13 +125,13 @@ const bosses = [
     xp: 990,
     normal: {
       hp: 20000,
-      speed: 37,
+      speed: 34,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/249.png",
     },
     shiny: {
       hp: 40000,
-      speed: 47.5,
+      speed: 40.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/249.png",
     },
@@ -176,7 +159,7 @@ const bosses = [
     xp: 290,
     normal: {
       hp: 17500,
-      speed: 34.5,
+      speed: 30.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png",
     },
@@ -193,7 +176,7 @@ const bosses = [
     xp: 520,
     normal: {
       hp: 28000,
-      speed: 30.5,
+      speed: 29.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/143.png",
     },
@@ -385,13 +368,13 @@ const enemies = [
     xp: 50,
     normal: {
       hp: 500,
-      speed: 11.1,
+      speed: 25.1,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png",
     },
     shiny: {
       hp: 1550,
-      speed: 22.3,
+      speed: 27.3,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/52.png",
     },
@@ -685,13 +668,15 @@ export function spawnBoss(x: number, y: number, timer: number) {
 
 export function spawnRandomEnemyNow(x: number, y: number, timer: number) {
   const { sprite, hp, speed, shiny, name, xp } = getRandomEnemy();
+
   const difficultyScaling = 1 + Math.floor(timer / 60) * 0.2;
   const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.05;
   const scaledSpeed = speed * speedScalingFactor;
   const scaledHp = parseFloat((hp * difficultyScaling).toFixed(2));
   const scaledXp = xp * difficultyScaling;
+
   const randomEnemyFeature = new Feature({
-    geometry: new Point([x ? x : 0, y ? y : 0]),
+    geometry: new Point([x || 0, y || 0]),
   });
 
   randomEnemyFeature.set("enemyData", {
@@ -703,28 +688,12 @@ export function spawnRandomEnemyNow(x: number, y: number, timer: number) {
     xp: scaledXp,
     timeAlive: 0,
   });
-
   randomEnemyFeature.set("name", name);
-  randomEnemyFeature.set("helsepoeng", scaledHp); // HP
+  randomEnemyFeature.set("helsepoeng", scaledHp);
   randomEnemyFeature.set("type", "normal");
   randomEnemyFeature.set("speed", scaledSpeed);
   randomEnemyFeature.set("shiny", shiny);
   randomEnemyFeature.set("xp", shiny ? scaledXp * 10 : scaledXp);
-
   enemySource.addFeature(randomEnemyFeature);
-
   randomEnemyFeature.setStyle(enemyStyle(randomEnemyFeature));
-  const updateEnemySpeed = () => {
-    const enemyData = randomEnemyFeature.get("enemyData");
-    if (!enemyData) return;
-    if (enemyData.name === "Meowth") {
-      enemyData.timeAlive += 1;
-      const speedIncreaseRate = enemyData.shiny ? 0.2 : 0.05;
-      enemyData.speed += speedIncreaseRate * enemyData.timeAlive;
-      randomEnemyFeature.set("speed", enemyData.speed);
-      randomEnemyFeature.setStyle(enemyStyle(randomEnemyFeature));
-    }
-    setTimeout(updateEnemySpeed, 1000);
-  };
-  updateEnemySpeed();
 }
