@@ -6,7 +6,7 @@ import { BASE_SCALE, enemySource } from "./addGameCharacter";
 const gigaEnemies = [
   {
     name: "Machamp",
-    xp: 1800,
+    xp: 900,
     normal: {
       hp: 920000,
       speed: 33.005,
@@ -23,7 +23,7 @@ const gigaEnemies = [
   },
   {
     name: "Alakazam",
-    xp: 1599,
+    xp: 700,
     normal: {
       hp: 100000,
       speed: 35.119422,
@@ -41,7 +41,7 @@ const gigaEnemies = [
 
   {
     name: "Ho-Oh",
-    xp: 2500,
+    xp: 1000,
     normal: {
       hp: 7302000,
       speed: 39.28,
@@ -61,11 +61,10 @@ const gigaEnemies = [
 export function spawnGigaEnemy(x: number, y: number, timer: number) {
   const { sprite, hp, speed, shiny, name, xp } = getGigaEnemy();
 
-  const difficultyScaling = 1 + Math.floor(timer / 60) * 0.2;
-  const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.05;
+  const difficultyScaling = 1 + Math.floor(timer / 60) * 0.25;
+  const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.07;
   const scaledSpeed = speed * speedScalingFactor;
   const scaledHp = parseFloat((hp * difficultyScaling).toFixed(2));
-  const scaledXp = xp * difficultyScaling;
 
   const gigaEnemyFeature = new Feature({
     geometry: new Point([x ? x : 0, y ? y : 0]),
@@ -77,7 +76,7 @@ export function spawnGigaEnemy(x: number, y: number, timer: number) {
     speed: scaledSpeed,
     shiny,
     name,
-    xp: scaledXp,
+    xp: xp,
     timeAlive: 0,
   });
 
@@ -86,7 +85,7 @@ export function spawnGigaEnemy(x: number, y: number, timer: number) {
   gigaEnemyFeature.set("type", "giga");
   gigaEnemyFeature.set("speed", scaledSpeed);
   gigaEnemyFeature.set("shiny", shiny);
-  gigaEnemyFeature.set("xp", shiny ? scaledXp * 10 : scaledXp);
+  gigaEnemyFeature.set("xp", shiny ? xp * 10 : xp);
   enemySource.addFeature(gigaEnemyFeature);
   gigaEnemyFeature.setStyle(gigaEnemyStyle(gigaEnemyFeature));
 }
@@ -122,7 +121,7 @@ const getGigaEnemy = () => {
 const bosses = [
   {
     name: "Lugia",
-    xp: 990,
+    xp: 500,
     normal: {
       hp: 20000,
       speed: 34,
@@ -139,7 +138,7 @@ const bosses = [
   },
   {
     name: "Gyarados",
-    xp: 232,
+    xp: 132,
     normal: {
       hp: 14000,
       speed: 31.9,
@@ -156,7 +155,7 @@ const bosses = [
   },
   {
     name: "Mewtwo",
-    xp: 290,
+    xp: 110,
     normal: {
       hp: 17500,
       speed: 30.5,
@@ -173,7 +172,7 @@ const bosses = [
   },
   {
     name: "Snorlax",
-    xp: 520,
+    xp: 170,
     normal: {
       hp: 28000,
       speed: 29.5,
@@ -190,7 +189,7 @@ const bosses = [
   },
   {
     name: "Charizard",
-    xp: 630,
+    xp: 200,
     normal: {
       hp: 13800,
       speed: 36.2,
@@ -207,7 +206,7 @@ const bosses = [
   },
   {
     name: "Nidoking",
-    xp: 500,
+    xp: 150,
     normal: {
       hp: 25000,
       speed: 31,
@@ -226,7 +225,7 @@ const bosses = [
 const midEnemies = [
   {
     name: "Ivysaur",
-    xp: 100,
+    xp: 50,
     normal: {
       hp: 400,
       speed: 25,
@@ -243,7 +242,7 @@ const midEnemies = [
   },
   {
     name: "Pidgeotto",
-    xp: 200,
+    xp: 55,
     normal: {
       hp: 100,
       speed: 50,
@@ -260,7 +259,7 @@ const midEnemies = [
   },
   {
     name: "Wartortle",
-    xp: 120,
+    xp: 60,
     normal: {
       hp: 500,
       speed: 28,
@@ -277,7 +276,7 @@ const midEnemies = [
   },
   {
     name: "Charmeleon",
-    xp: 150,
+    xp: 65,
     normal: {
       hp: 600,
       speed: 34,
@@ -294,7 +293,7 @@ const midEnemies = [
   },
   {
     name: "Raticate",
-    xp: 100,
+    xp: 60,
     normal: {
       hp: 400,
       speed: 38,
@@ -314,7 +313,7 @@ const midEnemies = [
 const enemies = [
   {
     name: "Bulbasaur",
-    xp: 5,
+    xp: 1,
     normal: {
       hp: 20,
       speed: 22,
@@ -331,7 +330,7 @@ const enemies = [
   },
   {
     name: "Beedrill",
-    xp: 20,
+    xp: 5,
     normal: {
       hp: 200,
       speed: 27.5,
@@ -348,7 +347,7 @@ const enemies = [
   },
   {
     name: "Nidorina",
-    xp: 30,
+    xp: 10,
     normal: {
       hp: 180,
       speed: 31,
@@ -365,7 +364,7 @@ const enemies = [
   },
   {
     name: "Meowth",
-    xp: 50,
+    xp: 20,
     normal: {
       hp: 500,
       speed: 25.1,
@@ -402,11 +401,10 @@ const enemies = [
 export function spawnRandomMidEnemyNow(x: number, y: number, timer: number) {
   const { sprite, hp, speed, shiny, name, xp } = getRandomMidEnemy();
 
-  const difficultyScaling = 1 + Math.floor(timer / 60) * 0.1;
-  const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.05;
+  const difficultyScaling = 1 + Math.floor(timer / 60) * 0.3;
+  const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.06;
   const scaledHp = parseFloat((hp * difficultyScaling).toFixed(2));
   const scaledSpeed = speed * speedScalingFactor;
-  const scaledXp = xp * difficultyScaling;
 
   const randomMidEnemyFeature = new Feature({
     geometry: new Point([x ? x : 0, y ? y : 0]),
@@ -418,7 +416,7 @@ export function spawnRandomMidEnemyNow(x: number, y: number, timer: number) {
     speed: scaledSpeed,
     shiny,
     name,
-    xp: scaledXp,
+    xp: xp,
     timeAlive: 0,
   });
 
@@ -427,7 +425,7 @@ export function spawnRandomMidEnemyNow(x: number, y: number, timer: number) {
   randomMidEnemyFeature.set("type", "mid");
   randomMidEnemyFeature.set("speed", scaledSpeed);
   randomMidEnemyFeature.set("shiny", shiny);
-  randomMidEnemyFeature.set("xp", shiny ? scaledXp * 10 : scaledXp);
+  randomMidEnemyFeature.set("xp", shiny ? xp * 10 : xp);
 
   enemySource.addFeature(randomMidEnemyFeature);
 
@@ -669,11 +667,10 @@ export function spawnBoss(x: number, y: number, timer: number) {
 export function spawnRandomEnemyNow(x: number, y: number, timer: number) {
   const { sprite, hp, speed, shiny, name, xp } = getRandomEnemy();
 
-  const difficultyScaling = 1 + Math.floor(timer / 60) * 0.2;
+  const difficultyScaling = 1 + Math.floor(timer / 60) * 0.7;
   const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.05;
   const scaledSpeed = speed * speedScalingFactor;
   const scaledHp = parseFloat((hp * difficultyScaling).toFixed(2));
-  const scaledXp = xp * difficultyScaling;
 
   const randomEnemyFeature = new Feature({
     geometry: new Point([x || 0, y || 0]),
@@ -685,7 +682,7 @@ export function spawnRandomEnemyNow(x: number, y: number, timer: number) {
     speed: scaledSpeed,
     shiny,
     name,
-    xp: scaledXp,
+    xp: xp,
     timeAlive: 0,
   });
   randomEnemyFeature.set("name", name);
@@ -693,7 +690,7 @@ export function spawnRandomEnemyNow(x: number, y: number, timer: number) {
   randomEnemyFeature.set("type", "normal");
   randomEnemyFeature.set("speed", scaledSpeed);
   randomEnemyFeature.set("shiny", shiny);
-  randomEnemyFeature.set("xp", shiny ? scaledXp * 10 : scaledXp);
+  randomEnemyFeature.set("xp", shiny ? xp * 10 : xp);
   enemySource.addFeature(randomEnemyFeature);
   randomEnemyFeature.setStyle(enemyStyle(randomEnemyFeature));
 }

@@ -572,8 +572,8 @@ export function GameButton({ map, source }: GameButtonProps) {
   }, [songActive, gamePaused]);
 
   function getXPRequiredForLevel(level: number) {
-    const baseXP = 20;
-    const multiplier = 1.5;
+    const baseXP = 10;
+    const multiplier = 1.7;
     return Math.floor(baseXP * Math.pow(multiplier, level - 1));
   }
 
