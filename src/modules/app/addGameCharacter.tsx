@@ -574,7 +574,7 @@ export function GameButton({ map, source }: GameButtonProps) {
 
   function getXPRequiredForLevel(level: number) {
     const baseXP = 10;
-    const multiplier = 1.7;
+    const multiplier = 1.75;
     return Math.floor(baseXP * Math.pow(multiplier, level - 1));
   }
 
@@ -1115,6 +1115,8 @@ export function GameButton({ map, source }: GameButtonProps) {
 
       if (dx !== 0 || (dy !== 0 && !gamePaused)) {
         moveFeature(dx, dy, isSprinting);
+        dy = 0;
+        dx = 0;
       }
       if (!gamePaused) {
         animationFrameId = requestAnimationFrame(movePlayerSmoothly);
