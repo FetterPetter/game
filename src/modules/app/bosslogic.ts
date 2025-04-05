@@ -58,31 +58,49 @@ const gigaEnemies = [
   },
 ];
 
-export function spawnGigaEnemy(x: number, y: number) {
+export function spawnGigaEnemy(x: number, y: number, timer: number) {
   const { sprite, hp, speed, shiny, name, xp } = getGigaEnemy();
 
-  const gigaFeature = new Feature({
-    geometry: new Point([x, y]),
+  const difficultyScaling = 1 + Math.floor(timer / 60) * 0.2;
+  const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.05;
+  const scaledSpeed = speed * speedScalingFactor;
+  const scaledHp = parseFloat((hp * difficultyScaling).toFixed(2));
+  const scaledXp = xp * difficultyScaling;
+
+  const gigaEnemyFeature = new Feature({
+    geometry: new Point([x ? x : 0, y ? y : 0]),
   });
-  gigaFeature.set("enemyData", { sprite, hp, speed, shiny, name });
-  gigaFeature.set("name", name);
-  gigaFeature.set("helsepoeng", hp);
-  gigaFeature.set("type", "giga");
-  gigaFeature.set("speed", speed);
-  gigaFeature.set("shiny", shiny);
-  gigaFeature.set("xp", shiny ? xp * 15 : xp);
-  enemySource.addFeature(gigaFeature);
-  gigaFeature.setStyle(gigaEnemyStyle(gigaFeature));
+
+  gigaEnemyFeature.set("enemyData", {
+    sprite,
+    hp: scaledHp,
+    speed: scaledSpeed,
+    shiny,
+    name,
+    xp: scaledXp,
+    timeAlive: 0,
+  });
+
+  gigaEnemyFeature.set("name", name);
+  gigaEnemyFeature.set("helsepoeng", scaledHp);
+  gigaEnemyFeature.set("type", "giga");
+  gigaEnemyFeature.set("speed", scaledSpeed);
+  gigaEnemyFeature.set("shiny", shiny);
+  gigaEnemyFeature.set("xp", shiny ? scaledXp * 10 : scaledXp);
+
+  enemySource.addFeature(gigaEnemyFeature);
+
+  gigaEnemyFeature.setStyle(gigaEnemyStyle(gigaEnemyFeature));
   const updateGigaEnemySpeed = () => {
-    const enemyData = gigaFeature.get("enemyData");
+    const enemyData = gigaEnemyFeature.get("enemyData");
     if (!enemyData) return;
 
     enemyData.timeAlive = (enemyData.timeAlive || 0) + 1;
     const speedIncreaseRate = enemyData.shiny ? 0.2 : 0.05;
     enemyData.speed += speedIncreaseRate * enemyData.timeAlive;
 
-    gigaFeature.set("speed", enemyData.speed);
-    gigaFeature.setStyle(gigaEnemyStyle(gigaFeature));
+    gigaEnemyFeature.set("speed", enemyData.speed);
+    gigaEnemyFeature.setStyle(gigaEnemyStyle(gigaEnemyFeature));
 
     setTimeout(updateGigaEnemySpeed, 100000);
   };
@@ -222,6 +240,93 @@ const bosses = [
     chance: 0.1,
   },
 ];
+const midEnemies = [
+  {
+    name: "Ivysaur",
+    xp: 100,
+    normal: {
+      hp: 400,
+      speed: 25,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/2.png",
+    },
+    shiny: {
+      hp: 4000,
+      speed: 28,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/2.png",
+    },
+    chance: 0.4,
+  },
+  {
+    name: "Pidgeotto",
+    xp: 200,
+    normal: {
+      hp: 100,
+      speed: 50,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/17.png",
+    },
+    shiny: {
+      hp: 1000,
+      speed: 52,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/17.png",
+    },
+    chance: 0.1,
+  },
+  {
+    name: "Wartortle",
+    xp: 120,
+    normal: {
+      hp: 500,
+      speed: 28,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/8.png",
+    },
+    shiny: {
+      speed: 31,
+      hp: 5000,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/8.png",
+    },
+    chance: 0.2,
+  },
+  {
+    name: "Charmeleon",
+    xp: 150,
+    normal: {
+      hp: 600,
+      speed: 34,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/5.png",
+    },
+    shiny: {
+      hp: 6000,
+      speed: 38,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/5.png",
+    },
+    chance: 0.1,
+  },
+  {
+    name: "Raticate",
+    xp: 100,
+    normal: {
+      hp: 400,
+      speed: 38,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/19.png",
+    },
+    shiny: {
+      hp: 4000,
+      speed: 42,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/19.png",
+    },
+    chance: 0.2,
+  },
+];
 
 const enemies = [
   {
@@ -310,6 +415,71 @@ const enemies = [
     chance: 0.01,
   },
 ];
+
+export function spawnRandomMidEnemyNow(x: number, y: number, timer: number) {
+  const { sprite, hp, speed, shiny, name, xp } = getRandomMidEnemy();
+
+  const difficultyScaling = 1 + Math.floor(timer / 60) * 0.1;
+  const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.05;
+  const scaledHp = parseFloat((hp * difficultyScaling).toFixed(2));
+  const scaledSpeed = speed * speedScalingFactor;
+  const scaledXp = xp * difficultyScaling;
+
+  const randomMidEnemyFeature = new Feature({
+    geometry: new Point([x ? x : 0, y ? y : 0]),
+  });
+
+  randomMidEnemyFeature.set("enemyData", {
+    sprite,
+    hp: scaledHp,
+    speed: scaledSpeed,
+    shiny,
+    name,
+    xp: scaledXp,
+    timeAlive: 0,
+  });
+
+  randomMidEnemyFeature.set("name", name);
+  randomMidEnemyFeature.set("helsepoeng", scaledHp);
+  randomMidEnemyFeature.set("type", "mid");
+  randomMidEnemyFeature.set("speed", scaledSpeed);
+  randomMidEnemyFeature.set("shiny", shiny);
+  randomMidEnemyFeature.set("xp", shiny ? scaledXp * 10 : scaledXp);
+
+  enemySource.addFeature(randomMidEnemyFeature);
+
+  randomMidEnemyFeature.setStyle(midEnemyStyle(randomMidEnemyFeature));
+}
+
+const getRandomMidEnemy = () => {
+  let rand = Math.random();
+  let shinyRand = Math.random();
+  let cumulative = 0;
+
+  for (const enemy of midEnemies) {
+    cumulative += enemy.chance;
+    if (rand < cumulative) {
+      const isShiny = shinyRand < 0.01;
+      const variant = isShiny ? enemy.shiny : enemy.normal;
+      return {
+        name: enemy.name,
+        sprite: variant.sprite,
+        hp: variant.hp,
+        speed: variant.speed,
+        xp: enemy.xp,
+        shiny: isShiny,
+      };
+    }
+  }
+
+  return {
+    sprite: midEnemies[0].normal.sprite,
+    hp: midEnemies[0].normal.hp,
+    speed: midEnemies[0].normal.speed,
+    xp: midEnemies[0].xp,
+    shiny: false,
+  };
+};
 const getRandomEnemy = () => {
   let rand = Math.random();
   let shinyRand = Math.random();
@@ -387,7 +557,7 @@ export const gigaEnemyStyle = (gigaFeature: Feature) => {
       fill: new Fill({ color: "white" }),
       stroke: new Stroke({
         color: glowColor,
-        width: 6,
+        width: shiny ? 8 : 6,
       }),
       offsetY: 55,
     }),
@@ -416,6 +586,34 @@ export const bossStyle = (bossFeature: Feature) => {
       stroke: new Stroke({
         color: shiny ? "gold" : "crimson",
         width: shiny ? 6 : 4,
+      }),
+      offsetY: 50,
+    }),
+  });
+};
+export const midEnemyStyle = (midFeature: Feature) => {
+  const { sprite, hp, shiny } = midFeature.get("enemyData");
+  const midScale = BASE_SCALE * 1.1; // Slightly larger than regular enemies but smaller than bosses
+  const minHp = 1;
+  const maxHp = 4000; // Mid-tier enemies should have higher HP than normal but less than bosses
+  const normalized = Math.min(Math.max((hp - minHp) / (maxHp - minHp), 0), 1);
+  const r = Math.floor(255 * (1 - normalized));
+  const g = 255;
+  const b = Math.floor(255 * (1 - normalized));
+
+  return new Style({
+    image: new Icon({
+      src: sprite,
+      scale: shiny ? midScale * 1.2 : midScale, // Slightly larger if shiny
+      anchor: [0.5, 0.5],
+    }),
+    text: new Text({
+      text: `HP: ${hp}`,
+      font: "bold 14px Arial",
+      fill: new Fill({ color: shiny ? `rgb(${r}, ${g}, ${b})` : "white" }),
+      stroke: new Stroke({
+        color: shiny ? "gold" : "black",
+        width: shiny ? 4 : 2, // Make the stroke slightly thicker for better visibility
       }),
       offsetY: 50,
     }),
@@ -450,44 +648,71 @@ export const enemyStyle = (enemyFeature: Feature) => {
   });
 };
 
-export function spawnBoss(x: number, y: number) {
+export function spawnBoss(x: number, y: number, timer: number) {
   const { sprite, hp, speed, shiny, name, xp } = getRandomBoss();
 
+  const difficultyScaling = 1 + Math.floor(timer / 60) * 0.1;
+  const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.05;
+  const scaledSpeed = speed * speedScalingFactor;
+  const scaledHp = parseFloat((hp * difficultyScaling).toFixed(2));
+  const scaledXp = xp * difficultyScaling;
+
   const bossFeature = new Feature({
-    geometry: new Point([x, y]),
+    geometry: new Point([x ? x : 0, y ? y : 0]),
   });
-  bossFeature.set("enemyData", { sprite, hp, speed, shiny, name, xp });
+
+  bossFeature.set("enemyData", {
+    sprite,
+    hp: scaledHp,
+    speed: scaledSpeed,
+    shiny,
+    name,
+    xp: scaledXp,
+    timeAlive: 0,
+  });
+
   bossFeature.set("name", name);
-  bossFeature.set("helsepoeng", hp);
+  bossFeature.set("helsepoeng", scaledHp);
   bossFeature.set("type", "boss");
-  bossFeature.set("speed", speed);
+  bossFeature.set("speed", scaledSpeed);
   bossFeature.set("shiny", shiny);
-  bossFeature.set("xp", shiny ? xp * 10 : xp);
+  bossFeature.set("xp", shiny ? scaledXp * 10 : scaledXp);
+
   enemySource.addFeature(bossFeature);
+
   bossFeature.setStyle(bossStyle(bossFeature));
 }
 
-export function spawnRandomEnemyNow(x: number, y: number) {
+export function spawnRandomEnemyNow(x: number, y: number, timer: number) {
   const { sprite, hp, speed, shiny, name, xp } = getRandomEnemy();
+  const difficultyScaling = 1 + Math.floor(timer / 60) * 0.2;
+  const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.05;
+  const scaledSpeed = speed * speedScalingFactor;
+  const scaledHp = parseFloat((hp * difficultyScaling).toFixed(2));
+  const scaledXp = xp * difficultyScaling;
   const randomEnemyFeature = new Feature({
     geometry: new Point([x ? x : 0, y ? y : 0]),
   });
+
   randomEnemyFeature.set("enemyData", {
     sprite,
-    hp,
-    speed,
+    hp: scaledHp,
+    speed: scaledSpeed,
     shiny,
     name,
-    xp,
+    xp: scaledXp,
     timeAlive: 0,
   });
+
   randomEnemyFeature.set("name", name);
-  randomEnemyFeature.set("helsepoeng", hp);
+  randomEnemyFeature.set("helsepoeng", scaledHp); // HP
   randomEnemyFeature.set("type", "normal");
-  randomEnemyFeature.set("speed", speed);
+  randomEnemyFeature.set("speed", scaledSpeed);
   randomEnemyFeature.set("shiny", shiny);
-  randomEnemyFeature.set("xp", shiny ? xp * 10 : xp);
+  randomEnemyFeature.set("xp", shiny ? scaledXp * 10 : scaledXp);
+
   enemySource.addFeature(randomEnemyFeature);
+
   randomEnemyFeature.setStyle(enemyStyle(randomEnemyFeature));
   const updateEnemySpeed = () => {
     const enemyData = randomEnemyFeature.get("enemyData");

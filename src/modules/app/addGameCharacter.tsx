@@ -11,9 +11,11 @@ import {
   bossStyle,
   enemyStyle,
   gigaEnemyStyle,
+  midEnemyStyle,
   spawnBoss,
   spawnGigaEnemy,
   spawnRandomEnemyNow,
+  spawnRandomMidEnemyNow,
 } from "./bosslogic";
 import { transform } from "ol/proj";
 import RestartButton from "./restartButton";
@@ -256,78 +258,60 @@ export function GameButton({ map, source }: GameButtonProps) {
     timerIntervalRef.current = setInterval(() => {
       setTimer((prevTime) => {
         const newTime = prevTime + 1;
-
-        if (newTime % 0.5 === 0) {
+        if (newTime % 0.5 === 0 || newTime % 1 === 0) {
           const { x, y } = spawnRandomEnemy();
-          spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
+          spawnRandomEnemyNow(x || 0, y || 0, newTime);
         }
-        if (newTime % 1 === 0) {
-          const { x, y } = spawnRandomEnemy();
-          spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
-        }
-        if (newTime % 60 === 0) {
-          const { x, y } = spawnRandomEnemy();
-          spawnBoss(x ? x : 0, y ? y : 0);
-        }
-        if (newTime > 28) {
-          if (newTime % 30 === 0) {
+        if (newTime >= 30) {
+          const extraSpawns = Math.floor((newTime - 30) / 15); // +1 spawn every 15s
+          for (let i = 0; i < extraSpawns; i++) {
             const { x, y } = spawnRandomEnemy();
-            spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
+            spawnRandomEnemyNow(x || 0, y || 0, newTime);
           }
         }
-        if (newTime > 140) {
-          if (newTime % 30 === 0) {
+        if (newTime >= 30) {
+          const elapsed = newTime - 30;
+          const midInterval = Math.max(15 - Math.floor(elapsed / 2), 1); // 30s ramp
+          if (newTime % midInterval === 0) {
             const { x, y } = spawnRandomEnemy();
-            spawnBoss(x ? x : 0, y ? y : 0);
+            spawnRandomMidEnemyNow(x || 0, y || 0, newTime);
           }
         }
-        if (newTime > 160) {
-          if (newTime % 15 === 0) {
+        if (newTime >= 60) {
+          const elapsed = newTime - 60;
+          const bossInterval = Math.max(60 - elapsed, 1);
+          if (newTime % bossInterval === 0) {
             const { x, y } = spawnRandomEnemy();
-            spawnBoss(x ? x : 0, y ? y : 0);
-            spawnRandomEnemyNow(x ? x : 0, y ? y : 0);
-          }
-        }
-        if (newTime > 230) {
-          const { x, y } = spawnRandomEnemy();
-          spawnBoss(x ? x : 0, y ? y : 0);
-        }
-        if (newTime > 350) {
-          if (newTime % 60 === 0) {
-            const { x, y } = spawnRandomEnemy();
-            spawnGigaEnemy(x ? x : 0, y ? y : 0);
-          }
-        }
-        if (newTime > 450) {
-          if (newTime % 30 === 0) {
-            const { x, y } = spawnRandomEnemy();
-            spawnGigaEnemy(x ? x : 0, y ? y : 0);
-          }
-          if (newTime % 0.5 === 0) {
-            const { x, y } = spawnRandomEnemy();
-            spawnBoss(x ? x : 0, y ? y : 0);
-          }
-          if (newTime % 1 === 0) {
-            const { x, y } = spawnRandomEnemy();
-            spawnBoss(x ? x : 0, y ? y : 0);
-          }
-        }
-        if (newTime > 600) {
-          const { x, y } = spawnRandomEnemy();
-          spawnGigaEnemy(x ? x : 0, y ? y : 0);
-          if (newTime % 0.5 === 0) {
-            const { x, y } = spawnRandomEnemy();
-            spawnGigaEnemy(x ? x : 0, y ? y : 0);
-          }
-          if (newTime % 1 === 0) {
-            const { x, y } = spawnRandomEnemy();
-            spawnGigaEnemy(x ? x : 0, y ? y : 0);
+            spawnBoss(x || 0, y || 0, newTime);
           }
         }
 
+        if (newTime >= 180) {
+          const elapsed = newTime - 180;
+          const gigaInterval = Math.max(60 - Math.floor(elapsed / 2), 1);
+          if (newTime % gigaInterval === 0) {
+            const { x, y } = spawnRandomEnemy();
+            spawnGigaEnemy(x || 0, y || 0, newTime);
+          }
+        }
+        if (newTime >= 200) {
+          const extraSpawns = Math.floor((newTime - 30) / 15);
+          for (let i = 0; i < extraSpawns; i++) {
+            const { x, y } = spawnRandomEnemy();
+            spawnBoss(x || 0, y || 0, newTime);
+          }
+        }
+        if (newTime >= 300) {
+          const extraSpawns = Math.floor((newTime - 30) / 15);
+          for (let i = 0; i < extraSpawns; i++) {
+            const { x, y } = spawnRandomEnemy();
+            spawnGigaEnemy(x || 0, y || 0, newTime);
+          }
+        }
         return newTime;
       });
     }, 1000);
+
     return timerIntervalRef.current;
   }
 
@@ -571,7 +555,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   }, [songActive, gamePaused]);
 
   function getXPRequiredForLevel(level: number) {
-    const baseXP = 12;
+    const baseXP = 20;
     const multiplier = 1.5;
     return Math.floor(baseXP * Math.pow(multiplier, level - 1));
   }
@@ -665,6 +649,12 @@ export function GameButton({ map, source }: GameButtonProps) {
             swordDamage += 5;
             newSwordLength += 300;
           }
+        } else if (enemyType === "mid") {
+          swordDamage += 5;
+          if (isShiny) {
+            swordDamage += 10;
+            newSwordLength += 600;
+          }
         } else if (enemyType === "boss") {
           swordDamage += 10;
           if (isShiny) {
@@ -737,6 +727,12 @@ export function GameButton({ map, source }: GameButtonProps) {
             enemyFeature.set("enemyData", enemyData);
           }
           enemyFeature.setStyle(gigaEnemyStyle(enemyFeature));
+        } else if (enemyType === "mid") {
+          if (enemyData) {
+            enemyData.hp = parseFloat(hp.toFixed(2)); // Update HP for mid enemy
+            enemyFeature.set("enemyData", enemyData);
+          }
+          enemyFeature.setStyle(midEnemyStyle(enemyFeature)); // Use midEnemyStyle for mid enemies
         }
       }
       return true;
@@ -804,6 +800,12 @@ export function GameButton({ map, source }: GameButtonProps) {
                   swordDamage += 0.4;
                   newSwordLength += 300;
                 }
+              } else if (enemyType === "mid") {
+                swordDamage += 1;
+                if (isShiny) {
+                  swordDamage += 5;
+                  newSwordLength += 600;
+                }
               } else if (enemyType === "boss") {
                 swordDamage += 5;
                 if (isShiny) {
@@ -844,7 +846,7 @@ export function GameButton({ map, source }: GameButtonProps) {
                   setLevelUpsQueued((prev) => prev + levelsToAdd);
                 }
 
-                setPlayerLevel(tempLevel); // if not already inside levelUp
+                setPlayerLevel(tempLevel);
                 return newXP;
               });
 
@@ -883,6 +885,12 @@ export function GameButton({ map, source }: GameButtonProps) {
                   enemyFeature.set("enemyData", enemyData);
                 }
                 enemyFeature.setStyle(gigaEnemyStyle(enemyFeature));
+              } else if (enemyType === "mid") {
+                if (enemyData) {
+                  enemyData.hp = parseFloat(hp.toFixed(2));
+                  enemyFeature.set("enemyData", enemyData);
+                }
+                enemyFeature.setStyle(midEnemyStyle(enemyFeature));
               }
             }
           }
@@ -921,6 +929,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     if (gamePaused) {
       metersX = 0;
       metersY = 0;
+      sprinting = false;
     }
     if (sprinting) {
       metersX *= 2.2;
@@ -1036,6 +1045,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         currentFeature.setStyle(backwardsPlayerStyle(currentFeature, canRun));
         dy += playerSpeed;
         if (gamePaused) {
+          isSprinting = false;
           dy = 0;
           dx = 0;
         }
@@ -1045,6 +1055,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         currentFeature.setStyle(playerStyle(false, currentFeature, canRun));
         dy -= playerSpeed;
         if (gamePaused) {
+          isSprinting = false;
           dy = 0;
           dx = 0;
         }
@@ -1055,6 +1066,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         currentFeature.setStyle(playerStyle(false, currentFeature, canRun));
         dx -= playerSpeed;
         if (gamePaused) {
+          isSprinting = false;
           dy = 0;
           dx = 0;
         }
@@ -1064,6 +1076,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         currentFeature.setStyle(playerStyle(true, currentFeature, canRun));
         dx += playerSpeed;
         if (gamePaused) {
+          isSprinting = false;
           dy = 0;
           dx = 0;
         }
@@ -1192,7 +1205,6 @@ export function GameButton({ map, source }: GameButtonProps) {
   };
   useEffect(() => {
     if (!currentFeature) return;
-    console.log("Updating style with canSprint:", canSprint);
 
     const direction = lastDirection.current;
     const mirror = lastMirror.current;
