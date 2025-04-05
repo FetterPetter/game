@@ -930,9 +930,21 @@ export function GameButton({ map, source }: GameButtonProps) {
     let animationFrameId: number | null = null;
     let isSprinting = false;
     let letCanSprint = true;
+    const resetMovement = () => {
+      isSprinting = false;
+      let dx = 0;
+      let dy = 0;
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
     const handleKeyDown = (event: KeyboardEvent) => {
       const normalizedKey = event.key.toLowerCase();
       keysPressed[normalizedKey] = true;
+      if (gamePaused) {
+        resetMovement();
+        return;
+      }
       if (animationFrameId === null) {
         movePlayerSmoothly();
       }
