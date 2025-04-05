@@ -31,7 +31,6 @@ export const playerStyle = (
   mirror: boolean = false,
   f: Feature,
   canSprint: boolean,
-  level: number,
 ) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
 
@@ -51,7 +50,7 @@ export const playerStyle = (
       anchor: [0.5, 0.5],
     }),
     text: new Text({
-      text: `dmg: ${dmg} Lvl: ${level}`,
+      text: `dmg: ${dmg}`,
       font: "bold 12px comic sans",
       fill: new Fill({ color: `rgb(${r}, ${g}, ${b})` }),
       stroke: new Stroke({
@@ -67,11 +66,7 @@ const maxDmg = 500;
 export const SCREEN = window.innerWidth;
 export const BASE_WIDTH = 1920;
 export let BASE_SCALE = SCREEN / BASE_WIDTH;
-const backwardsPlayerStyle = (
-  f: Feature,
-  canSprint: boolean,
-  level: number,
-) => {
+const backwardsPlayerStyle = (f: Feature, canSprint: boolean) => {
   const dmg = parseFloat(f.get("swordDamage").toFixed(2));
 
   const normalized = Math.min(
@@ -91,7 +86,7 @@ const backwardsPlayerStyle = (
       anchor: [0.5, 0.5],
     }),
     text: new Text({
-      text: `dmg: ${dmg} Lvl: ${level}`,
+      text: `dmg: ${dmg}`,
       font: "bold 12px comic sans",
       fill: new Fill({ color: `rgb(${r}, ${g}, ${b})` }),
       stroke: new Stroke({
@@ -181,12 +176,13 @@ export function GameButton({ map, source }: GameButtonProps) {
   const [killCount, setKillCount] = useState(0);
   const [swingSpeed, setSwingSpeed] = useState(1000);
   const [canSprint, setCanSprint] = useState(true);
+  const [isRunning, setIsRunning] = useState(false);
+  const sprintCooldownTimer = useRef<NodeJS.Timeout | null>(null);
   const canSprintRef = useRef(canSprint);
   const lastDirection = useRef<"front" | "back">("front");
   const lastMirror = useRef<boolean>(false);
   const [playerXP, setPlayerXP] = useState(0);
-  const [megaShootOnDash, setMegaShootOnDash] = useState(false);
-  const [playerLevel, setPlayerLevel] = useState(1);
+  const [playerLevel, setPlayerLevel] = useState(0);
   const [speedUpgrades, setSpeedUpgrades] = useState(0);
   const [autoShootCooldown, setAutoShootCooldown] = useState(2000);
   const [autoUpgrades, setAutoUpgrades] = useState(0);
@@ -245,6 +241,14 @@ export function GameButton({ map, source }: GameButtonProps) {
       }
     };
   }, [gamePaused, currentFeature]);
+  const resetMovement = () => {
+    setIsRunning(false);
+    setCanSprint(true);
+    if (sprintCooldownTimer.current !== null) {
+      clearTimeout(sprintCooldownTimer.current);
+      sprintCooldownTimer.current = null;
+    }
+  };
 
   function startTimer() {
     timerIntervalRef.current = setInterval(() => {
@@ -361,7 +365,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         setAutoShoot(true);
         startAutoShooting();
       } else {
-        setAutoShootCooldown((prev) => Math.max(500, prev - 250));
+        setAutoShootCooldown((prev) => Math.max(50, prev - 100));
         setAutoUpgrades((prev) => prev + 1);
       }
     }
@@ -520,9 +524,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       e.feature!.set("swordLength", 3000);
       e.feature!.set("canSprint", true);
       setCurrentFeature(e.feature!);
-      e.feature!.setStyle(
-        playerStyle(false, e.feature!, canSprint, playerLevel),
-      );
+      e.feature!.setStyle(playerStyle(false, e.feature!, canSprint));
       startTimer();
       setSongActive(true);
     });
@@ -562,7 +564,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   }, [songActive, gamePaused]);
 
   function getXPRequiredForLevel(level: number) {
-    const baseXP = 10;
+    const baseXP = 12;
     const multiplier = 1.5;
     return Math.floor(baseXP * Math.pow(multiplier, level - 1));
   }
@@ -587,7 +589,7 @@ export function GameButton({ map, source }: GameButtonProps) {
 
     const angle = Math.random() * 2 * Math.PI;
 
-    const bulletDistance = 0.09;
+    const bulletDistance = 0.15;
 
     const targetCoords = [
       bulletCoords[0] + bulletDistance * Math.cos(angle),
@@ -908,7 +910,11 @@ export function GameButton({ map, source }: GameButtonProps) {
     metersY: number,
     sprinting: boolean,
   ) => {
-    if (gameOver || gamePaused) return;
+    if (gameOver) return;
+    if (gamePaused) {
+      metersX = 0;
+      metersY = 0;
+    }
     if (sprinting) {
       metersX *= 2.2;
       metersY *= 2.2;
@@ -928,88 +934,132 @@ export function GameButton({ map, source }: GameButtonProps) {
     }
     const keysPressed: { [key: string]: boolean } = {};
     let animationFrameId: number | null = null;
+    let dx = 0,
+      dy = 0;
+    let canRun = true;
     let isSprinting = false;
-    let letCanSprint = true;
-    const resetMovement = () => {
-      isSprinting = false;
-      let dx = 0;
-      let dy = 0;
-      if (animationFrameId !== null) {
-        cancelAnimationFrame(animationFrameId);
-      }
-    };
+
     const handleKeyDown = (event: KeyboardEvent) => {
       const normalizedKey = event.key.toLowerCase();
       keysPressed[normalizedKey] = true;
       if (gamePaused) {
         resetMovement();
+        dx = 0;
+        dy = 0;
+        canRun = true;
+        isSprinting = false;
+        if (animationFrameId !== null) {
+          cancelAnimationFrame(animationFrameId);
+        }
+        window.removeEventListener("keydown", handleKeyDown);
+        window.removeEventListener("keyup", handleKeyUp);
         return;
       }
       if (animationFrameId === null) {
         movePlayerSmoothly();
       }
 
-      if (event.key === " " && canSprint && dashUnlocked && !gamePaused) {
+      if (
+        event.key === " " &&
+        canRun &&
+        dashUnlocked &&
+        !gamePaused &&
+        !isSprinting
+      ) {
+        setIsRunning(true);
         isSprinting = true;
-        letCanSprint = false;
+        canRun = false;
         setCanSprint(false);
         currentFeature.set("canSprint", false);
         if (shootOnDash) {
           shootBullet();
         }
         if (doubleShootOnDash) {
-          shootBullet();
+          setTimeout(() => shootBullet(), 50);
           setTimeout(() => shootBullet(), 100);
+          if (autoUpgrades >= 5) {
+            setTimeout(() => shootBullet(), 150);
+            setTimeout(() => shootBullet(), 200);
+            setTimeout(() => shootBullet(), 250);
+          }
+          if (autoUpgrades >= 10) {
+            setTimeout(() => shootBullet(), 300);
+            setTimeout(() => shootBullet(), 350);
+            setTimeout(() => shootBullet(), 400);
+            setTimeout(() => shootBullet(), 450);
+          }
         }
-        setTimeout(() => {
-          letCanSprint = true;
+
+        sprintCooldownTimer.current = setTimeout(() => {
           setCanSprint(true);
+          canRun = true;
           currentFeature.set("canSprint", true);
         }, 2000);
+
         setTimeout(() => {
           isSprinting = false;
+          setIsRunning(false);
         }, 350);
       }
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
+      if (gamePaused) {
+        resetMovement();
+        dx = 0;
+        dy = 0;
+        canRun = true;
+        isSprinting = false;
+        if (animationFrameId !== null) {
+          cancelAnimationFrame(animationFrameId);
+        }
+        return;
+      }
       const normalizedKey = event.key.toLowerCase();
       delete keysPressed[normalizedKey];
     };
 
     const movePlayerSmoothly = () => {
       if (!currentFeature) return;
-      let dx = 0,
-        dy = 0;
+      dx = 0;
+      dy = 0;
       if (keysPressed["w"] || keysPressed["arrowup"]) {
         lastDirection.current = "back";
         lastMirror.current = false;
-        currentFeature.setStyle(
-          backwardsPlayerStyle(currentFeature, letCanSprint, playerLevel),
-        );
+        currentFeature.setStyle(backwardsPlayerStyle(currentFeature, canRun));
         dy += playerSpeed;
+        if (gamePaused) {
+          dy = 0;
+          dx = 0;
+        }
       } else if (keysPressed["s"] || keysPressed["arrowdown"]) {
         lastDirection.current = "front";
         lastMirror.current = false;
-        currentFeature.setStyle(
-          playerStyle(false, currentFeature, letCanSprint, playerLevel),
-        );
+        currentFeature.setStyle(playerStyle(false, currentFeature, canRun));
         dy -= playerSpeed;
+        if (gamePaused) {
+          dy = 0;
+          dx = 0;
+        }
       }
 
       if (keysPressed["a"] || keysPressed["arrowleft"]) {
         lastMirror.current = false;
-        currentFeature.setStyle(
-          playerStyle(false, currentFeature, letCanSprint, playerLevel),
-        );
+        currentFeature.setStyle(playerStyle(false, currentFeature, canRun));
         dx -= playerSpeed;
+        if (gamePaused) {
+          dy = 0;
+          dx = 0;
+        }
       }
       if (keysPressed["d"] || keysPressed["arrowright"]) {
         lastMirror.current = true;
-        currentFeature.setStyle(
-          playerStyle(true, currentFeature, letCanSprint, playerLevel),
-        );
+        currentFeature.setStyle(playerStyle(true, currentFeature, canRun));
         dx += playerSpeed;
+        if (gamePaused) {
+          dy = 0;
+          dx = 0;
+        }
       }
 
       if (dx !== 0 || (dy !== 0 && !gamePaused)) {
@@ -1141,13 +1191,9 @@ export function GameButton({ map, source }: GameButtonProps) {
     const mirror = lastMirror.current;
 
     if (direction === "back") {
-      currentFeature.setStyle(
-        backwardsPlayerStyle(currentFeature, canSprint, playerLevel),
-      );
+      currentFeature.setStyle(backwardsPlayerStyle(currentFeature, canSprint));
     } else {
-      currentFeature.setStyle(
-        playerStyle(mirror, currentFeature, canSprint, playerLevel),
-      );
+      currentFeature.setStyle(playerStyle(mirror, currentFeature, canSprint));
     }
   }, [canSprint, currentFeature, playerLevel]);
 
@@ -1266,10 +1312,10 @@ export function GameButton({ map, source }: GameButtonProps) {
           <button
             onClick={() => handleLevelUpChoice("autoShoot")}
             className={autoShoot ? "upgrade" : ""}
-            disabled={autoUpgrades >= 6}
+            disabled={autoUpgrades >= 20}
           >
             {autoShoot
-              ? autoUpgrades >= 6
+              ? autoUpgrades >= 20
                 ? "Auto-Shoot Maxed"
                 : `Reduce Auto-Shoot Cooldown (${autoShootCooldown / 1000}s) + ${autoUpgrades}`
               : "Unlock Auto-Shoot"}{" "}
