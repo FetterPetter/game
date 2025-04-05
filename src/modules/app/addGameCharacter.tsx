@@ -357,7 +357,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       | "damage",
   ) => {
     if (choice === "damage") {
-      dialogRef.current?.close();
+      setCurrentDamage((prev) => prev + 10);
     }
     if (choice === "dashCooldown") {
       setDashCooldown((prev) => Math.max(200, prev - 100));
@@ -1070,6 +1070,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         currentFeature.setStyle(backwardsPlayerStyle(currentFeature, canRun));
         dy += playerSpeed;
         if (gamePaused) {
+          resetMovement();
           isSprinting = false;
           dy = 0;
           dx = 0;
@@ -1080,6 +1081,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         currentFeature.setStyle(playerStyle(false, currentFeature, canRun));
         dy -= playerSpeed;
         if (gamePaused) {
+          resetMovement();
           isSprinting = false;
           dy = 0;
           dx = 0;
@@ -1091,6 +1093,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         currentFeature.setStyle(playerStyle(false, currentFeature, canRun));
         dx -= playerSpeed;
         if (gamePaused) {
+          resetMovement();
           isSprinting = false;
           dy = 0;
           dx = 0;
@@ -1101,6 +1104,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         currentFeature.setStyle(playerStyle(true, currentFeature, canRun));
         dx += playerSpeed;
         if (gamePaused) {
+          resetMovement();
           isSprinting = false;
           dy = 0;
           dx = 0;
@@ -1109,6 +1113,7 @@ export function GameButton({ map, source }: GameButtonProps) {
 
       if (dx !== 0 || (dy !== 0 && !gamePaused)) {
         moveFeature(dx, dy, isSprinting);
+        resetMovement();
       }
       if (!gamePaused) {
         animationFrameId = requestAnimationFrame(movePlayerSmoothly);
