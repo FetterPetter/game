@@ -944,6 +944,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   ) => {
     if (gameOver) return;
     if (gamePaused) {
+      resetMovement();
       metersX = 0;
       metersY = 0;
       sprinting = false;
@@ -1113,7 +1114,6 @@ export function GameButton({ map, source }: GameButtonProps) {
 
       if (dx !== 0 || (dy !== 0 && !gamePaused)) {
         moveFeature(dx, dy, isSprinting);
-        resetMovement();
       }
       if (!gamePaused) {
         animationFrameId = requestAnimationFrame(movePlayerSmoothly);
