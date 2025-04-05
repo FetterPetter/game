@@ -296,7 +296,7 @@ export function GameButton({ map, source }: GameButtonProps) {
           }
         }
 
-        if (newTime >= 200) {
+        if (newTime >= 250) {
           const elapsed = newTime - 200;
           const gigaInterval = Math.max(60 - Math.floor(elapsed / 2), 1);
           if (newTime % gigaInterval === 0) {
