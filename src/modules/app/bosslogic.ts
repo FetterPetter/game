@@ -245,13 +245,13 @@ const midEnemies = [
     xp: 55,
     normal: {
       hp: 100,
-      speed: 50,
+      speed: 40,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/17.png",
     },
     shiny: {
       hp: 1000,
-      speed: 52,
+      speed: 49,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/17.png",
     },
@@ -574,9 +574,9 @@ export const bossStyle = (bossFeature: Feature) => {
 };
 export const midEnemyStyle = (midFeature: Feature) => {
   const { sprite, hp, shiny } = midFeature.get("enemyData");
-  const midScale = BASE_SCALE * 1.1; // Slightly larger than regular enemies but smaller than bosses
+  const midScale = BASE_SCALE * 1.1;
   const minHp = 1;
-  const maxHp = 4000; // Mid-tier enemies should have higher HP than normal but less than bosses
+  const maxHp = 4000;
   const normalized = Math.min(Math.max((hp - minHp) / (maxHp - minHp), 0), 1);
   const r = Math.floor(255 * (1 - normalized));
   const g = 255;
@@ -585,7 +585,7 @@ export const midEnemyStyle = (midFeature: Feature) => {
   return new Style({
     image: new Icon({
       src: sprite,
-      scale: shiny ? midScale * 1.2 : midScale, // Slightly larger if shiny
+      scale: shiny ? midScale * 1.2 : midScale,
       anchor: [0.5, 0.5],
     }),
     text: new Text({
@@ -594,7 +594,7 @@ export const midEnemyStyle = (midFeature: Feature) => {
       fill: new Fill({ color: shiny ? `rgb(${r}, ${g}, ${b})` : "white" }),
       stroke: new Stroke({
         color: shiny ? "gold" : "black",
-        width: shiny ? 4 : 2, // Make the stroke slightly thicker for better visibility
+        width: shiny ? 4 : 2,
       }),
       offsetY: 50,
     }),

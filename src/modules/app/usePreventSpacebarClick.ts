@@ -5,7 +5,7 @@ export function usePreventSpacebarClick() {
     const handler = (e: KeyboardEvent) => {
       const isButton = document.activeElement?.tagName === "BUTTON";
       if (isButton && e.code === "Space") {
-        e.preventDefault(); // Prevents spacebar from "clicking" the button
+        e.preventDefault();
       }
     };
 

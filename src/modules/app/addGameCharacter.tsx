@@ -279,15 +279,15 @@ export function GameButton({ map, source }: GameButtonProps) {
             spawnRandomEnemyNow(x || 0, y || 0, newTime);
           }
         }
-        if (newTime >= 30) {
+        if (newTime >= 30 && newTime) {
           const elapsed = newTime - 30;
-          const midInterval = Math.max(15 - Math.floor(elapsed / 2), 1); // 30s ramp
+          const midInterval = Math.max(15 - Math.floor(elapsed / 2), 1);
           if (newTime % midInterval === 0) {
             const { x, y } = spawnRandomEnemy();
             spawnRandomMidEnemyNow(x || 0, y || 0, newTime);
           }
         }
-        if (newTime >= 60) {
+        if (newTime >= 60 && newTime <= 200) {
           const elapsed = newTime - 60;
           const bossInterval = Math.max(60 - elapsed, 1);
           if (newTime % bossInterval === 0) {
@@ -327,6 +327,7 @@ export function GameButton({ map, source }: GameButtonProps) {
 
   useEffect(() => {
     if (gamePaused) {
+      resetMovement();
       setMovingEnemies(false);
       resetMovement();
     } else if (!gamePaused) {
@@ -746,10 +747,10 @@ export function GameButton({ map, source }: GameButtonProps) {
           enemyFeature.setStyle(gigaEnemyStyle(enemyFeature));
         } else if (enemyType === "mid") {
           if (enemyData) {
-            enemyData.hp = parseFloat(hp.toFixed(2)); // Update HP for mid enemy
+            enemyData.hp = parseFloat(hp.toFixed(2));
             enemyFeature.set("enemyData", enemyData);
           }
-          enemyFeature.setStyle(midEnemyStyle(enemyFeature)); // Use midEnemyStyle for mid enemies
+          enemyFeature.setStyle(midEnemyStyle(enemyFeature));
         }
       }
       return true;
@@ -1340,7 +1341,7 @@ export function GameButton({ map, source }: GameButtonProps) {
           </button>
           <button
             onClick={() => handleLevelUpChoice("dashCooldown")}
-            disabled={!dashUnlocked || dashUpgrades >= 18} // Disable if dash is not unlocked or upgrades are 18 or more
+            disabled={!dashUnlocked || dashUpgrades >= 18}
           >
             {dashUpgrades < 18
               ? `Reduce Dash Cooldown +${dashUpgrades}`
