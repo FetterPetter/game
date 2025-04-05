@@ -1036,6 +1036,9 @@ export function GameButton({ map, source }: GameButtonProps) {
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
+      const normalizedKey = event.key.toLowerCase();
+
+      delete keysPressed[normalizedKey];
       if (gamePaused) {
         resetMovement();
         dx = 0;
@@ -1047,8 +1050,6 @@ export function GameButton({ map, source }: GameButtonProps) {
         }
         return;
       }
-      const normalizedKey = event.key.toLowerCase();
-      delete keysPressed[normalizedKey];
     };
 
     const movePlayerSmoothly = () => {
