@@ -772,6 +772,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       currentFeature.getGeometry() as Point
     ).getCoordinates();
     const swordLength = currentFeature.get("swordLength");
+
     const numberOfFrames = 244;
     const angleStep = (Math.PI * 2) / numberOfFrames;
 
@@ -806,6 +807,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         swordFeature.getGeometry()!.setCoordinates(newSwordCoords);
         enemySource.forEachFeature((enemyFeature) => {
           if (checkSwordHit(swordFeature, enemyFeature)) {
+            const updatedSwordLength = currentFeature.get("swordLength");
             const enemyCoord = (
               enemyFeature.getGeometry() as Point
             ).getCoordinates();
@@ -815,7 +817,7 @@ export function GameButton({ map, source }: GameButtonProps) {
             const enemyData = enemyFeature.get("enemyData");
             const enemyType = enemyFeature.get("type");
             const isShiny = enemyFeature.get("shiny");
-            let newSwordLength = swordLength;
+            let newSwordLength = updatedSwordLength;
             const featureDmg = currentFeature.get("swordDamage");
             hp -= featureDmg;
             if (hp <= 0) {
