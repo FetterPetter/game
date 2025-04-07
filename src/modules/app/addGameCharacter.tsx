@@ -562,7 +562,7 @@ export function GameButton({ map, source }: GameButtonProps) {
 
   function getXPRequiredForLevel(level: number) {
     const baseXP = 10;
-    const multiplier = 1.75;
+    const multiplier = 1.55;
     return Math.floor(baseXP * Math.pow(multiplier, level - 1));
   }
 

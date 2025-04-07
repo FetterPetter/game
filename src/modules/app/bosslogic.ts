@@ -9,7 +9,7 @@ const gigaEnemies = [
     xp: 900,
     normal: {
       hp: 920000,
-      speed: 33.005,
+      speed: 32.055,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/68.png",
     },
@@ -26,7 +26,7 @@ const gigaEnemies = [
     xp: 700,
     normal: {
       hp: 100000,
-      speed: 35.119422,
+      speed: 33.119422,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/65.png",
     },
@@ -225,7 +225,7 @@ const bosses = [
 const midEnemies = [
   {
     name: "Ivysaur",
-    xp: 50,
+    xp: 55,
     normal: {
       hp: 555,
       speed: 25,
@@ -242,7 +242,7 @@ const midEnemies = [
   },
   {
     name: "Pidgeotto",
-    xp: 55,
+    xp: 65,
     normal: {
       hp: 100,
       speed: 42,
@@ -259,7 +259,7 @@ const midEnemies = [
   },
   {
     name: "Wartortle",
-    xp: 60,
+    xp: 65,
     normal: {
       hp: 750,
       speed: 28,
@@ -276,7 +276,7 @@ const midEnemies = [
   },
   {
     name: "Charmeleon",
-    xp: 65,
+    xp: 70,
     normal: {
       hp: 600,
       speed: 34,
@@ -293,7 +293,7 @@ const midEnemies = [
   },
   {
     name: "Raticate",
-    xp: 60,
+    xp: 85,
     normal: {
       hp: 400,
       speed: 35,
@@ -330,7 +330,7 @@ const enemies = [
   },
   {
     name: "Beedrill",
-    xp: 5,
+    xp: 10,
     normal: {
       hp: 200,
       speed: 27.5,
@@ -347,7 +347,7 @@ const enemies = [
   },
   {
     name: "Nidorina",
-    xp: 10,
+    xp: 15,
     normal: {
       hp: 180,
       speed: 31,

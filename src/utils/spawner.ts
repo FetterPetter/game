@@ -42,7 +42,7 @@ export function handleEnemySpawns(
 
   const midUnlock = 15;
   const midRampDelay = 30;
-  const reducedMidRate = timer > 100 ? 0.3 : 1;
+  const reducedMidRate = timer > 165 ? 0.3 : 1;
   if (timer >= midUnlock && !midSpawnedOnce) {
     const { x, y } = spawnRandomEnemy();
     spawnRandomMidEnemyNow(x, y, timer);
@@ -59,8 +59,8 @@ export function handleEnemySpawns(
     }
   }
   const bossUnlock = 120;
-  const bossRampDelay = 60;
-  const reducedBossRate = timer > 300 ? 0.5 : 1;
+  const bossRampDelay = 15;
+  const reducedBossRate = timer > 320 ? 0.5 : 1;
   if (timer >= bossUnlock && !bossSpawnedOnce) {
     const { x, y } = spawnRandomEnemy();
     spawnBoss(x, y, timer);
@@ -70,7 +70,7 @@ export function handleEnemySpawns(
     let bossCount = 1;
     if (timer > bossUnlock + bossRampDelay) {
       const elapsedTime = timer - bossUnlock - bossRampDelay;
-      const rampUpFactor = Math.min(elapsedTime / 30, 7);
+      const rampUpFactor = Math.min(elapsedTime / 15, 7);
       bossCount = Math.floor(rampUpFactor);
     }
 
@@ -80,8 +80,8 @@ export function handleEnemySpawns(
     }
   }
 
-  const gigaUnlock = 240;
-  const gigaRampDelay = 120;
+  const gigaUnlock = 300;
+  const gigaRampDelay = 100;
 
   if (timer >= gigaUnlock && !gigaSpawnedOnce) {
     const { x, y } = spawnRandomEnemy();
