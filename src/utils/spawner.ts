@@ -70,7 +70,7 @@ export function handleEnemySpawns(
   }
   const bossUnlock = 120;
   const bossRampDelay = 15;
-  const reducedBossRate = timer > 320 ? 0.5 : 1;
+  const reducedBossRate = timer > 260 ? 0.5 : 1;
   if (timer >= bossUnlock && !bossSpawnedOnce) {
     const { x, y } = spawnRandomEnemy();
     spawnBoss(x, y, timer);
