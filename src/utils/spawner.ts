@@ -91,7 +91,7 @@ export function handleEnemySpawns(
     }
   }
   const gigaUnlock = 250;
-  const gigaRampDelay = 50;
+  const gigaRampDelay = 15;
 
   if (timer >= gigaUnlock && !gigaSpawnedOnce) {
     const { x, y } = spawnRandomEnemy();

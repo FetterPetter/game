@@ -352,7 +352,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       setPlayerSpeed((prev) => prev + 0.5);
       setSpeedUpgrades((prev) => prev + 1);
     } else if (choice === "cooldown") {
-      setSwingSpeed((prev) => Math.max(500, prev - 25));
+      setSwingSpeed((prev) => Math.max(500, prev - 50));
       setCooldownUpgrades((prev) => prev + 1);
     } else if (choice === "dash") {
       if (!dashUnlocked) {
@@ -563,7 +563,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         if (!gamePaused) {
           swordSwing();
         }
-        if (cooldownUpgrades >= 20) {
+        if (cooldownUpgrades >= 15) {
           setTimeout(() => swordSwing(), 250);
         }
       }, swingSpeed);
@@ -1356,9 +1356,9 @@ export function GameButton({ map, source }: GameButtonProps) {
           </button>
           <button
             onClick={() => handleLevelUpChoice("cooldown")}
-            disabled={cooldownUpgrades >= 20}
+            disabled={cooldownUpgrades >= 15}
           >
-            {cooldownUpgrades < 20
+            {cooldownUpgrades < 15
               ? `Sword cooldown (${(swingSpeed - 50) / 1000}s) +${cooldownUpgrades + 1}`
               : "Maxed Sword Cooldown"}
           </button>
