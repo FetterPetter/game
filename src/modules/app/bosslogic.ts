@@ -175,7 +175,7 @@ const bosses = [
     xp: 870,
     normal: {
       hp: 78000,
-      speed: 29.5,
+      speed: 29.2,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/143.png",
     },
