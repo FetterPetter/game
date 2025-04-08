@@ -6,7 +6,7 @@ import { BASE_SCALE, bossSource, enemySource } from "./addGameCharacter";
 const gigaEnemies = [
   {
     name: "Machamp",
-    xp: 900,
+    xp: 1400,
     normal: {
       hp: 920000,
       speed: 32.055,
@@ -23,9 +23,9 @@ const gigaEnemies = [
   },
   {
     name: "Alakazam",
-    xp: 700,
+    xp: 1300,
     normal: {
-      hp: 100000,
+      hp: 500000,
       speed: 33.119422,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/65.png",
@@ -41,7 +41,7 @@ const gigaEnemies = [
 
   {
     name: "Ho-Oh",
-    xp: 1000,
+    xp: 2000,
     normal: {
       hp: 7302000,
       speed: 35.28,
@@ -121,7 +121,7 @@ const getGigaEnemy = () => {
 const bosses = [
   {
     name: "Lugia",
-    xp: 500,
+    xp: 1000,
     normal: {
       hp: 50000,
       speed: 34,
@@ -138,7 +138,7 @@ const bosses = [
   },
   {
     name: "Gyarados",
-    xp: 132,
+    xp: 632,
     normal: {
       hp: 34000,
       speed: 31.9,
@@ -155,7 +155,7 @@ const bosses = [
   },
   {
     name: "Mewtwo",
-    xp: 110,
+    xp: 610,
     normal: {
       hp: 27500,
       speed: 30.5,
@@ -172,7 +172,7 @@ const bosses = [
   },
   {
     name: "Snorlax",
-    xp: 170,
+    xp: 670,
     normal: {
       hp: 78000,
       speed: 29.5,
@@ -189,7 +189,7 @@ const bosses = [
   },
   {
     name: "Charizard",
-    xp: 200,
+    xp: 700,
     normal: {
       hp: 23800,
       speed: 33.2,
@@ -206,7 +206,7 @@ const bosses = [
   },
   {
     name: "Nidoking",
-    xp: 150,
+    xp: 550,
     normal: {
       hp: 45000,
       speed: 31,
@@ -309,13 +309,12 @@ const midEnemies = [
     chance: 0.05,
   },
 ];
-
-export function spawnFirstBoss(x: number, y: number, timer: number) {
-  const firstBoss = {
+const firstBosses = [
+  {
     name: "Dragonite",
-    xp: 2000,
+    xp: 223000,
     normal: {
-      hp: 1000000,
+      hp: 19999000000,
       speed: 60,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/149.png",
@@ -326,34 +325,83 @@ export function spawnFirstBoss(x: number, y: number, timer: number) {
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/149.png",
     },
+    chance: 0.5,
+  },
+  {
+    name: "Porygon",
+    xp: 185300,
+    normal: {
+      hp: 192003000,
+      speed: 70,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/137.png",
+    },
+    shiny: {
+      hp: 20123128974100,
+      speed: 70,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/137.png",
+    },
+    chance: 0.05,
+  },
+];
+const getFirstBoss = () => {
+  let rand = Math.random();
+  let shinyRand = Math.random();
+  let cumulativeProbability = 0;
+  for (const firstBoss of firstBosses) {
+    cumulativeProbability += firstBoss.chance;
+    if (rand < cumulativeProbability) {
+      const isShiny = shinyRand < 0.01;
+      const variant = isShiny ? firstBoss.shiny : firstBoss.normal;
+      return {
+        name: firstBoss.name,
+        sprite: variant.sprite,
+        hp: variant.hp,
+        speed: variant.speed,
+        xp: firstBoss.xp,
+        shiny: isShiny,
+      };
+    }
+  }
+  return {
+    name: firstBosses[0].name,
+    sprite: firstBosses[0].normal.sprite,
+    hp: firstBosses[0].normal.hp,
+    speed: firstBosses[0].normal.speed,
+    xp: firstBosses[0].xp,
+    shiny: false,
   };
-  const shinyRand = Math.random();
-  const isShiny = shinyRand < 0.01;
-  const variant = isShiny ? firstBoss.shiny : firstBoss.normal;
+};
 
+export function spawnFirstBoss(x: number, y: number, timer: number) {
+  const { sprite, hp, speed, shiny, name, xp } = getFirstBoss();
+
+  const difficultyScaling = 1 + Math.floor(timer / 60) * 0.3;
+  const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.06;
+  const scaledHp = parseFloat((hp * difficultyScaling).toFixed(2));
+  const scaledSpeed = speed * speedScalingFactor;
   const firstBossFeature = new Feature({
     geometry: new Point([x || 0, y || 0]),
   });
 
   firstBossFeature.set("enemyData", {
-    sprite: variant.sprite,
-    hp: variant.hp,
-    speed: variant.speed,
-    shiny: isShiny,
-    name: firstBoss.name,
-    xp: isShiny ? firstBoss.xp * 10 : firstBoss.xp * 10,
+    sprite,
+    hp: scaledHp,
+    speed: scaledSpeed,
+    shiny,
+    name,
+    xp: xp,
     timeAlive: 0,
   });
 
-  firstBossFeature.set("name", firstBoss.name);
-  firstBossFeature.set("health", variant.hp);
+  firstBossFeature.set("name", name);
+  firstBossFeature.set("helsepoeng", scaledHp);
   firstBossFeature.set("type", "firstBoss");
-  firstBossFeature.set("speed", variant.speed);
-  firstBossFeature.set("shiny", isShiny);
-  firstBossFeature.set("xp", firstBoss.xp);
-
-  bossSource.addFeature(firstBossFeature);
-
+  firstBossFeature.set("speed", scaledSpeed);
+  firstBossFeature.set("shiny", shiny);
+  firstBossFeature.set("xp", shiny ? xp * 10 : xp);
+  enemySource.addFeature(firstBossFeature);
   firstBossFeature.setStyle(firstBossStyle(firstBossFeature));
 }
 

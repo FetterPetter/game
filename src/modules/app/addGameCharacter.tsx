@@ -10,6 +10,7 @@ import { dropBlood } from "./randomBloodPattern";
 import {
   bossStyle,
   enemyStyle,
+  firstBossStyle,
   gigaEnemyStyle,
   midEnemyStyle,
   spawnBoss,
@@ -351,7 +352,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       setPlayerSpeed((prev) => prev + 0.5);
       setSpeedUpgrades((prev) => prev + 1);
     } else if (choice === "cooldown") {
-      setSwingSpeed((prev) => Math.max(250, prev - 50));
+      setSwingSpeed((prev) => Math.max(500, prev - 25));
       setCooldownUpgrades((prev) => prev + 1);
     } else if (choice === "dash") {
       if (!dashUnlocked) {
@@ -562,8 +563,8 @@ export function GameButton({ map, source }: GameButtonProps) {
         if (!gamePaused) {
           swordSwing();
         }
-        if (cooldownUpgrades >= 15) {
-          setTimeout(() => swordSwing(), 125);
+        if (cooldownUpgrades >= 20) {
+          setTimeout(() => swordSwing(), 250);
         }
       }, swingSpeed);
     } else {
@@ -667,28 +668,34 @@ export function GameButton({ map, source }: GameButtonProps) {
       hp -= featureDmg;
       if (hp <= 0) {
         if (enemyType === "normal") {
-          swordDamage += 1;
+          swordDamage += 3;
           if (isShiny) {
-            swordDamage += 10;
+            swordDamage += 30;
             newSwordLength += 350;
           }
         } else if (enemyType === "mid") {
-          swordDamage += 10;
+          swordDamage += 30;
           if (isShiny) {
-            swordDamage += 30;
+            swordDamage += 60;
             newSwordLength += 600;
           }
         } else if (enemyType === "boss") {
-          swordDamage += 30;
+          swordDamage += 60;
           if (isShiny) {
-            swordDamage += 90;
+            swordDamage += 120;
             newSwordLength += 1300;
           }
         } else if (enemyType == "giga") {
-          swordDamage += 200;
+          swordDamage += 300;
           if (isShiny) {
-            swordDamage += 500;
+            swordDamage += 600;
             newSwordLength += 1500;
+          }
+        } else if (enemyType === "firstBoss") {
+          swordDamage += 1000;
+          if (isShiny) {
+            swordDamage += 2000;
+            newSwordLength += 2000;
           }
         }
         if (newSwordLength >= 12000 && isShiny) {
@@ -759,6 +766,12 @@ export function GameButton({ map, source }: GameButtonProps) {
             enemyFeature.set("enemyData", enemyData);
           }
           enemyFeature.setStyle(midEnemyStyle(enemyFeature));
+        } else if (enemyType === "firstBoss") {
+          if (enemyData) {
+            enemyData.hp = parseFloat(hp.toFixed(2));
+            enemyFeature.set("enemyData", enemyData);
+          }
+          enemyFeature.setStyle(firstBossStyle(enemyFeature));
         }
       }
       return true;
@@ -796,7 +809,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     swordFeature.setStyle(swordStyle(currentFeature));
 
     let startTime: number | null = null;
-    const animationDuration = 520;
+    const animationDuration = 500;
 
     const animationStep = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
@@ -840,11 +853,17 @@ export function GameButton({ map, source }: GameButtonProps) {
                   swordDamage += 10;
                   newSwordLength += 1300;
                 }
-              } else if (enemyType == "giga") {
+              } else if (enemyType === "giga") {
                 swordDamage += 15;
                 if (isShiny) {
                   swordDamage += 30;
                   newSwordLength += 1500;
+                }
+              } else if (enemyType === "firstBoss") {
+                swordDamage += 100;
+                if (isShiny) {
+                  swordDamage += 500;
+                  newSwordLength += 2000;
                 }
               }
               if (newSwordLength >= 12000 && isShiny) {
@@ -922,6 +941,12 @@ export function GameButton({ map, source }: GameButtonProps) {
                   enemyFeature.set("enemyData", enemyData);
                 }
                 enemyFeature.setStyle(midEnemyStyle(enemyFeature));
+              } else if (enemyType === "firstBoss") {
+                if (enemyData) {
+                  enemyData.hp = parseFloat(hp.toFixed(2));
+                  enemyFeature.set("enemyData", enemyData);
+                }
+                enemyFeature.setStyle(firstBossStyle(enemyFeature));
               }
             }
           }
@@ -1331,9 +1356,9 @@ export function GameButton({ map, source }: GameButtonProps) {
           </button>
           <button
             onClick={() => handleLevelUpChoice("cooldown")}
-            disabled={cooldownUpgrades >= 15}
+            disabled={cooldownUpgrades >= 20}
           >
-            {cooldownUpgrades < 15
+            {cooldownUpgrades < 20
               ? `Sword cooldown (${(swingSpeed - 50) / 1000}s) +${cooldownUpgrades + 1}`
               : "Maxed Sword Cooldown"}
           </button>
