@@ -547,7 +547,6 @@ export function GameButton({ map, source }: GameButtonProps) {
     y: number,
     duration: number = 1000,
   ) {
-    console.log(`Popup: ${text} at ${x}, ${y} with duration: ${duration}`);
     const id = Date.now() + Math.random();
     setPopups((prev) => [...prev, { id, x, y, text, duration }]);
 
@@ -587,7 +586,6 @@ export function GameButton({ map, source }: GameButtonProps) {
 
   function shootBullet() {
     if (!currentFeature || gameOver || gamePaused) return;
-
     const playerCoords = (
       currentFeature.getGeometry() as Point
     ).getCoordinates();

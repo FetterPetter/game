@@ -53,7 +53,7 @@ export function handleEnemySpawns(
 
   const midUnlock = 60;
   const midRampDelay = 0;
-  const reducedMidRate = timer > 165 ? 0.3 : 1;
+  const reducedMidRate = timer > 150 ? 0.3 : 1;
   if (timer >= midUnlock && !midSpawnedOnce) {
     const { x, y } = spawnRandomEnemy();
     spawnRandomMidEnemyNow(x, y, timer);
