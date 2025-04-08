@@ -6,9 +6,9 @@ import { BASE_SCALE, bossSource, enemySource } from "./addGameCharacter";
 const gigaEnemies = [
   {
     name: "Machamp",
-    xp: 1400,
+    xp: 2000,
     normal: {
-      hp: 920000,
+      hp: 720000,
       speed: 32.055,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/68.png",
@@ -23,9 +23,9 @@ const gigaEnemies = [
   },
   {
     name: "Alakazam",
-    xp: 1300,
+    xp: 1700,
     normal: {
-      hp: 500000,
+      hp: 300000,
       speed: 33.119422,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/65.png",
@@ -41,10 +41,10 @@ const gigaEnemies = [
 
   {
     name: "Ho-Oh",
-    xp: 2000,
+    xp: 3000,
     normal: {
-      hp: 7302000,
-      speed: 35.28,
+      hp: 5302000,
+      speed: 35.04,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/250.png",
     },
@@ -121,15 +121,15 @@ const getGigaEnemy = () => {
 const bosses = [
   {
     name: "Lugia",
-    xp: 1000,
+    xp: 1200,
     normal: {
-      hp: 50000,
+      hp: 40000,
       speed: 34,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/249.png",
     },
     shiny: {
-      hp: 90000,
+      hp: 80000,
       speed: 39.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/249.png",
@@ -138,15 +138,15 @@ const bosses = [
   },
   {
     name: "Gyarados",
-    xp: 632,
+    xp: 832,
     normal: {
-      hp: 34000,
+      hp: 29000,
       speed: 31.9,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/130.png",
     },
     shiny: {
-      hp: 93900,
+      hp: 88000,
       speed: 34.9,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/130.png",
@@ -155,7 +155,7 @@ const bosses = [
   },
   {
     name: "Mewtwo",
-    xp: 610,
+    xp: 810,
     normal: {
       hp: 27500,
       speed: 30.5,
@@ -172,7 +172,7 @@ const bosses = [
   },
   {
     name: "Snorlax",
-    xp: 670,
+    xp: 870,
     normal: {
       hp: 78000,
       speed: 29.5,
@@ -189,7 +189,7 @@ const bosses = [
   },
   {
     name: "Charizard",
-    xp: 700,
+    xp: 900,
     normal: {
       hp: 23800,
       speed: 33.2,
@@ -206,7 +206,7 @@ const bosses = [
   },
   {
     name: "Nidoking",
-    xp: 550,
+    xp: 750,
     normal: {
       hp: 45000,
       speed: 31,
@@ -342,7 +342,7 @@ const firstBosses = [
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/137.png",
     },
-    chance: 0.05,
+    chance: 0.5,
   },
 ];
 const getFirstBoss = () => {
