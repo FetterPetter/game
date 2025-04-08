@@ -4,6 +4,7 @@ type SpawnFunctions = {
   spawnRandomMidEnemyNow: (x: number, y: number, timer: number) => void;
   spawnBoss: (x: number, y: number, timer: number) => void;
   spawnGigaEnemy: (x: number, y: number, timer: number) => void;
+  showPopup: (text: string, x: number, y: number, duration: number) => void;
 };
 
 let burstActive = false;
@@ -12,10 +13,19 @@ let midSpawnedOnce = false;
 let bossSpawnedOnce = false;
 let gigaSpawnedOnce = false;
 
-function maybeTriggerBurst(timer: number) {
-  if (timer > burstCooldown && Math.random() < 0.1) {
+function maybeTriggerBurst(
+  timer: number,
+  showPopup: SpawnFunctions["showPopup"],
+  onBurst?: () => void,
+) {
+  if (timer > burstCooldown && Math.random() < 0.01) {
     burstActive = true;
     burstCooldown = timer + 30;
+    onBurst?.();
+    const popupX = window.innerWidth / 2;
+    const popupY = window.innerHeight / 2;
+
+    showPopup("💀 MONSTER TIME 💀", popupX, popupY, 3000);
     setTimeout(() => (burstActive = false), 5000); // Burst lasts for 5 seconds
   }
 }
@@ -28,30 +38,30 @@ export function handleEnemySpawns(
     spawnRandomMidEnemyNow,
     spawnBoss,
     spawnGigaEnemy,
+    showPopup,
   }: SpawnFunctions,
 ) {
-  maybeTriggerBurst(timer);
+  maybeTriggerBurst(timer, showPopup);
   const burstMultiplier = burstActive ? 2 : 1;
 
-  const normalCount = Math.min(Math.floor(timer / 10) + 1, 8);
-  const reducedNormalRate = timer >= 120 ? 0.3 : 1;
+  const normalCount = Math.min(Math.floor(timer / 10) + 1, 6);
+  const reducedNormalRate = timer >= 100 ? 0.3 : 1;
   for (let i = 0; i < normalCount * reducedNormalRate * burstMultiplier; i++) {
     const { x, y } = spawnRandomEnemy();
     spawnRandomEnemyNow(x, y, timer);
   }
 
-  const midUnlock = 15;
-  const midRampDelay = 30;
+  const midUnlock = 60;
+  const midRampDelay = 0;
   const reducedMidRate = timer > 165 ? 0.3 : 1;
   if (timer >= midUnlock && !midSpawnedOnce) {
     const { x, y } = spawnRandomEnemy();
     spawnRandomMidEnemyNow(x, y, timer);
     midSpawnedOnce = true;
   }
-
   if (timer > midUnlock + midRampDelay) {
     const elapsedTime = timer - midUnlock - midRampDelay;
-    const rampUpFactor = Math.min(elapsedTime / 15, 8);
+    const rampUpFactor = Math.min(elapsedTime / 15, 6);
     const midCount = Math.floor(rampUpFactor);
     for (let i = 0; i < midCount * burstMultiplier * reducedMidRate; i++) {
       const { x, y } = spawnRandomEnemy();
@@ -65,37 +75,40 @@ export function handleEnemySpawns(
     const { x, y } = spawnRandomEnemy();
     spawnBoss(x, y, timer);
     bossSpawnedOnce = true;
+    const popupX = window.innerWidth / 2;
+    const popupY = window.innerHeight / 2;
+    showPopup("⚔️ BOSS SPAWN ⚔️", popupX, popupY, 3000);
   }
   if (timer >= bossUnlock + bossRampDelay) {
     let bossCount = 1;
     if (timer > bossUnlock + bossRampDelay) {
       const elapsedTime = timer - bossUnlock - bossRampDelay;
-      const rampUpFactor = Math.min(elapsedTime / 15, 7);
+      const rampUpFactor = Math.min(elapsedTime / 15, 6);
       bossCount = Math.floor(rampUpFactor);
     }
-
     for (let i = 0; i < bossCount * burstMultiplier * reducedBossRate; i++) {
       const { x, y } = spawnRandomEnemy();
       spawnBoss(x, y, timer);
     }
   }
-
-  const gigaUnlock = 300;
-  const gigaRampDelay = 100;
+  const gigaUnlock = 250;
+  const gigaRampDelay = 50;
 
   if (timer >= gigaUnlock && !gigaSpawnedOnce) {
     const { x, y } = spawnRandomEnemy();
     spawnGigaEnemy(x, y, timer);
     gigaSpawnedOnce = true;
+    const popupX = window.innerWidth / 2;
+    const popupY = window.innerHeight / 2;
+    showPopup("⚔️ BOSS SPAWN ⚔️", popupX, popupY, 3000);
   }
   if (timer >= gigaUnlock + gigaRampDelay) {
     let gigaCount = 1;
     if (timer > gigaUnlock + gigaRampDelay) {
       const elapsedTime = timer - gigaUnlock - gigaRampDelay;
-      const rampUpFactor = Math.min(elapsedTime / 30, 10);
+      const rampUpFactor = Math.min(elapsedTime / 15, 10);
       gigaCount = Math.floor(rampUpFactor);
     }
-
     for (let i = 0; i < gigaCount * burstMultiplier; i++) {
       const { x, y } = spawnRandomEnemy();
       spawnGigaEnemy(x, y, timer);

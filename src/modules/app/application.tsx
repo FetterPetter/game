@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Map, View } from "ol";
 import TileLayer from "ol/layer/Tile";
 import { OSM, XYZ } from "ol/source";
@@ -7,6 +7,7 @@ import { useGeographic } from "ol/proj";
 import "ol/ol.css";
 import {
   bloodLayer,
+  bossLayer,
   enemyLayer,
   GameButton,
   playerLayer,
@@ -60,7 +61,7 @@ const map = new Map({
     minZoom: 12.82,
     maxZoom: 12.82,
   }),
-  layers: [darkMatterLayer, bloodLayer, playerLayer, enemyLayer],
+  layers: [darkMatterLayer, bloodLayer, playerLayer, enemyLayer, bossLayer],
 });
 
 export function Application() {
@@ -71,7 +72,7 @@ export function Application() {
 
   return (
     <>
-      <div className="game-container">
+      <div className={`game-container`}>
         <GameButton map={map} source={source} />
         <div ref={mapRef} className="game-map"></div>
       </div>

@@ -1,7 +1,7 @@
 import { Feature } from "ol";
 import { Point } from "ol/geom";
 import { Icon, Style, Fill, Stroke, Text } from "ol/style";
-import { BASE_SCALE, enemySource } from "./addGameCharacter";
+import { BASE_SCALE, bossSource, enemySource } from "./addGameCharacter";
 
 const gigaEnemies = [
   {
@@ -44,13 +44,13 @@ const gigaEnemies = [
     xp: 1000,
     normal: {
       hp: 7302000,
-      speed: 39.28,
+      speed: 35.28,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/250.png",
     },
     shiny: {
       hp: 999999999999,
-      speed: 47.45,
+      speed: 40.45,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/250.png",
     },
@@ -62,7 +62,7 @@ export function spawnGigaEnemy(x: number, y: number, timer: number) {
   const { sprite, hp, speed, shiny, name, xp } = getGigaEnemy();
 
   const difficultyScaling = 1 + Math.floor(timer / 60) * 0.25;
-  const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.07;
+  const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.01;
   const scaledSpeed = speed * speedScalingFactor;
   const scaledHp = parseFloat((hp * difficultyScaling).toFixed(2));
 
@@ -123,14 +123,14 @@ const bosses = [
     name: "Lugia",
     xp: 500,
     normal: {
-      hp: 20000,
+      hp: 50000,
       speed: 34,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/249.png",
     },
     shiny: {
-      hp: 40000,
-      speed: 40.5,
+      hp: 90000,
+      speed: 39.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/249.png",
     },
@@ -140,14 +140,14 @@ const bosses = [
     name: "Gyarados",
     xp: 132,
     normal: {
-      hp: 14000,
+      hp: 34000,
       speed: 31.9,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/130.png",
     },
     shiny: {
       hp: 93900,
-      speed: 35.9,
+      speed: 34.9,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/130.png",
     },
@@ -157,14 +157,14 @@ const bosses = [
     name: "Mewtwo",
     xp: 110,
     normal: {
-      hp: 17500,
+      hp: 27500,
       speed: 30.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png",
     },
     shiny: {
       hp: 55000,
-      speed: 35.5,
+      speed: 33.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/150.png",
     },
@@ -174,14 +174,14 @@ const bosses = [
     name: "Snorlax",
     xp: 170,
     normal: {
-      hp: 28000,
+      hp: 78000,
       speed: 29.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/143.png",
     },
     shiny: {
-      hp: 2500000,
-      speed: 32,
+      hp: 250000,
+      speed: 30.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/143.png",
     },
@@ -191,14 +191,14 @@ const bosses = [
     name: "Charizard",
     xp: 200,
     normal: {
-      hp: 13800,
+      hp: 23800,
       speed: 33.2,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png",
     },
     shiny: {
       hp: 29000,
-      speed: 39.3,
+      speed: 35.3,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png",
     },
@@ -208,13 +208,13 @@ const bosses = [
     name: "Nidoking",
     xp: 150,
     normal: {
-      hp: 25000,
+      hp: 45000,
       speed: 31,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/34.png",
     },
     shiny: {
-      hp: 95000,
+      hp: 125000,
       speed: 31.2,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/34.png",
@@ -225,95 +225,170 @@ const bosses = [
 const midEnemies = [
   {
     name: "Ivysaur",
-    xp: 55,
+    xp: 155,
     normal: {
-      hp: 555,
+      hp: 4055,
       speed: 25,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/2.png",
     },
     shiny: {
-      hp: 5555,
+      hp: 40555,
       speed: 28,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/2.png",
     },
-    chance: 0.4,
+    chance: 0.3,
   },
   {
     name: "Pidgeotto",
-    xp: 65,
+    xp: 165,
     normal: {
-      hp: 100,
-      speed: 42,
+      hp: 2200,
+      speed: 37.5,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/17.png",
     },
     shiny: {
-      hp: 1000,
-      speed: 52,
+      hp: 2300,
+      speed: 42,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/17.png",
     },
-    chance: 0.1,
+    chance: 0.05,
   },
   {
     name: "Wartortle",
-    xp: 65,
+    xp: 165,
     normal: {
-      hp: 750,
-      speed: 28,
+      hp: 3450,
+      speed: 26,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/8.png",
     },
     shiny: {
-      speed: 31,
-      hp: 7500,
+      speed: 27.5,
+      hp: 34500,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/8.png",
     },
-    chance: 0.2,
+    chance: 0.3,
   },
   {
     name: "Charmeleon",
-    xp: 70,
+    xp: 170,
     normal: {
-      hp: 600,
-      speed: 34,
+      hp: 4200,
+      speed: 27.7,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/5.png",
     },
     shiny: {
-      hp: 6000,
-      speed: 38,
+      hp: 42000,
+      speed: 29,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/5.png",
     },
-    chance: 0.1,
+    chance: 0.3,
   },
   {
     name: "Raticate",
-    xp: 85,
+    xp: 185,
     normal: {
-      hp: 400,
-      speed: 35,
+      hp: 1000,
+      speed: 39,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/19.png",
     },
     shiny: {
-      hp: 4000,
+      hp: 2000,
       speed: 42,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/19.png",
     },
-    chance: 0.2,
+    chance: 0.05,
   },
 ];
 
+export function spawnFirstBoss(x: number, y: number, timer: number) {
+  const firstBoss = {
+    name: "Dragonite",
+    xp: 2000,
+    normal: {
+      hp: 1000000,
+      speed: 60,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/149.png",
+    },
+    shiny: {
+      hp: 10000000,
+      speed: 60,
+      sprite:
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/149.png",
+    },
+  };
+  const shinyRand = Math.random();
+  const isShiny = shinyRand < 0.01;
+  const variant = isShiny ? firstBoss.shiny : firstBoss.normal;
+
+  const firstBossFeature = new Feature({
+    geometry: new Point([x || 0, y || 0]),
+  });
+
+  firstBossFeature.set("enemyData", {
+    sprite: variant.sprite,
+    hp: variant.hp,
+    speed: variant.speed,
+    shiny: isShiny,
+    name: firstBoss.name,
+    xp: isShiny ? firstBoss.xp * 10 : firstBoss.xp * 10,
+    timeAlive: 0,
+  });
+
+  firstBossFeature.set("name", firstBoss.name);
+  firstBossFeature.set("health", variant.hp);
+  firstBossFeature.set("type", "firstBoss");
+  firstBossFeature.set("speed", variant.speed);
+  firstBossFeature.set("shiny", isShiny);
+  firstBossFeature.set("xp", firstBoss.xp);
+
+  bossSource.addFeature(firstBossFeature);
+
+  firstBossFeature.setStyle(firstBossStyle(firstBossFeature));
+}
+
+export const firstBossStyle = (firstBossFeature: Feature) => {
+  const { sprite, hp, shiny } = firstBossFeature.get("enemyData");
+  const firstBossScale = BASE_SCALE * 2;
+  const glowColor =
+    hp > 10000000
+      ? "rgba(255, 0, 0, 0.8)"
+      : hp > 5000000
+        ? "rgba(255, 165, 0, 0.8)"
+        : "rgba(0, 255, 0, 0.8)";
+
+  return new Style({
+    image: new Icon({
+      src: sprite,
+      scale: shiny ? firstBossScale * 1.2 : firstBossScale,
+      anchor: [0.5, 0.5],
+    }),
+    text: new Text({
+      text: `HP: ${hp}`,
+      font: "bold 16px Arial",
+      fill: new Fill({ color: "white" }),
+      stroke: new Stroke({
+        color: glowColor,
+        width: shiny ? 8 : 6,
+      }),
+      offsetY: 55,
+    }),
+  });
+};
 const enemies = [
   {
     name: "Bulbasaur",
-    xp: 1,
+    xp: 3,
     normal: {
       hp: 20,
       speed: 22,
@@ -330,7 +405,7 @@ const enemies = [
   },
   {
     name: "Beedrill",
-    xp: 10,
+    xp: 20,
     normal: {
       hp: 200,
       speed: 27.5,
@@ -347,7 +422,7 @@ const enemies = [
   },
   {
     name: "Nidorina",
-    xp: 15,
+    xp: 25,
     normal: {
       hp: 180,
       speed: 31,
@@ -364,7 +439,7 @@ const enemies = [
   },
   {
     name: "Meowth",
-    xp: 20,
+    xp: 28,
     normal: {
       hp: 500,
       speed: 25.1,
@@ -632,8 +707,8 @@ export const enemyStyle = (enemyFeature: Feature) => {
 export function spawnBoss(x: number, y: number, timer: number) {
   const { sprite, hp, speed, shiny, name, xp } = getRandomBoss();
 
-  const difficultyScaling = 1 + Math.floor(timer / 60) * 0.1;
-  const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.05;
+  const difficultyScaling = 1 + Math.floor(timer / 60) * 0.5;
+  const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.02;
   const scaledSpeed = speed * speedScalingFactor;
   const scaledHp = parseFloat((hp * difficultyScaling).toFixed(2));
   const scaledXp = xp * difficultyScaling;

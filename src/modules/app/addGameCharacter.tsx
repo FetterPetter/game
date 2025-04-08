@@ -115,6 +115,10 @@ export const enemySource = new VectorSource({});
 export const enemyLayer = new VectorLayer({
   source: enemySource,
 });
+export const bossSource = new VectorSource({});
+export const bossLayer = new VectorLayer({
+  source: bossSource,
+});
 
 export const bloodSource = new VectorSource({});
 export const bloodLayer = new VectorLayer({
@@ -204,6 +208,7 @@ export function GameButton({ map, source }: GameButtonProps) {
   const [gamePaused, setGamePaused] = useState(false);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const [autoShoot, setAutoShoot] = useState(false);
+
   const autoShootIntervalRef = useRef<NodeJS.Timeout | null>(null);
   let dx = 0,
     dy = 0;
@@ -284,6 +289,7 @@ export function GameButton({ map, source }: GameButtonProps) {
           spawnRandomMidEnemyNow,
           spawnBoss,
           spawnGigaEnemy,
+          showPopup: showPopup,
         });
 
         return newTime;
@@ -322,6 +328,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       | "damage",
   ) => {
     resetMovement();
+    stopTimer();
     if (choice === "damage") {
       if (currentFeature) {
         setCurrentDamage((prevDamage) => {
@@ -337,7 +344,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       }
     }
     if (choice === "dashCooldown") {
-      setDashCooldown((prev) => Math.max(500, prev - 85));
+      setDashCooldown((prev) => Math.max(500, prev - 100));
       setDashUpgrades((prev) => prev + 1);
     }
     if (choice === "speed") {
@@ -355,7 +362,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         setAutoShoot(true);
         startAutoShooting();
       } else {
-        setAutoShootCooldown((prev) => Math.max(50, prev - 100));
+        setAutoShootCooldown((prev) => Math.max(250, prev - 117));
         setAutoUpgrades((prev) => prev + 1);
       }
     }
@@ -392,6 +399,12 @@ export function GameButton({ map, source }: GameButtonProps) {
           shootBullet();
         }
         if (autoUpgrades >= 6) {
+          shootBullet();
+        }
+        if (autoUpgrades >= 8) {
+          shootBullet();
+        }
+        if (autoUpgrades >= 15) {
           shootBullet();
         }
         shootBullet();
@@ -525,16 +538,22 @@ export function GameButton({ map, source }: GameButtonProps) {
   }
 
   const [popups, setPopups] = useState<
-    { id: number; x: number; y: number; text: string }[]
+    { id: number; x: number; y: number; text: string; duration: number }[]
   >([]);
 
-  function showPopup(text: string, x: number, y: number) {
+  function showPopup(
+    text: string,
+    x: number,
+    y: number,
+    duration: number = 1000,
+  ) {
+    console.log(`Popup: ${text} at ${x}, ${y} with duration: ${duration}`);
     const id = Date.now() + Math.random();
-    setPopups((prev) => [...prev, { id, x, y, text }]);
+    setPopups((prev) => [...prev, { id, x, y, text, duration }]);
 
     setTimeout(() => {
       setPopups((prev) => prev.filter((p) => p.id !== id));
-    }, 1000);
+    }, duration); // This should respect the duration passed
   }
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -544,8 +563,8 @@ export function GameButton({ map, source }: GameButtonProps) {
         if (!gamePaused) {
           swordSwing();
         }
-        if (cooldownUpgrades >= 10) {
-          swordSwing();
+        if (cooldownUpgrades >= 15) {
+          setTimeout(() => swordSwing(), 125);
         }
       }, swingSpeed);
     } else {
@@ -586,7 +605,7 @@ export function GameButton({ map, source }: GameButtonProps) {
 
     const angle = Math.random() * 2 * Math.PI;
 
-    const bulletDistance = 0.15;
+    const bulletDistance = 0.19;
 
     const targetCoords = [
       bulletCoords[0] + bulletDistance * Math.cos(angle),
@@ -652,27 +671,32 @@ export function GameButton({ map, source }: GameButtonProps) {
         if (enemyType === "normal") {
           swordDamage += 1;
           if (isShiny) {
-            swordDamage += 5;
+            swordDamage += 10;
             newSwordLength += 350;
           }
         } else if (enemyType === "mid") {
-          swordDamage += 5;
+          swordDamage += 10;
           if (isShiny) {
-            swordDamage += 10;
+            swordDamage += 30;
             newSwordLength += 600;
           }
         } else if (enemyType === "boss") {
-          swordDamage += 10;
+          swordDamage += 30;
           if (isShiny) {
-            swordDamage += 20;
+            swordDamage += 90;
             newSwordLength += 1300;
           }
         } else if (enemyType == "giga") {
-          swordDamage += 20;
+          swordDamage += 200;
           if (isShiny) {
-            swordDamage += 50;
+            swordDamage += 500;
             newSwordLength += 1500;
           }
+        }
+        if (newSwordLength >= 12000 && isShiny) {
+          const extraDamage = 100;
+          swordDamage += extraDamage;
+          newSwordLength = swordLength;
         }
         const newDamage = swordDamage + featureDmg - 20;
         currentFeature.set("swordLength", newSwordLength);
@@ -825,6 +849,11 @@ export function GameButton({ map, source }: GameButtonProps) {
                   newSwordLength += 1500;
                 }
               }
+              if (newSwordLength >= 12000 && isShiny) {
+                const extraDamage = 50;
+                swordDamage += extraDamage;
+                newSwordLength = swordLength;
+              }
               const newDamage = swordDamage + featureDmg;
               currentFeature.set("swordLength", newSwordLength);
               currentFeature.set(
@@ -974,16 +1003,24 @@ export function GameButton({ map, source }: GameButtonProps) {
         if (doubleShootOnDash) {
           setTimeout(() => shootBullet(), 50);
           setTimeout(() => shootBullet(), 100);
-          if (dashUpgrades >= 7) {
+          if (dashUpgrades >= 3) {
             setTimeout(() => shootBullet(), 150);
             setTimeout(() => shootBullet(), 200);
             setTimeout(() => shootBullet(), 250);
+            if (speedUpgrades >= 3) {
+              setTimeout(() => shootBullet(), 75);
+              setTimeout(() => shootBullet(), 125);
+            }
           }
           if (dashUpgrades >= 10) {
             setTimeout(() => shootBullet(), 300);
             setTimeout(() => shootBullet(), 350);
             setTimeout(() => shootBullet(), 400);
             setTimeout(() => shootBullet(), 450);
+            if (speedUpgrades >= 5) {
+              setTimeout(() => shootBullet(), 175);
+              setTimeout(() => shootBullet(), 225);
+            }
           }
         }
 
@@ -1164,6 +1201,7 @@ export function GameButton({ map, source }: GameButtonProps) {
       return newDeathLog;
     });
   };
+
   useEffect(() => {
     if (!currentFeature) return;
 
@@ -1281,36 +1319,36 @@ export function GameButton({ map, source }: GameButtonProps) {
           </button>
           <button
             onClick={() => handleLevelUpChoice("dashCooldown")}
-            disabled={!dashUnlocked || dashUpgrades >= 18}
+            disabled={!dashUnlocked || dashUpgrades >= 15}
           >
-            {dashUpgrades < 18
-              ? `Reduce Dash Cooldown +${dashUpgrades}`
+            {dashUpgrades < 15
+              ? `Reduce Dash Cooldown +${dashUpgrades + 1}`
               : "Maxed Dash Cooldown"}{" "}
           </button>
           <button
             onClick={() => handleLevelUpChoice("speed")}
             disabled={speedUpgrades >= 5}
           >
-            Speed +{speedUpgrades} {speedUpgrades >= 5 ? "(Maxed)" : ""}
+            Speed +{speedUpgrades + 1} {speedUpgrades >= 5 ? "(Maxed)" : ""}
           </button>
           <button
             onClick={() => handleLevelUpChoice("cooldown")}
             disabled={cooldownUpgrades >= 15}
           >
             {cooldownUpgrades < 15
-              ? `Sword cooldown +${cooldownUpgrades}`
+              ? `Sword cooldown (${(swingSpeed - 50) / 1000}s) +${cooldownUpgrades + 1}`
               : "Maxed Sword Cooldown"}
           </button>
 
           <button
             onClick={() => handleLevelUpChoice("autoShoot")}
             className={autoShoot ? "upgrade" : ""}
-            disabled={autoUpgrades >= 20}
+            disabled={autoUpgrades >= 15}
           >
             {autoShoot
-              ? autoUpgrades >= 20
+              ? autoUpgrades >= 15
                 ? "Auto-Shoot Maxed"
-                : `Reduce Auto-Shoot Cooldown (${autoShootCooldown / 1000}s) + ${autoUpgrades}`
+                : `Reduce Auto-Shoot Cooldown (${(autoShootCooldown - 130) / 1000}s) + ${autoUpgrades + 1}`
               : "Unlock Auto-Shoot"}{" "}
           </button>
           {playerLevel > 5 && (
@@ -1329,6 +1367,7 @@ export function GameButton({ map, source }: GameButtonProps) {
           x={popup.x}
           y={popup.y}
           text={popup.text}
+          duration={popup.duration} // Pass the duration here
         />
       ))}
     </>
