@@ -1273,7 +1273,8 @@ export function GameButton({ map, source }: GameButtonProps) {
           </>
         ) : (
           <>
-            <p>{killCount}</p>
+            <p>Poeng: {killCount}</p>
+            <p>Level:{playerLevel}</p>
             <p>damege: {currentDamage}</p>
             <RestartButton />
 
