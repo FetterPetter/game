@@ -1045,6 +1045,11 @@ export function GameButton({ map, source }: GameButtonProps) {
               setTimeout(() => shootBullet(), 225);
             }
           }
+          if (dashUpgrades >= 15) {
+            setTimeout(() => shootBullet(), 25);
+            setTimeout(() => shootBullet(), 275);
+            setTimeout(() => shootBullet(), 325);
+          }
         }
 
         sprintCooldownTimer.current = setTimeout(() => {
