@@ -15,7 +15,7 @@ const gigaEnemies = [
     },
     shiny: {
       hp: 5105600,
-      speed: 35.2278,
+      speed: 34.2278,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/68.png",
     },
@@ -32,7 +32,7 @@ const gigaEnemies = [
     },
     shiny: {
       hp: 1105600,
-      speed: 37.3417,
+      speed: 35.3417,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/65.png",
     },
@@ -44,13 +44,13 @@ const gigaEnemies = [
     xp: 3000,
     normal: {
       hp: 5302000,
-      speed: 35.04,
+      speed: 34.84,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/250.png",
     },
     shiny: {
       hp: 999999999999,
-      speed: 40.45,
+      speed: 39.45,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/250.png",
     },
