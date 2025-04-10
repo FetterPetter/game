@@ -46,7 +46,7 @@ export function handleEnemySpawns(
   maybeTriggerBurst(timer, showPopup);
   const burstMultiplier = burstActive ? 2 : 1;
   const normalCount = Math.min(Math.floor(timer / 10) + 1, 6);
-  const reducedNormalRate = timer >= 100 ? 0.3 : 1;
+  const reducedNormalRate = timer >= 120 ? 0.3 : 1;
   for (let i = 0; i < normalCount * reducedNormalRate * burstMultiplier; i++) {
     const { x, y } = spawnRandomEnemy();
     spawnRandomEnemyNow(x, y, timer);
@@ -71,7 +71,7 @@ export function handleEnemySpawns(
   }
   const bossUnlock = 120;
   const bossRampDelay = 15;
-  const reducedBossRate = timer > 260 ? 0.5 : 1;
+  const reducedBossRate = timer > 270 ? 0.5 : 1;
   if (timer >= bossUnlock && !bossSpawnedOnce) {
     const { x, y } = spawnRandomEnemy();
     spawnBoss(x, y, timer);
@@ -103,7 +103,7 @@ export function handleEnemySpawns(
     let gigaCount = 1;
     if (timer > gigaUnlock + gigaRampDelay) {
       const elapsedTime = timer - gigaUnlock - gigaRampDelay;
-      const rampUpFactor = Math.min(elapsedTime / 15, 10);
+      const rampUpFactor = Math.min(elapsedTime / 15, 8);
       gigaCount = Math.floor(rampUpFactor);
     }
     for (let i = 0; i < gigaCount * burstMultiplier; i++) {

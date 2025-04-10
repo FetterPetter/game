@@ -6,15 +6,15 @@ import { BASE_SCALE, bossSource, enemySource } from "./addGameCharacter";
 const gigaEnemies = [
   {
     name: "Machamp",
-    xp: 2000,
+    xp: 15000,
     normal: {
-      hp: 720000,
+      hp: 620000,
       speed: 32.055,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/68.png",
     },
     shiny: {
-      hp: 5105600,
+      hp: 4105600,
       speed: 34.2278,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/68.png",
@@ -23,16 +23,16 @@ const gigaEnemies = [
   },
   {
     name: "Alakazam",
-    xp: 1700,
+    xp: 13700,
     normal: {
-      hp: 300000,
-      speed: 33.119422,
+      hp: 270000,
+      speed: 32.519422,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/65.png",
     },
     shiny: {
       hp: 1105600,
-      speed: 35.3417,
+      speed: 33.3417,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/65.png",
     },
@@ -41,16 +41,16 @@ const gigaEnemies = [
 
   {
     name: "Ho-Oh",
-    xp: 3000,
+    xp: 25000,
     normal: {
-      hp: 3302000,
-      speed: 34.84,
+      hp: 1302000,
+      speed: 33.84,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/250.png",
     },
     shiny: {
       hp: 9302000,
-      speed: 39.45,
+      speed: 35.45,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/250.png",
     },
@@ -62,7 +62,7 @@ export function spawnGigaEnemy(x: number, y: number, timer: number) {
   const { sprite, hp, speed, shiny, name, xp } = getGigaEnemy();
 
   const difficultyScaling = 1 + Math.floor(timer / 60) * 0.25;
-  const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.01;
+  const speedScalingFactor = 1 + Math.floor(timer / 60) * 0.005;
   const scaledSpeed = speed * speedScalingFactor;
   const scaledHp = parseFloat((hp * difficultyScaling).toFixed(2));
 
@@ -121,7 +121,7 @@ const getGigaEnemy = () => {
 const bosses = [
   {
     name: "Lugia",
-    xp: 1200,
+    xp: 1700,
     normal: {
       hp: 40000,
       speed: 34,

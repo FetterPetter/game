@@ -345,14 +345,14 @@ export function GameButton({ map, source }: GameButtonProps) {
       }
     }
     if (choice === "dashCooldown") {
-      setDashCooldown((prev) => Math.max(500, prev - 100));
+      setDashCooldown((prev) => Math.max(1500, prev - 100));
       setDashUpgrades((prev) => prev + 1);
     }
     if (choice === "speed") {
       setPlayerSpeed((prev) => prev + 0.5);
       setSpeedUpgrades((prev) => prev + 1);
     } else if (choice === "cooldown") {
-      setSwingSpeed((prev) => Math.max(500, prev - 50));
+      setSwingSpeed((prev) => Math.max(500, prev - 32));
       setCooldownUpgrades((prev) => prev + 1);
     } else if (choice === "dash") {
       if (!dashUnlocked) {
@@ -363,7 +363,7 @@ export function GameButton({ map, source }: GameButtonProps) {
         setAutoShoot(true);
         startAutoShooting();
       } else {
-        setAutoShootCooldown((prev) => Math.max(250, prev - 117));
+        setAutoShootCooldown((prev) => Math.max(200, prev - 120));
         setAutoUpgrades((prev) => prev + 1);
       }
     }
@@ -376,8 +376,8 @@ export function GameButton({ map, source }: GameButtonProps) {
     setLevelUpsQueued((prev) => prev - 1);
 
     if (levelUpsQueued - 1 > 0) {
-      dialogRef.current?.showModal();
       resetMovement();
+      dialogRef.current?.showModal();
     } else {
       startTimer();
       setGamePaused(false);
@@ -581,7 +581,7 @@ export function GameButton({ map, source }: GameButtonProps) {
 
   function getXPRequiredForLevel(level: number) {
     const baseXP = 10;
-    const multiplier = 1.55;
+    const multiplier = 1.5;
     return Math.floor(baseXP * Math.pow(multiplier, level - 1));
   }
 
@@ -809,7 +809,7 @@ export function GameButton({ map, source }: GameButtonProps) {
     swordFeature.setStyle(swordStyle(currentFeature));
 
     let startTime: number | null = null;
-    const animationDuration = 500;
+    const animationDuration = 520;
 
     const animationStep = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
@@ -1024,31 +1024,15 @@ export function GameButton({ map, source }: GameButtonProps) {
           shootBullet();
         }
         if (doubleShootOnDash) {
-          setTimeout(() => shootBullet(), 50);
-          setTimeout(() => shootBullet(), 100);
-          if (dashUpgrades >= 3) {
-            setTimeout(() => shootBullet(), 150);
-            setTimeout(() => shootBullet(), 200);
-            setTimeout(() => shootBullet(), 250);
+          setTimeout(() => shootBullet(), 25);
+          if (dashUpgrades >= 5) {
+            setTimeout(() => shootBullet(), 50);
             if (speedUpgrades >= 3) {
               setTimeout(() => shootBullet(), 75);
-              setTimeout(() => shootBullet(), 125);
             }
-          }
-          if (dashUpgrades >= 10) {
-            setTimeout(() => shootBullet(), 300);
-            setTimeout(() => shootBullet(), 350);
-            setTimeout(() => shootBullet(), 400);
-            setTimeout(() => shootBullet(), 450);
             if (speedUpgrades >= 5) {
-              setTimeout(() => shootBullet(), 175);
-              setTimeout(() => shootBullet(), 225);
+              setTimeout(() => shootBullet(), 100);
             }
-          }
-          if (dashUpgrades >= 15) {
-            setTimeout(() => shootBullet(), 25);
-            setTimeout(() => shootBullet(), 275);
-            setTimeout(() => shootBullet(), 325);
           }
         }
 
@@ -1348,9 +1332,9 @@ export function GameButton({ map, source }: GameButtonProps) {
           </button>
           <button
             onClick={() => handleLevelUpChoice("dashCooldown")}
-            disabled={!dashUnlocked || dashUpgrades >= 15}
+            disabled={!dashUnlocked || dashUpgrades >= 5}
           >
-            {dashUpgrades < 15
+            {dashUpgrades < 5
               ? `Reduce Dash Cooldown +${dashUpgrades + 1}`
               : "Maxed Dash Cooldown"}{" "}
           </button>
