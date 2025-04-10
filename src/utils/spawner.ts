@@ -46,7 +46,7 @@ export function handleEnemySpawns(
   maybeTriggerBurst(timer, showPopup);
   const burstMultiplier = burstActive ? 2 : 1;
   const normalCount = Math.min(Math.floor(timer / 10) + 1, 6);
-  const reducedNormalRate = timer >= 120 ? 0.3 : 1;
+  const reducedNormalRate = timer >= 150 ? 0.3 : 1;
   for (let i = 0; i < normalCount * reducedNormalRate * burstMultiplier; i++) {
     const { x, y } = spawnRandomEnemy();
     spawnRandomEnemyNow(x, y, timer);
