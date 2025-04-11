@@ -838,7 +838,7 @@ export function GameButton({ map, source }: GameButtonProps) {
               if (enemyType === "normal") {
                 swordDamage += 0.1;
                 if (isShiny) {
-                  swordDamage += 0.4;
+                  swordDamage += 1;
                   newSwordLength += 350;
                 }
               } else if (enemyType === "mid") {
@@ -848,15 +848,15 @@ export function GameButton({ map, source }: GameButtonProps) {
                   newSwordLength += 650;
                 }
               } else if (enemyType === "boss") {
-                swordDamage += 5;
+                swordDamage += 10;
                 if (isShiny) {
-                  swordDamage += 10;
+                  swordDamage += 20;
                   newSwordLength += 1300;
                 }
               } else if (enemyType === "giga") {
-                swordDamage += 15;
+                swordDamage += 20;
                 if (isShiny) {
-                  swordDamage += 30;
+                  swordDamage += 40;
                   newSwordLength += 1500;
                 }
               } else if (enemyType === "firstBoss") {
