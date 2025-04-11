@@ -315,13 +315,13 @@ const firstBosses = [
     xp: 223000,
     normal: {
       hp: 19999000000,
-      speed: 60,
+      speed: 39,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/149.png",
     },
     shiny: {
       hp: 10000000,
-      speed: 60,
+      speed: 40,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/149.png",
     },
@@ -332,13 +332,13 @@ const firstBosses = [
     xp: 185300,
     normal: {
       hp: 192003000,
-      speed: 70,
+      speed: 40,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/137.png",
     },
     shiny: {
       hp: 20123128974100,
-      speed: 70,
+      speed: 41,
       sprite:
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/137.png",
     },
