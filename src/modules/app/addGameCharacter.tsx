@@ -1025,13 +1025,15 @@ export function GameButton({ map, source }: GameButtonProps) {
         }
         if (doubleShootOnDash) {
           setTimeout(() => shootBullet(), 25);
+          setTimeout(() => shootBullet(), 50);
           if (dashUpgrades >= 5) {
-            setTimeout(() => shootBullet(), 50);
+            setTimeout(() => shootBullet(), 75);
             if (speedUpgrades >= 3) {
-              setTimeout(() => shootBullet(), 75);
+              setTimeout(() => shootBullet(), 100);
             }
             if (speedUpgrades >= 5) {
-              setTimeout(() => shootBullet(), 100);
+              setTimeout(() => shootBullet(), 125);
+              setTimeout(() => shootBullet(), 150);
             }
           }
         }
