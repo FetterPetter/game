@@ -25,26 +25,25 @@ const osmLayer = new TileLayer({
   source: new OSM(),
 });
 const capitalCities = [
-  { name: "Berlin", lat: 52.52, lon: 13.405 },
-  { name: "Tokyo", lat: 35.6762, lon: 139.6503 },
-  { name: "Washington, D.C.", lat: 38.9072, lon: -77.0369 },
-  { name: "London", lat: 51.5074, lon: -0.1278 },
-  { name: "Paris", lat: 48.8566, lon: 2.3522 },
-  { name: "Moscow", lat: 55.7558, lon: 37.6173 },
-  { name: "Beijing", lat: 39.9042, lon: 116.4074 },
-  { name: "New Delhi", lat: 28.6139, lon: 77.209 },
-  { name: "Cairo", lat: 30.0444, lon: 31.2357 },
-  { name: "Brasília", lat: -15.7801, lon: -47.9292 },
-  { name: "Ottawa", lat: 45.4215, lon: -75.6992 },
-  { name: "Canberra", lat: -35.2809, lon: 149.13 },
-  { name: "Buenos Aires", lat: -34.6037, lon: -58.3816 },
-  { name: "Rome", lat: 41.9028, lon: 12.4964 },
-  { name: "Abuja", lat: 9.0578, lon: 7.4951 },
-  { name: "Cape Town", lat: -33.9249, lon: 18.4241 },
-  { name: "Lagos", lat: 6.5244, lon: 3.3792 },
-  { name: "Mexico City", lat: 19.4326, lon: -99.1332 },
-  { name: "Kuala Lumpur", lat: 3.139, lon: 101.6869 },
-  { name: "Amsterdam", lat: 52.3676, lon: 4.9041 },
+  { name: "Austin", lat: 30.2672, lon: -97.7431 }, // Texas, USA
+  { name: "Denver", lat: 39.7392, lon: -104.9903 }, // Colorado, USA
+  { name: "Dallas", lat: 32.7767, lon: -96.797 }, // Texas, USA
+  { name: "Phoenix", lat: 33.4484, lon: -112.074 }, // Arizona, USA
+  { name: "Chicago", lat: 41.8781, lon: -87.6298 }, // Illinois, USA (near lake, not ocean)
+  { name: "Madrid", lat: 40.4168, lon: -3.7038 }, // Spain — deep inland
+  { name: "Vienna", lat: 48.2082, lon: 16.3738 }, // Austria
+  { name: "Prague", lat: 50.0755, lon: 14.4378 }, // Czech Republic
+  { name: "Budapest", lat: 47.4979, lon: 19.0402 }, // Hungary
+  { name: "Munich", lat: 48.1351, lon: 11.582 }, // Southern Germany
+  { name: "Johannesburg", lat: -26.2041, lon: 28.0473 }, // South Africa (not coastal like Cape Town)
+  { name: "Nairobi", lat: -1.2921, lon: 36.8219 }, // Kenya
+  { name: "Addis Ababa", lat: 9.03, lon: 38.74 }, // Ethiopia
+  { name: "Brasília", lat: -15.7801, lon: -47.9292 }, // Brazil (inland capital)
+  { name: "New Delhi", lat: 28.6139, lon: 77.209 }, // India
+  { name: "Moscow", lat: 55.7558, lon: 37.6173 }, // Russia
+  { name: "Canberra", lat: -35.2809, lon: 149.13 }, // Australia
+  { name: "Abuja", lat: 9.0578, lon: 7.4951 }, // Nigeria
+  { name: "Lima", lat: -12.0464, lon: -77.0428 },
   { name: "Oslo", lat: 59.9139, lon: 10.7522 },
 ];
 const getRandomCapitalCity = () => {
