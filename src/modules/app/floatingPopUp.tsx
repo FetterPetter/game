@@ -16,7 +16,7 @@ export const FloatingPopup: React.FC<FloatingPopupProps> = ({
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setVisible(false), duration); // Use the duration here
+    const timer = setTimeout(() => setVisible(false), duration);
     return () => clearTimeout(timer);
   }, [duration]);
   const animationClass =
@@ -31,13 +31,13 @@ export const FloatingPopup: React.FC<FloatingPopupProps> = ({
             : "popupShort";
   const fontColor =
     duration === 6000
-      ? "#FF6347" // Tomato color for the longest duration
+      ? "#FF6347"
       : duration === 5000
-        ? "#FF4500" // OrangeRed for a bit less intense
+        ? "#FF4500"
         : duration === 4000
-          ? "#FFD700" // Gold for medium duration
+          ? "#FFD700"
           : duration === 3000
-            ? "#32CD32" // LimeGreen for shorter duration
+            ? "#32CD32"
             : "#FFD700";
   if (!visible) return null;
 
@@ -49,7 +49,7 @@ export const FloatingPopup: React.FC<FloatingPopupProps> = ({
         left: `${x}px`,
         top: `${y}px`,
         transform: "translateX(-50%)",
-        color: fontColor, //"#FFD700",
+        color: fontColor,
         fontWeight: "bold",
         animation: `${animationClass} ${duration / 1000}s ease-out forwards`,
         pointerEvents: "none",

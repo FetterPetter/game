@@ -13,7 +13,7 @@ html {
 }
 
 .game-header {
-  height: 10px; /* Adjust height as needed */
+  height: 10px;
   background: rgba(0, 0, 0, 0.8);
   color: white;
   display: flex;
@@ -38,9 +38,9 @@ html {
 }
 
 .game-map {
-  flex-grow: 1; /* Makes it take the remaining space */
+  flex-grow: 1;
   width: 100vw;
-  height: calc(100vh - 80px); /* Full height minus header */
+  height: calc(100vh - 80px);
   background-color: black;
 }
 
@@ -48,8 +48,8 @@ html {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Centers the div */
-  background: rgba(0, 0, 0, 0.8); /* Dark background */
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
   color: white;
   padding: 30px;
   border-radius: 10px;
@@ -88,18 +88,14 @@ html {
   border-radius: 10px;
   text-align: center;
   z-index: 1000;
-  max-height: 80%; /* Set maximum height */
-  overflow-y: auto; /* Allow vertical scrolling if content overflows */
-  width: 80%; /* Set width */
+  max-height: 80%;
+  overflow-y: auto;
+  width: 80%;
 }
 
-/* Grid layout for enemy kills */
 .enemy-kill-container {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(120px, 1fr)
-  ); /* Automatically adjust number of columns */
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 15px;
   margin-top: 10px;
 }
@@ -129,7 +125,7 @@ html {
 
 .game-active .kill-tracker {
   opacity: 0.3;
-  pointer-events: none; /* Prevent interaction */
+  pointer-events: none;
 }
 
 .level-up-dialog {

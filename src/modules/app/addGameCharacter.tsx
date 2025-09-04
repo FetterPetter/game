@@ -553,7 +553,7 @@ export function GameButton({ map, source }: GameButtonProps) {
 
     setTimeout(() => {
       setPopups((prev) => prev.filter((p) => p.id !== id));
-    }, duration); // This should respect the duration passed
+    }, duration);
   }
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -1382,7 +1382,7 @@ export function GameButton({ map, source }: GameButtonProps) {
           x={popup.x}
           y={popup.y}
           text={popup.text}
-          duration={popup.duration} // Pass the duration here
+          duration={popup.duration}
         />
       ))}
     </>

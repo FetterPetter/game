@@ -15,8 +15,9 @@ let midSpawnedOnce = false;
 let bossSpawnedOnce = false;
 let gigaSpawnedOnce = false;
 let firstSpawnedOnce = false;
-const popupX = window.innerWidth / 2 - 100; // 100px to the left
-const popupY = window.innerHeight / 2 - 100; // 150px higher
+const popupX = window.innerWidth / 2 - 100;
+const popupY = window.innerHeight / 2 - 100;
+
 function maybeTriggerBurst(
   timer: number,
   showPopup: SpawnFunctions["showPopup"],
@@ -28,7 +29,7 @@ function maybeTriggerBurst(
     onBurst?.();
 
     showPopup("⚠️💀 MONSTER TIME 💀⚠️", popupX, popupY, 5000);
-    setTimeout(() => (burstActive = false), 5000); // Burst lasts for 5 seconds
+    setTimeout(() => (burstActive = false), 5000);
   }
 }
 
@@ -112,7 +113,7 @@ export function handleEnemySpawns(
     }
   }
   const firstUnlock = 450;
-  const firstRampDelay = 200;
+  const firstRampDelay = 40;
   if (timer >= firstUnlock && !firstSpawnedOnce) {
     const { x, y } = spawnRandomEnemy();
     spawnFirstBoss(x, y, timer);
