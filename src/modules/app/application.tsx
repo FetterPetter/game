@@ -60,7 +60,7 @@ const map = new Map({
     minZoom: 12.82,
     maxZoom: 12.82,
   }),
-  layers: [darkMatterLayer, bloodLayer, playerLayer, enemyLayer, bossLayer],
+  layers: [osmLayer, bloodLayer, playerLayer, enemyLayer, bossLayer],
 });
 
 export function Application() {
